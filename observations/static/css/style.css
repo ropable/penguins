@@ -1,0 +1,211 @@
+body { font-family: 'Varela Round', sans-serif; }
+
+.object-tools a.btn { margin-top: 10px; margin-bottom: 10px; }
+
+.navbar {
+  background: none repeat scroll 0 0 #3580CA;
+}
+
+.navbar-text {
+  color: #ffffff !important;
+}
+
+.navbar-brand {
+  display: block;
+  height: 50px;
+  margin-left: 0 !important;
+  padding-left: 40px;
+  line-height: 35px;
+  background: url('../img/logo.png') no-repeat center left;
+  color: #ffffff !important;
+}
+
+.navbar-default .navbar-nav > li > a {
+  color: #ffffff !important;
+}
+
+.sub-header {
+    border-bottom: 1px solid #EEEEEE;
+    padding-bottom: 10px;
+}
+
+.sidebar {
+    display: none;
+}
+
+@media (min-width: 768px) {
+.sidebar {
+    background-color: #F5F5F5;
+    border-right: 1px solid #EEEEEE;
+    bottom: 0;
+    display: block;
+    left: 0;
+    overflow-x: hidden;
+    overflow-y: auto;
+    padding: 20px;
+    position: fixed;
+    top: 165px;
+    z-index: 1000;
+}
+}
+
+.nav-sidebar {
+    margin-bottom: 20px;
+    margin-left: -20px;
+    margin-right: -21px;
+}
+
+.nav-sidebar > li > a {
+    padding-left: 20px;
+    padding-right: 20px;
+}
+
+.nav-sidebar > .active > a, .nav-sidebar > .active > a:hover {
+    background-color: #428BCA;
+    color: #FFFFFF;
+}
+
+.main {
+    padding: 20px;
+}
+
+@media (min-width: 768px) {
+.main {
+    padding-left: 40px;
+    padding-right: 40px;
+}
+}
+
+.main .page-header {
+    margin-top: 0;
+}
+
+.placeholders {
+    margin-bottom: 30px;
+    text-align: center;
+}
+
+.placeholders h4 {
+    margin-bottom: 0;
+}
+
+.placeholder {
+    margin-bottom: 20px;
+}
+
+.placeholder img {
+    border-radius: 50%;
+    display: inline-block;
+}
+
+.canvasjs-chart-credit {
+  display: none;
+}
+
+h1#site-title, div#site-title {
+    color: #3580CA;
+    height: 81px;
+    margin: 0 0 0 30px;
+    overflow: hidden;
+    text-decoration: none;
+    white-space: nowrap;
+    width: 216px;
+}
+
+h1#site-logo {
+    color: #3580CA;
+    height: 81px;
+    margin: 0 30px 0 0;
+    overflow: hidden;
+    text-decoration: none;
+    white-space: nowrap;
+    width: 350px;
+}
+
+
+.topmast a {
+    color: #FFFFFF;
+}
+.topmast #id_copyright {
+    color: #FFFFFF;
+}
+.topmast {
+    background: url("../img/top-bg.gif") repeat-x scroll center bottom #3580CA;
+}
+.masthead {
+    min-height: 115px;
+    padding: 0;
+}
+.masthead > .row-fluid {
+    padding-top: 15px;
+}
+.navbar .nav > .active > a, .navbar .nav > li > a:hover, .navbar .nav > .active > a:hover, .navbar .nav > .active > a:focus, .navbar .nav > .active > a:visited, .navbar .nav li.dropdown.active > .dropdown-toggle, .navbar .nav li.dropdown.open > a:hover > .dropdown-toggle, .navbar .nav li.dropdown.open a:hover, .navbar .nav li.dropdown.open > .dropdown-toggle, .navbar .nav li.dropdown.active > .dropdown-toggle, .navbar .nav li.dropdown.open.active > .dropdown-toggle, .dropdown-menu > .active > a:hover {
+    background: none repeat scroll 0 0 #005590;
+    box-shadow: none;
+    color: #FFFFFF;
+    text-shadow: none;
+}
+.navbar-fixed-top > .navbar-inner a.top-header-active {
+    background-color: #CCCCCC;
+    box-shadow: none;
+    color: #000000;
+    text-shadow: none;
+}
+div.navbar-fixed-bottom {
+    height: 36px;
+}
+#mainnav .navbar-inner {
+    background: none repeat scroll 0 0 #3580CA;
+    color: #FFFFFF;
+    filter: none;
+    margin-bottom: 0;
+}
+#mainnav .navbar .nav > li > a {
+    color: #FFFFFF;
+    text-shadow: 0 1px 0 #777777;
+}
+.form-search, .topsearch form {
+    margin: 0;
+    padding: 5px 0 0;
+}
+#mod-search-searchword {
+    margin: 0;
+}
+
+input.parsley-success,
+select.parsley-success,
+textarea.parsley-success {
+  color: #468847;
+  background-color: #DFF0D8;
+  border: 1px solid #D6E9C6;
+}
+
+input.parsley-error,
+select.parsley-error,
+textarea.parsley-error {
+  color: #B94A48;
+  background-color: #F2DEDE;
+  border: 1px solid #EED3D7;
+}
+
+.parsley-errors-list {
+  margin: 2px 0 3px 0;
+  padding: 0;
+  list-style-type: none;
+  font-size: 0.9em;
+  line-height: 0.9em;
+  opacity: 0;
+  -moz-opacity: 0;
+  -webkit-opacity: 0;
+
+  transition: all .3s ease-in;
+  -o-transition: all .3s ease-in;
+  -ms-transition: all .3s ease-in-;
+  -moz-transition: all .3s ease-in;
+  -webkit-transition: all .3s ease-in;
+}
+
+.parsley-errors-list.filled {
+  opacity: 1;
+}
+
