@@ -1,0 +1,9 @@
+.env
+*.pyc
+*.swp
+*.swo
+*.orig
+media/
+staticfiles/
+static/
+celerybeat*

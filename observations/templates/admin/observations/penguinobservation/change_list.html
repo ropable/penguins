@@ -1,0 +1,22 @@
+{% extends "admin/change_list.html" %}
+{% load i18n %}
+
+{% if not is_popup %}
+{% block breadcrumbs %}
+<ol class="breadcrumb">
+  <li><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
+  <li>{{ cl.opts.verbose_name_plural|capfirst }}</li>
+</ol>
+{% endblock %}
+{% endif %}
+
+{% block navbar %}
+<ul class="nav navbar-nav">
+  <li><a href="{% url "admin:index" %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+  <li><a href="{% url "admin:observations_site_changelist" %}"><span class="glyphicon glyphicon-map-marker"></span> Sites</a></li>
+  <li><a href="{% url "admin:observations_video_changelist" %}"><span class="glyphicon glyphicon-facetime-video"></span> Videos</a></li>
+  <li class="active"><a href="{% url "admin:observations_penguinobservation_changelist" %}"><span class="glyphicon glyphicon-eye-open"></span> Observations</a></li>
+  <li><a href="{% url "admin:observations_penguincount_changelist" %}"><span class="glyphicon glyphicon-check"></span> Penguin count</a></li>
+  <li><a href="{% url "admin:auth_user_changelist" %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>
+</ul>
+{% endblock %}

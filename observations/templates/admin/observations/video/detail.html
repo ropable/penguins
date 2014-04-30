@@ -1,0 +1,197 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls admin_static admin_modify tz %}
+
+{% block extrahead %}{{ block.super }}
+<script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
+{{ media }}
+{% endblock %}
+
+{% block extrastyle %}
+{{ block.super }}
+<link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
+<link rel="stylesheet" type="text/css" href="{% static "css/bootstrap-datetimepicker.min.css" %}" />
+{% endblock %}
+
+{% block coltype %}colM{% endblock %}
+
+{% block bodyclass %}{{ opts.app_label }}-{{ opts.object_name.lower }} detail{% endblock %}
+
+{% if not is_popup %}
+{% block breadcrumbs %}
+<ol class="breadcrumb">
+  <li><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
+  <li>{% if has_change_permission %}<a href="{% url 'admin:observations_site_changelist' %}">Sites</a>{% else %}Sites{% endif %}</li>
+  <li><a href="{% url 'admin:observations_site_detail' original.camera.site.id %}">{{ original.camera.site.name }}</a></li>
+  <li>View video ({{ original.date|date:"d-m-Y" }} {{ original.start_time|time:"H:i" }}-{{ original.end_time|time:"H:i" }})</li>
+</ol>
+{% endblock %}
+{% endif %}
+
+{% block navbar %}
+<ul class="nav navbar-nav">
+  <li><a href="{% url "admin:index" %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+  <li class="active"><a href="{% url "admin:observations_site_changelist" %}"><span class="glyphicon glyphicon-map-marker"></span> Sites</a></li>
+  <li><a href="{% url "admin:observations_video_changelist" %}"><span class="glyphicon glyphicon-facetime-video"></span> Videos</a></li>
+  <li><a href="{% url "admin:observations_penguinobservation_changelist" %}"><span class="glyphicon glyphicon-eye-open"></span> Observations</a></li>
+  <li><a href="{% url "admin:observations_penguincount_changelist" %}"><span class="glyphicon glyphicon-check"></span> Penguin count</a></li>
+  <li><a href="{% url "admin:auth_user_changelist" %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>
+</ul>
+{% endblock %}
+
+{% block content %}
+{% block object-tools %}
+{% if change %}{% if not is_popup %}
+  <div class="btn-toolbar">
+    {% block object-tools-items %}
+        {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
+        <a href="{% add_preserved_filters history_url %}" class="btn btn-default"><span class="glyphicon glyphicon-time"></span> {% trans "History" %}</a>
+    {% if has_absolute_url %}<li><a href="{% url 'admin:view_on_site' content_type_id original.pk %}" class="viewsitelink">{% trans "View on site" %}</a></li>{% endif%}
+    {% endblock %}
+  </div>
+{% endif %}{% endif %}
+{% endblock %}
+
+<video src="{{ original.file.url|cut:"mov" }}webm" width="800" height="500" controls>
+  <source src="{{ original.file.url|cut:"mov" }}webm" type="video/webm; codecs=vp8,vorbis">
+</video>
+</br>
+<a href="{{ original.file.url }}">Download Link </a>
+<div class="row">
+  <div class="col-xs-6 col-md-6">
+    <h3>Your observations for this video</h3>
+  </div>
+  <div class="col-xs-6 col-md-6 object-tools">
+    <span class="pull-right">
+  <button type="button" class="btn btn-primary" role="button" data-target="#addform" data-toggle="modal"><span class="glyphicon glyphicon-plus"></span> Add observation</button>
+    </span>
+  </div>
+</div>
+<table id="observations" class="table table-striped">
+  <thead>
+    <tr>
+      <th>Time</th>
+      <th>Penguins seen</th>
+      <th>Comments</th>
+    </tr>
+  <thead>
+  <tbody>
+  {% for observation in user_observations %}
+    <tr>
+      <td>{{ observation.date|localtime|time:"H:i" }}</th>
+      <td>{{ observation.seen }}</th>
+      <td>{{ observation.comments }}</th>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+<div id="addform" class="modal fade">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
+        <h4 class="modal-title">Add an observation</h4>
+      </div>
+      <div class="modal-body">
+        <form class="form-horizontal" id="add-form" role="form" data-parsley-validate>{% csrf_token %}
+          <div class="form-group">
+            <label for="id_time" class="col-sm-2 control-label required">Time</label>
+            <div class="col-sm-10">
+              <div class="input-group bootstrap-timepicker">
+                <input type="text" class="form-control" id="id_time" required>
+                <span class="input-group-addon glyphicon glyphicon-time"></span>
+              </div>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="id_seen" class="col-sm-2 control-label required">Penguins seen</label>
+            <div class="col-sm-10">
+              <input type="text" class="form-control" id="id_seen" min="1" required>
+            </div>
+          </div>
+          <div class="form-group">
+            <label for="id_comments" class="col-sm-2 control-label">Comments</label>
+            <div class="col-sm-10">
+              <textarea id="id_comments" class="form-control" rows="3"></textarea>
+            </div>
+          </div>
+        </form>
+      </div>
+      <div class="modal-footer">
+        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+        <button id="save" type="submit" class="btn btn-primary" data-loading-text="Saving...">Save observation</button>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
+
+{% block extrajs %}
+<script src="{% static 'js/jquery.cookie.js' %}"></script>
+<script src="{% static 'js/moment.min.js' %}"></script>
+<script src="{% static 'js/bootstrap-datetimepicker.min.js' %}"></script>
+<script src="{% static 'js/parsley.min.js' %}"></script>
+<script>
+  $(function() {
+    /* Setup CSRF protection. */
+    var csrftoken = $.cookie('csrftoken');
+
+    function csrfSafeMethod(method) {
+        // these HTTP methods do not require CSRF protection
+        return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
+    }
+
+    $.ajaxSetup({
+        crossDomain: false, // obviates need for sameOrigin test
+        beforeSend: function(xhr, settings) {
+            if (!csrfSafeMethod(settings.type)) {
+                xhr.setRequestHeader("X-CSRFToken", csrftoken);
+            }
+        }
+    });
+
+    $('#id_time').datetimepicker({
+      pickDate: false,
+      useSeconds: false,
+      minuteStepping: 1,
+      defaultDate: '{{ original.start_time|time:"H:i" }}'
+    });
+
+    $('#save').on('click', function () {
+      $('#add-form').parsley().validate();
+    });
+
+    $('#add-form').parsley().subscribe('parsley:form:validate', function(form) {
+      if (form.isValid()) {
+        var btn = $('#save');
+        btn.button('loading')
+
+        var time = moment('{{ original.date|date:"Y-m-d" }} ' + $('#id_time').val(), "YYYY-MM-DD h:m a");
+
+        var data = {
+          'date': time.format(),
+          'observer': {{ user.id }},
+          'camera': {{ original.camera.id }},
+          'site': {{ original.camera.site.id }},
+          'seen': $('#id_seen').val(),
+          'comments': $('#id_comments').val()
+        };
+
+        $.ajax({
+          type: "POST",
+          url: "/api/observations/",
+          data: data
+        }).done(function() {
+          $('#addform').modal('hide');
+          $('#observations tbody').append("<tr><td>" + $('#id_time').val() + "</td><td>" + $('#id_seen').val() + "</td>" + "<td>" + $('#id_comments').val() + "</td>" + "</tr>");
+          $('#add-form').parsley().reset();
+          $('#add-form').find('input:text, textarea').val('');
+          $('#id_time').data("DateTimePicker").setDate('{{ original.start_time|time:"H:i" }}');
+        }).fail(function(msg) {
+        }).always(function() {
+          btn.button('reset');
+        });
+      }
+    });
+  });
+</script>
+{% endblock %}

@@ -1,0 +1,141 @@
+{% load admin_static %}{% load firstof from future %}<!DOCTYPE html>
+<html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
+  <head>
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>{% block title %}{% endblock %}</title>
+    <link href='http://fonts.googleapis.com/css?family=Varela+Round' rel='stylesheet' type='text/css'>
+    <link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "css/bootstrap.min.css" %}{% endblock %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "css/bootstrap-theme.min.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "css/style.css" %}" />
+    {% block extrastyle %}{% endblock %}
+    <!--[if lte IE 7]><link rel="stylesheet" type="text/css" href="{% block stylesheet_ie %}{% static "admin/css/ie.css" %}{% endblock %}" /><![endif]-->
+    {% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}" />{% endif %}
+    <script type="text/javascript">window.__admin_media_prefix__ = "{% filter escapejs %}{% static "admin/" %}{% endfilter %}";</script>
+    {% block extrahead %}{% endblock %}
+    {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE" />{% endblock %}
+  </head>
+{% load i18n %}
+
+<body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">
+  {% if not is_popup %}
+  {% block header %}
+<div class="topmast">
+  <div class="container-fluid">
+    <div class="masthead">
+      <div class="row-fluid">
+        <div class="span8">
+          <div class="agency-freespace">
+            <a class="brand pull-left" href="/">
+              <img src="{% static 'img/waTextBlack_80-bluebg.gif' %}" alt="Government of Western Australia" />
+            </a>
+            <h1 id="site-title" class="site-logo pull-left">
+              <a href="/">
+                <img src="{% static 'img/logo-dpaw.gif' %}" alt="Department of Parks and Wildlife" />
+                Department of <br><strong>Parks and Wildlife</strong>
+              </a>
+            </h1>
+            <h1 id="site-logo" class="site-logo pull-right">
+              <a href="/">
+                <img src="{% static 'img/logo-penguins.png' %}" alt="Little penguins database">
+                Little penguins database
+              </a>
+            </h1>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+  <!-- Header -->
+  <nav class="navbar navbar-default navbar-static-top" role="navigation">
+    <div class="container-fluid">
+      <div class="navbar-header">
+        <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+          <span class="sr-only">Toggle navigation</span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+          <span class="icon-bar"></span>
+        </button>
+        {% if user.is_authenticated %}
+        {% block navbar %}
+        <ul class="nav navbar-nav">
+          <li class="active"><a href="{% url "admin:index" %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+          {% if perms.observations.view_site %}<li><a href="{% url "admin:observations_site_changelist" %}"><span class="glyphicon glyphicon-map-marker"></span> Sites</a></li>{% endif %}
+          {% if perms.observations.change_video %}<li><a href="{% url "admin:observations_video_changelist" %}"><span class="glyphicon glyphicon-facetime-video"></span> Videos</a></li>{% endif %}
+          {% if perms.observations.change_penguinobservation %}<li><a href="{% url "admin:observations_penguinobservation_changelist" %}"><span class="glyphicon glyphicon-eye-open"></span> Observations</a></li>{% endif %}
+          {% if perms.observations.change_penguincount %}<li><a href="{% url "admin:observations_penguincount_changelist" %}"><span class="glyphicon glyphicon-check"></span> Penguin count</a></li>{% endif %}
+          {% if perms.auth.change_user %}<li><a href="{% url "admin:auth_user_changelist" %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>{% endif %}
+        </ul>
+        {% endblock %}
+        {% endif %}
+      </div>
+
+      {% if user.is_active and user.is_staff %}
+      <div class="collapse navbar-collapse">
+        <ul class="nav navbar-nav navbar-right">
+          <li id="user-tools"><p class="navbar-text">
+          {% trans 'Welcome,' %}
+          <strong>{% firstof user.get_short_name user.get_username %}</strong>.
+          </p></li>
+          {% block userlinks %}
+            {% url 'django-admindocs-docroot' as docsroot %}
+            {% if docsroot %}
+            <li><a href="{{ docsroot }}">{% trans 'Documentation' %}</a></li>
+            {% endif %}
+            {% if user.has_usable_password %}
+            <li><a href="{% url 'admin:password_change' %}">{% trans 'Change password' %}</a></li>
+            {% endif %}
+            <li><a href="{% url 'admin:logout' %}">{% trans 'Log out' %}</a></li>
+          {% endblock %}
+        </ul>
+      </div>
+      {% endif %}
+      {% block nav-global %}{% endblock %}
+    </div>
+  </nav>
+  {% endblock %}
+  {% endif %}
+  <!-- END Header -->
+  <!-- Content -->
+  {% block layout %}
+  <div id="content" class="container-fluid {% block coltype %}colM{% endblock %}">
+    <div class="row">
+      <div class="col-xs-12">
+      {% block breadcrumbs %}
+        <ol class="breadcrumb">
+          <li><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
+          {% if title %}<li>{{ title }}</li>{% endif %}
+        </ol>
+      {% endblock %}
+
+      {% block messages %}
+        {% if messages %}
+        {% for message in messages %}
+        <div class="alert alert-{{ message.tags }}"><span class="glyphicon glyphicon-ok"></span> {{ message|capfirst }}</div>
+        {% endfor %}
+        {% endif %}
+      {% endblock messages %}
+
+        <div class="row">
+        {% block pretitle %}{% endblock %}
+        {% block content_title %}<div class="col-xs-9 col-md-6">{% if title %}<h1>{{ title }}</h1>{% endif %}</div>{% endblock %}
+          <div class="col-xs-3 col-md-6 object-tools">{% block object-tools %}{% endblock %}</div>
+        </div>
+        {% block content %}
+        {{ content }}
+        {% endblock %}
+      </div>
+    </div>
+  </div>
+  {% endblock layout %}
+  <!-- END Content -->
+
+  {% block footer %}<div id="footer"></div>{% endblock %}
+  <script src="{% static "js/jquery.min.js" %}"></script>
+  <script src="{% static "js/bootstrap.min.js" %}"></script>
+  <script src="{% static "js/holder.js" %}"></script>
+  {% block extrajs %}{% endblock %}
+</body>
+</html>

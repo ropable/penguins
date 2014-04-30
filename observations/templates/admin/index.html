@@ -1,0 +1,82 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_static %}
+
+{% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript" src="{% static 'js/canvasjs.min.js' %}"></script>
+    <script>
+    $(function() {
+      var chart = new CanvasJS.Chart("line", {
+        legend: {
+          horizontalAlign: "right",
+          verticalAlign: "center",
+          fontSize: 15
+        },
+        data: [
+        {% for site, data in site_dataset.items %}
+        {
+          type: "spline",
+          showInLegend: true,
+          legendText: "{{ site }}",
+          dataPoints: [
+            {% for point in data %}
+            {x: new Date({{ point.date.year }}, {{ point.date.month }} - 1, {{ point.date.day }}), y: {{ point.value }} },
+            {% endfor %}
+          ]
+        }{% if not forloop.last %},{% endif %}
+        {% endfor %}
+        ]
+      });
+
+      chart.render();
+    });
+    </script>
+{% endblock %}
+
+{% block coltype %}colMS{% endblock %}
+
+{% block bodyclass %}dashboard{% endblock %}
+
+{% block breadcrumbs %}{% endblock %}
+
+{% block navbar %}
+<ul class="nav navbar-nav">
+  <li class="active"><a href="{% url "admin:index" %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
+  {% if perms.observations.view_site %}<li><a href="{% url "admin:observations_site_changelist" %}"><span class="glyphicon glyphicon-map-marker"></span> Sites</a></li>{% endif %}
+  {% if perms.observations.change_video %}<li><a href="{% url "admin:observations_video_changelist" %}"><span class="glyphicon glyphicon-facetime-video"></span> Videos</a></li>{% endif %}
+  {% if perms.observations.change_penguinobservation %}<li><a href="{% url "admin:observations_penguinobservation_changelist" %}"><span class="glyphicon glyphicon-eye-open"></span> Observations</a></li>{% endif %}
+  {% if perms.observations.change_penguincount %}<li><a href="{% url "admin:observations_penguincount_changelist" %}"><span class="glyphicon glyphicon-check"></span> Penguin count</a></li>{% endif %}
+  {% if perms.auth.change_user %}<li><a href="{% url "admin:auth_user_changelist" %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>{% endif %}
+</ul>
+{% endblock %}
+
+{% block content_title %}{% endblock %}
+
+{% block content %}
+<div class="row">
+  <div class="col-xs-12 col-md-6">
+    <h3>Penguin island sites</h3>
+    <div class="list-group">
+    {% for site in sites %}
+      <a class="list-group-item" href="{% url 'admin:observations_site_detail' site.id %}">{{ site }}</a>
+    {% endfor %}
+    </div>
+  </div>
+  <div class="col-xs-12 col-md-6">
+    <h3>Actions</h3>
+    <div class="list-group">
+      {% if perms.auth.add_user %}<a class="list-group-item" href="{% url 'admin:auth_user_add' %}"><span class="glyphicon glyphicon-plus"></span> Add a user</a>{% endif %}
+      {% if perms.observations.add_video %}<a class="list-group-item" href="{% url 'admin:observations_video_add' %}"><span class="glyphicon glyphicon-plus"></span> Add a video</a>{% endif %}
+      {% if perms.observations.add_penguinobservation %}<a class="list-group-item" href="{% url 'admin:observations_penguinobservation_add' %}"><span class="glyphicon glyphicon-plus"></span> Add a penguin observation</a>{% endif %}
+    </div>
+  </div>
+</div>
+<div class="row">
+  <div class="col-xs-12">
+    <h3>Average daily returning penguins</h3>
+    <div id="line" style="height: 300px; width: 100%;">
+    </div>
+  </div>
+</div>
+{% endblock %}

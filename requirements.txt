@@ -1,0 +1,29 @@
+Django<1.7
+psycopg2
+Pillow
+gunicorn
+honcho
+south
+dj-database-url
+-e git+https://github.com/kennethreitz/dj-static#egg=dj_static
+django-extensions
+django-compressor
+django-debug-toolbar
+django-browserid
+django-auth-ldap
+django-nose
+django-leaflet
+django-swingers
+factory-boy
+selenium
+unicodecsv
+pyephem
+-e hg+https://bitbucket.org/david/django-storages#egg=storages
+boto
+arrow
+djangorestframework
+markdown
+django-filter
+celery-with-redis
+django-celery
+openpyxl

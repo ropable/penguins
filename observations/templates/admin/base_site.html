@@ -1,0 +1,10 @@
+{% extends "admin/base.html" %}
+{% load i18n staticfiles %}
+
+{% block title %}{{ title }} | {% trans 'Little penguin videos' %}{% endblock %}
+
+{% block branding %}
+<a class="navbar-brand" id="nav-home" href="{% url 'admin:index' %}" title="Little penguins">Little penguins</a>
+{% endblock %}
+
+{% block nav-global %}{% endblock %}
