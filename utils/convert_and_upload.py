@@ -26,7 +26,8 @@ for filename in files:
         continue
     try:
         subprocess.check_call(["ffmpeg", "-i", filename, "-y", "-b:v", OUTPUT_BITRATE, "-vf",
-                               OUTPUT_SIZE, "-vcodec", "libx264", "-f", "mp4", destination])
+                               OUTPUT_SIZE, "-movflags", "faststart", "-profile:v", "main",
+                               "-vcodec", "libx264", "-f", "mp4", destination])
     except Exception as e:
         print(e)
     else:
