@@ -95,4 +95,4 @@ class PartialMediaCling(MediaCling):
         self.cling = PartialCling(base_dir)
 
 
-application = Cling(PartialMediaCling(get_wsgi_application()))
+application = Cling(MediaCling(get_wsgi_application()))
