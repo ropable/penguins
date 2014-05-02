@@ -5,6 +5,7 @@ from django.db.models.signals import post_save, post_syncdb
 from django.dispatch import receiver
 from django.contrib.auth.models import User, Group, Permission
 from django.contrib.gis.db import models as geo_models
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -143,7 +144,8 @@ class PenguinObservation(models.Model):
     site = models.ForeignKey(Site)
     camera = models.ForeignKey(Camera, blank=True, null=True)
     observer = models.ForeignKey(User)
-    seen = models.PositiveSmallIntegerField(verbose_name='count')
+    seen = models.PositiveSmallIntegerField(verbose_name='count',
+        validators=[MinValueValidator(1), MaxValueValidator(100)])
     comments = models.TextField(blank=True, null=True)
     wind_direction = models.PositiveSmallIntegerField(choices=DIRECTION_CHOICES,
         verbose_name=_("Wind direction"), blank=True, null=True)

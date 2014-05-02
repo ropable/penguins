@@ -5,5 +5,3 @@
 *.orig
 media/
 staticfiles/
-static/
-celerybeat*
