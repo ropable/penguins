@@ -17,17 +17,6 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 # Application definition
 INSTALLED_APPS = (
-    'observations',
-    'django_browserid',
-    'django_extensions',
-    'debug_toolbar',
-    'compressor',
-    'south',
-    'gunicorn',
-    'django_nose',
-    'rest_framework',
-    'leaflet',
-
     'django.contrib.admin',
     'django.contrib.admindocs',
     'django.contrib.contenttypes',
@@ -38,6 +27,17 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.humanize',
     'django.contrib.gis',
+
+    'observations',
+    'django_browserid',
+    'django_extensions',
+    'debug_toolbar',
+    'compressor',
+    'south',
+    'gunicorn',
+    'django_nose',
+    'rest_framework',
+    'leaflet',
 )
 
 

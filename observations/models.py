@@ -1,9 +1,9 @@
 from __future__ import unicode_literals
 
 from django.db import models
-from django.db.models.signals import post_save, post_syncdb
+from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.auth.models import User, Group, Permission
+from django.contrib.auth.models import User, Group
 from django.contrib.gis.db import models as geo_models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
@@ -296,48 +296,11 @@ def update_penguin_count(sender, instance, created, **kwargs):
     penguin_count.total_penguins = (total)
     penguin_count.save()
 
+
 @receiver(post_save, sender=User)
 def update_user(sender, instance, created, **kwargs):
     if created:
-        group = Group.objects.get(name="Observers")
+        group, created = Group.objects.get_or_create(name="Observers")
         instance.is_staff = True
         instance.groups.add(group)
         instance.save()
-
-
-@receiver(post_syncdb)
-def add_default_group(sender, **kwargs):
-    """
-    Set up the default group and their permissions after syncdb.
-    """
-    group, created = Group.objects.get_or_create(name="Observers")
-
-    permissions = (
-        ('view_site', 'observations', 'site'),
-        ('view_video', 'observations', 'video'),
-        ('add_penguinobservation', 'observations', 'penguinobservation'),
-        ('view_penguinobservation', 'observations', 'penguinobservation'),
-    )
-
-    for codename, app_label, model in permissions:
-        permission = Permission.objects.get_by_natural_key(codename,
-            app_label, model)
-        group.permissions.add(permission)
-
-
-@receiver(post_syncdb)
-def add_view_permissions(sender, **kwargs):
-    """
-    This syncdb hook takes care of adding a view permission to all our
-    content types.
-    """
-    from django.contrib.contenttypes.models import ContentType
-    from django.contrib.auth.models import Permission
-
-    for content_type in ContentType.objects.all():
-        codename = "view_%s" % content_type.model
-        if not Permission.objects.filter(content_type=content_type,
-                                         codename=codename):
-            Permission.objects.create(content_type=content_type,
-                                      codename=codename,
-                                      name="Can view %s" % content_type.name)
