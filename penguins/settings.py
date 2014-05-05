@@ -63,7 +63,6 @@ CONN_MAX_AGE = None
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 SITE_ID = 1
-SITE_URL = os.environ['SITE_URL']
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Australia/Perth'
 USE_I18N = True
