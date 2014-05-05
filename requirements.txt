@@ -13,6 +13,9 @@ django-auth-ldap
 django-nose
 django-leaflet
 django-swingers
+django-jenkins
+pep8
+flake8
 factory-boy
 selenium
 unicodecsv
