@@ -6,6 +6,7 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User, Group
 from django.contrib.gis.db import models as geo_models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.files.storage import default_storage
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -95,6 +96,18 @@ class Video(models.Model):
 
     def __str__(self):
         return "%s - %s" % (self.camera.name, self.name)
+
+    @classmethod
+    def import_folder(cls, folder="beach_return_cams"):
+        videos = default_storage.listdir(folder)[1]
+        videos = [video.split("_tl_") for video in videos]
+        for datestr, camstr in videos:
+            start_time = datetime.datetime.strptime(datestr, "%d-%m-%Y_%H")
+            # assume each video is 30 mins long
+            end_time = start_time + datetime.timedelta(minutes=30)
+            camera = Camera.objects.get(name_istartswith=camstr.split("_")[0])
+            cls.objects.create(start_time=start_time, end_time=end_time,
+                               camera=camera)
 
     class Meta:
         ordering = ['-date']

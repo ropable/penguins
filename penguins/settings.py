@@ -33,6 +33,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'compressor',
     'south',
+    'storages',
     'gunicorn',
     'django_nose',
     'rest_framework',
@@ -89,16 +90,10 @@ if os.environ.get('USE_AWS', False):
     from boto.s3.connection import OrdinaryCallingFormat
 
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
-    AWS_S3_HOST = os.environ['AWS_S3_HOST']
-    AWS_S3_PORT = int(os.environ['AWS_S3_PORT'])
-    AWS_S3_USE_SSL = False
-    AWS_AUTO_CREATE_BUCKET = True
     AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
     AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
-    AWS_S3_CALLING_FORMAT = OrdinaryCallingFormat()
 
 TEMPLATE_LOADERS = (
     ('django.template.loaders.cached.Loader', (
@@ -181,10 +176,10 @@ JENKINS_TASKS = (
     'django_jenkins.tasks.run_pep8',
     'django_jenkins.tasks.run_pyflakes',
     #'django_jenkins.tasks.run_jslint',
-    #'django_jenkins.tasks.run_csslint',    
-    'django_jenkins.tasks.run_sloccount',    
+    #'django_jenkins.tasks.run_csslint',
+    'django_jenkins.tasks.run_sloccount',
     #'django_jenkins.tasks.lettuce_tests',
-    
+
 )
 
 
