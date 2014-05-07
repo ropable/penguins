@@ -17,16 +17,6 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 # Application definition
 INSTALLED_APPS = (
-    'observations',
-    'django_extensions',
-    'debug_toolbar',
-    'compressor',
-    'south',
-    'gunicorn',
-    'django_nose',
-    'rest_framework',
-    'leaflet',
-
     'django.contrib.admin',
     'django.contrib.admindocs',
     'django.contrib.contenttypes',
@@ -37,6 +27,17 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.humanize',
     'django.contrib.gis',
+    'django_jenkins',
+    'observations',
+    'django_extensions',
+    'debug_toolbar',
+    'compressor',
+    'south',
+    'storages',
+    'gunicorn',
+    'django_nose',
+    'rest_framework',
+    'leaflet',
 )
 
 
@@ -63,7 +64,6 @@ CONN_MAX_AGE = None
 # Internationalization
 # https://docs.djangoproject.com/en/1.6/topics/i18n/
 SITE_ID = 1
-SITE_URL = os.environ['SITE_URL']
 LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Australia/Perth'
 USE_I18N = True
@@ -84,22 +84,14 @@ STATICFILES_FINDERS = (
     'compressor.finders.CompressorFinder',
 )
 
-INCOMING_ROOT = os.environ.get('INCOMING_ROOT', False)
-
 if os.environ.get('USE_AWS', False):
     from boto.s3.connection import OrdinaryCallingFormat
 
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    STATICFILES_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
 
-    AWS_S3_HOST = os.environ['AWS_S3_HOST']
-    AWS_S3_PORT = int(os.environ['AWS_S3_PORT'])
-    AWS_S3_USE_SSL = False
-    AWS_AUTO_CREATE_BUCKET = True
     AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
     AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
-    AWS_S3_CALLING_FORMAT = OrdinaryCallingFormat()
 
 TEMPLATE_LOADERS = (
     ('django.template.loaders.cached.Loader', (
@@ -173,6 +165,21 @@ DEBUG_TOOLBAR_CONFIG = {
     'HIDE_DJANGO_SQL': False,
     'INTERCEPT_REDIRECTS': False,
 }
+
+
+JENKINS_TASKS = (
+    'django_jenkins.tasks.with_coverage',
+    #'django_jenkins.tasks.django_tests',   # select one django or
+    #'django_jenkins.tasks.dir_tests'      # directory tests discovery
+    'django_jenkins.tasks.run_pep8',
+    'django_jenkins.tasks.run_pyflakes',
+    #'django_jenkins.tasks.run_jslint',
+    #'django_jenkins.tasks.run_csslint',
+    'django_jenkins.tasks.run_sloccount',
+    #'django_jenkins.tasks.lettuce_tests',
+
+)
+
 
 # Logging configuration
 LOGGING = {

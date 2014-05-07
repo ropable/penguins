@@ -9,17 +9,20 @@ dj-database-url
 django-extensions
 django-compressor
 django-debug-toolbar
-django-browserid
 django-auth-ldap
 django-nose
 django-leaflet
 django-swingers
+django-jenkins
+pep8
+flake8
 factory-boy
 selenium
 unicodecsv
 pyephem
 -e hg+https://bitbucket.org/david/django-storages#egg=storages
 boto
+django-storages
 arrow
 djangorestframework
 markdown
