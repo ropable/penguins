@@ -17,6 +17,7 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 # Application definition
 INSTALLED_APPS = (
+    'observations',
     'django.contrib.admin',
     'django.contrib.admindocs',
     'django.contrib.contenttypes',
@@ -28,7 +29,6 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'django.contrib.gis',
     'django_jenkins',
-    'observations',
     'django_extensions',
     'debug_toolbar',
     'compressor',
@@ -95,7 +95,6 @@ if os.environ.get('USE_AWS', False):
 
 TEMPLATE_LOADERS = (
     ('django.template.loaders.cached.Loader', (
-        'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
     )),
 )
