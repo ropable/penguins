@@ -84,8 +84,6 @@ STATICFILES_FINDERS = (
     'compressor.finders.CompressorFinder',
 )
 
-INCOMING_ROOT = os.environ.get('INCOMING_ROOT', False)
-
 if os.environ.get('USE_AWS', False):
     from boto.s3.connection import OrdinaryCallingFormat
 

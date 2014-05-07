@@ -14,6 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 from observations.utils import civil_twilight
 import datetime
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -100,14 +101,24 @@ class Video(models.Model):
     @classmethod
     def import_folder(cls, folder="beach_return_cams"):
         videos = default_storage.listdir(folder)[1]
-        videos = [video.split("_tl_") for video in videos]
-        for datestr, camstr in videos:
-            start_time = datetime.datetime.strptime(datestr, "%d-%m-%Y_%H")
+        for video in videos:
+            nameparts = video.split("_t1_")
+            if len(nameparts) != 2:
+                continue
+            filename = os.path.join(folder, video)
+            if cls.objects.filter(file=filename).exists():
+                continue
+            # If video doesn't exist, and filename splits nicely
+            # create it
+            datestr, camstr = nameparts
+            video_datetime = datetime.datetime.strptime(datestr, "%d-%m-%Y_%H")
+            date = video_datetime.date()
+            start_time = video_datetime.time()
             # assume each video is 30 mins long
-            end_time = start_time + datetime.timedelta(minutes=30)
-            camera = Camera.objects.get(name_istartswith=camstr.split("_")[0])
-            cls.objects.create(start_time=start_time, end_time=end_time,
-                               camera=camera)
+            end_time = (video_datetime + datetime.timedelta(minutes=30)).time()
+            camera = Camera.objects.get(name__istartswith=camstr.split("_")[0])
+            cls.objects.create(date=date, start_time=start_time, end_time=end_time,
+                               camera=camera, file=os.path.join(folder, video))
 
     class Meta:
         ordering = ['-date']
