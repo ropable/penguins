@@ -209,3 +209,11 @@ textarea.parsley-error {
   opacity: 1;
 }
 
+.flowplayer {
+  background-color: #333;
+}
+
+#video {
+    margin: 50px auto;
+    max-width: 982px;
+}

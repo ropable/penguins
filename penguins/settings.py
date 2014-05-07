@@ -85,13 +85,12 @@ STATICFILES_FINDERS = (
 )
 
 if os.environ.get('USE_AWS', False):
-    from boto.s3.connection import OrdinaryCallingFormat
-
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-
     AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
     AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
+    AWS_S3_SECURE_URLS = False
+    AWS_S3_URL_PROTOCOL = 'http'
 
 TEMPLATE_LOADERS = (
     ('django.template.loaders.cached.Loader', (
