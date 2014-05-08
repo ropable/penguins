@@ -6,6 +6,7 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User, Group
 from django.contrib.gis.db import models as geo_models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.core.files.storage import default_storage
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -13,6 +14,7 @@ from django.utils.translation import ugettext_lazy as _
 from observations.utils import civil_twilight
 import datetime
 import logging
+import os
 
 logger = logging.getLogger(__name__)
 
@@ -95,6 +97,31 @@ class Video(models.Model):
 
     def __str__(self):
         return "%s - %s" % (self.camera.name, self.name)
+
+    @classmethod
+    def import_folder(cls, folder="beach_return_cams"):
+        videos = default_storage.listdir(folder)[1]
+        for video in videos:
+            print("checking {0}".format(video))
+            nameparts = video.split("_tl_")
+            if len(nameparts) != 2:
+                print("can't parse {0}".format(nameparts))
+                continue
+            filename = os.path.join(folder, video)
+            if cls.objects.filter(file=filename).exists():
+                continue
+            # If video doesn't exist, and filename splits nicely
+            # create it
+            print("importing {0}".format(video))
+            datestr, camstr = nameparts
+            video_datetime = datetime.datetime.strptime(datestr, "%d-%m-%Y_%H")
+            date = video_datetime.date()
+            start_time = video_datetime.time()
+            # assume each video is 60 mins long (video times are inaccurate/halved?)
+            end_time = (video_datetime + datetime.timedelta(minutes=60)).time()
+            camera = Camera.objects.get(name__istartswith=camstr.split("_")[0])
+            cls.objects.create(date=date, start_time=start_time, end_time=end_time,
+                               camera=camera, file=os.path.join(folder, video))
 
     class Meta:
         ordering = ['-date']

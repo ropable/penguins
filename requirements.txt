@@ -22,6 +22,7 @@ unicodecsv
 pyephem
 -e hg+https://bitbucket.org/david/django-storages#egg=storages
 boto
+django-storages
 arrow
 djangorestframework
 markdown

@@ -163,7 +163,6 @@ class PenguinObservationAdmin(BaseAdmin):
 
 
 class VideoAdmin(DetailAdmin):
-    actions = ['convert_video_to_webm', 'convert_video_to_mp4']
     list_display = ('camera', 'name', 'start_time', 'end_time')
     exclude = ('views',)
 
@@ -172,20 +171,6 @@ class VideoAdmin(DetailAdmin):
             'fields': ('camera', 'file', 'date', 'start_time', 'end_time'),
         }),
     )
-
-    def convert_video_to_webm(self, request, queryset):
-        for item in queryset:
-            path = os.path.join(settings.MEDIA_ROOT, item.file.name)
-            cmd = ['ffmpeg', '-y', '-i', path, '-vcodec', 'libvpx',
-                   '-acodec', 'libvorbis', '-f', 'webm', path[:-4] + '.webm']
-            subprocess.check_output(cmd, stderr=subprocess.STDOUT)
-
-    def convert_video_to_mp4(self, request, queryset):
-        for item in queryset:
-            path = os.path.join(settings.MEDIA_ROOT, item.file.name)
-            cmd = ['ffmpeg', '-y', '-i', path, '-vcodec', 'h264',
-                   '-acodec', 'libvorbis', '-f', 'mp4', path[:-4] + '.mp4']
-            subprocess.check_output(cmd, stderr=subprocess.STDOUT)
 
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts

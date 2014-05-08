@@ -2,14 +2,16 @@
 {% load i18n admin_urls admin_static admin_modify tz %}
 
 {% block extrahead %}{{ block.super }}
-<script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
 {{ media }}
+<script type="text/javascript" src="{% url 'admin:jsi18n' %}"></script>
 {% endblock %}
 
 {% block extrastyle %}
 {{ block.super }}
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="stylesheet" type="text/css" href="{% static "admin/css/forms.css" %}" />
 <link rel="stylesheet" type="text/css" href="{% static "css/bootstrap-datetimepicker.min.css" %}" />
+<link rel="stylesheet" href="//cdn.jsdelivr.net/flowplayer/5.4.3/skin/minimalist.css">
 {% endblock %}
 
 {% block coltype %}colM{% endblock %}
@@ -51,11 +53,15 @@
 {% endif %}{% endif %}
 {% endblock %}
 
-<video src="{{ original.file.url|cut:"mov" }}webm" width="800" height="500" controls>
-  <source src="{{ original.file.url|cut:"mov" }}webm" type="video/webm; codecs=vp8,vorbis">
-</video>
+<div id=video>
+<div data-embed="false" class="flowplayer is-splash color-alt no-background no-volume no-mute">
+   <video preload="none">
+   <source type="video/mp4" src="{{ original.file.url }}"></video>
+</div>
+</div>
+
 </br>
-<a href="{{ original.file.url }}">Download Link </a>
+<a href="{{ original.file.url }}">Download Video</a>
 <div class="row">
   <div class="col-xs-6 col-md-6">
     <h3>Your observations for this video</h3>
@@ -130,6 +136,7 @@
 <script src="{% static 'js/moment.min.js' %}"></script>
 <script src="{% static 'js/bootstrap-datetimepicker.min.js' %}"></script>
 <script src="{% static 'js/parsley.min.js' %}"></script>
+<script src="//cdn.jsdelivr.net/flowplayer/5.4.3/flowplayer.min.js"></script>
 <script>
   $(function() {
     /* Setup CSRF protection. */
