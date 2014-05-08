@@ -89,8 +89,7 @@ if os.environ.get('USE_AWS', False):
     AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
     AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
-    AWS_S3_SECURE_URLS = False
-    AWS_S3_URL_PROTOCOL = 'http'
+    AWS_S3_HOST = os.environ['AWS_S3_HOST']
 
 TEMPLATE_LOADERS = (
     ('django.template.loaders.cached.Loader', (
