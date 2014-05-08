@@ -17,7 +17,6 @@ INTERNAL_IPS = ('127.0.0.1',)
 
 # Application definition
 INSTALLED_APPS = (
-    'observations',
     'django.contrib.admin',
     'django.contrib.admindocs',
     'django.contrib.contenttypes',
@@ -38,6 +37,8 @@ INSTALLED_APPS = (
     'django_nose',
     'rest_framework',
     'leaflet',
+    # actual app
+    'observations'
 )
 
 
@@ -93,8 +94,13 @@ if os.environ.get('USE_AWS', False):
 
 TEMPLATE_LOADERS = (
     ('django.template.loaders.cached.Loader', (
+        'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',
     )),
+)
+
+TEMPLATE_DIRS = (
+    os.path.join(BASE_DIR, "observations", "templates"),
 )
 
 AUTHENTICATION_BACKENDS = (
