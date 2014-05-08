@@ -117,8 +117,8 @@ class Video(models.Model):
             video_datetime = datetime.datetime.strptime(datestr, "%d-%m-%Y_%H")
             date = video_datetime.date()
             start_time = video_datetime.time()
-            # assume each video is 30 mins long
-            end_time = (video_datetime + datetime.timedelta(minutes=30)).time()
+            # assume each video is 60 mins long (video times are inaccurate/halved?)
+            end_time = (video_datetime + datetime.timedelta(minutes=60)).time()
             camera = Camera.objects.get(name__istartswith=camstr.split("_")[0])
             cls.objects.create(date=date, start_time=start_time, end_time=end_time,
                                camera=camera, file=os.path.join(folder, video))
