@@ -102,14 +102,17 @@ class Video(models.Model):
     def import_folder(cls, folder="beach_return_cams"):
         videos = default_storage.listdir(folder)[1]
         for video in videos:
-            nameparts = video.split("_t1_")
+            print("checking {0}".format(video))
+            nameparts = video.split("_tl_")
             if len(nameparts) != 2:
+                print("can't parse {0}".format(nameparts))
                 continue
             filename = os.path.join(folder, video)
             if cls.objects.filter(file=filename).exists():
                 continue
             # If video doesn't exist, and filename splits nicely
             # create it
+            print("importing {0}".format(video))
             datestr, camstr = nameparts
             video_datetime = datetime.datetime.strptime(datestr, "%d-%m-%Y_%H")
             date = video_datetime.date()
