@@ -1,5 +1,4 @@
 Django<1.7
-webdriver
 psycopg2
 Pillow
 gunicorn
