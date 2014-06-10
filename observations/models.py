@@ -29,7 +29,7 @@ class Site(geo_models.Model):
     location = geo_models.PointField()
 
     def __str__(self):
-        return self.name
+        return "{} ({})".format(self.name, self.camera_set.all())
 
     class Meta:
         ordering = ['name']
@@ -114,11 +114,13 @@ class Video(models.Model):
             # create it
             print("importing {0}".format(video))
             datestr, camstr = nameparts
+            camstr = camstr.split(".")[0]
             video_datetime = datetime.datetime.strptime(datestr, "%d-%m-%Y_%H")
             date = video_datetime.date()
             start_time = video_datetime.time()
             # assume each video is 60 mins long (video times are inaccurate/halved?)
             end_time = (video_datetime + datetime.timedelta(minutes=60)).time()
+            print("Finding camera name closest to {}".format(camstr))
             camera = Camera.objects.get(name__istartswith=camstr.split("_")[0])
             cls.objects.create(date=date, start_time=start_time, end_time=end_time,
                                camera=camera, file=os.path.join(folder, video))
