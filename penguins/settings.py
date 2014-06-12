@@ -37,7 +37,6 @@ INSTALLED_APPS = (
     'django_nose',
     'rest_framework',
     'leaflet',
-    'swingers',
     # actual app
     'observations'
 )
