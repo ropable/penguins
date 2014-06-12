@@ -29,7 +29,7 @@ class Site(geo_models.Model):
     location = geo_models.PointField()
 
     def __str__(self):
-        return "{} ({})".format(self.name, self.camera_set.all())
+        return "{} ({})".format( self.name, ', '.join([c.name.encode("ascii") for c in self.camera_set.all()]) )
 
     class Meta:
         ordering = ['name']
