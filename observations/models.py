@@ -6,6 +6,7 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User, Group
 from django.contrib.gis.db import models as geo_models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.forms import ValidationError
 from django.core.files.storage import default_storage
 from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
@@ -17,6 +18,37 @@ import logging
 import os
 
 logger = logging.getLogger(__name__)
+
+class ObservationBase(models.Model):
+
+    def clean_fields(self, exclude=None):
+        """
+        Override clean_fields to do what model validation should have done
+        in the first place -- call clean_FIELD during model validation.
+        """
+        errors = {}
+
+        for f in self._meta.fields:
+            if f.name in exclude:
+                continue
+            if hasattr(self, "clean_%s" % f.attname):
+                try:
+                    getattr(self, "clean_%s" % f.attname)()
+                except ValidationError as e:
+                    # TODO: Django 1.6 introduces new features to
+                    # ValidationError class, update it to use e.error_list
+                    errors[f.name] = e.messages
+
+        try:
+            super(ObservationBase, self).clean_fields(exclude)
+        except ValidationError as e:
+            errors = e.update_error_dict(errors)
+
+        if errors:
+            raise ValidationError(errors)
+
+    class Meta:
+        abstract = True
 
 
 @python_2_unicode_compatible
@@ -50,7 +82,7 @@ class Camera(models.Model):
 
 
 @python_2_unicode_compatible
-class PenguinCount(models.Model):
+class PenguinCount(ObservationBase):
     site = models.ForeignKey(Site)
     date = models.DateField(default=timezone.now)
     comments = models.TextField(null=True, blank=True)
@@ -78,12 +110,22 @@ class PenguinCount(models.Model):
     outlier = models.DecimalField(
         _("outlying times"), default=0, max_digits=5, decimal_places=2)
 
+    def clean_date(self):
+        if self.date > datetime.date.today():
+            raise ValidationError("The 'Date' cannot be in the future!")
+
+    def clean_civil_twilight(self):
+        if self.civil_twilight is None:
+            raise ValidationError("This field is required!")
+        if self.civil_twilight > timezone.now():
+            raise ValidationError("The 'Civil Twilight Date' cannot be in the future!")
+
     def __str__(self):
         return "%s" % self.date
 
 
 @python_2_unicode_compatible
-class Video(models.Model):
+class Video(ObservationBase):
     name = models.CharField(max_length=100)
     date = models.DateField(_("Date"),
         help_text=_("The date of the recording."))
@@ -94,6 +136,14 @@ class Video(models.Model):
     end_time = models.TimeField(_("End time"),
         help_text=_("The end time of the recording (usually 1h after start)."))
     views = models.IntegerField(default=0)
+
+    def clean_date(self):
+        if self.date > datetime.date.today():
+            raise ValidationError("The 'Date' cannot be in the future!")
+
+    def clean_end_time(self):
+        if self.end_time < self.start_time:
+            raise ValidationError("The 'End Time' cannot be before the 'Start Time'!")
 
     def __str__(self):
         return "%s - %s" % (self.camera.name, self.name)
@@ -141,7 +191,7 @@ class PenguinVideoObservation(models.Model):
 
 
 @python_2_unicode_compatible
-class PenguinObservation(models.Model):
+class PenguinObservation(ObservationBase):
     DIRECTION_CHOICES = (
         (1, _("N")),
         (2, _("NNW")),
@@ -190,6 +240,10 @@ class PenguinObservation(models.Model):
         verbose_name=_("Moon phase"), blank=True, null=True)
     raining = models.BooleanField(_("Raining?"), default=False,
         help_text=_("Was it raining at the time of the observation?"))
+
+    def clean_date(self):
+        if self.date > timezone.now():
+            raise ValidationError("The 'Date' cannot be in the future!")
 
     def __str__(self):
         return "%s penguins seen on %s by %s" % (
