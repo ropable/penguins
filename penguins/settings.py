@@ -105,6 +105,7 @@ TEMPLATE_DIRS = (
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
+    'swingers.sauth.backends.EmailBackend',
 )
 
 LOGIN_URL = '/login/'
@@ -112,6 +113,7 @@ LOGIN_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL_FAILURE = LOGIN_URL
 LOGOUT_URL = '/logout/'
 LOGOUT_REDIRECT_URL = LOGOUT_URL
+ANONYMOUS_USER_ID = -1
 
 # LDAP settings
 AUTH_LDAP_SERVER_URI = os.environ.get('LDAP_SERVER_URI')
@@ -169,6 +171,8 @@ DEBUG_TOOLBAR_CONFIG = {
     'INTERCEPT_REDIRECTS': False,
 }
 
+# Application version number
+APPLICATION_VERSION_NO = '0.1a'
 
 JENKINS_TASKS = (
     'django_jenkins.tasks.with_coverage',
