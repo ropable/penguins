@@ -4,12 +4,13 @@ from django.conf.urls import patterns, include, url
 from rest_framework.routers import DefaultRouter
 
 from observations.sites import site
-from observations.api import PenguinCountViewSet, PenguinObservationViewSet
+from observations.api import PenguinCountViewSet, PenguinObservationViewSet, VideoViewSet
 
 
 router = DefaultRouter()
 router.register(r'count', PenguinCountViewSet)
 router.register(r'observations', PenguinObservationViewSet)
+router.register(r'videos', VideoViewSet)
 
 urlpatterns = patterns('',
     url(r'^api/', include(router.urls)),
