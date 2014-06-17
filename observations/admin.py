@@ -163,7 +163,7 @@ class PenguinObservationAdmin(BaseAdmin):
 
 
 class VideoAdmin(DetailAdmin):
-    list_display = ('camera', 'name', 'start_time', 'end_time')
+    list_display = ('camera', 'name', 'start_time', 'end_time', 'views')
     exclude = ('views',)
 
     fieldsets = (
@@ -172,10 +172,15 @@ class VideoAdmin(DetailAdmin):
         }),
     )
 
+    list_per_page = 15
+
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts
 
         obj = self.get_object(request, unquote(object_id))
+
+        obj.views += 1
+        obj.save()
 
         if not self.has_view_permission(request, obj):
             raise PermissionDenied

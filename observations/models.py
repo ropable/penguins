@@ -20,6 +20,11 @@ import os
 logger = logging.getLogger(__name__)
 
 class ObservationBase(models.Model):
+    """
+    TODO 
+    This class can be replaced if inheriting from 
+    swingers.models.auth.Audit. clean_field() method below is from there.
+    """
 
     def clean_fields(self, exclude=None):
         """
