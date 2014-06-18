@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import unicode_literals, absolute_import
 
 from django.db import models
 from django.db.models.signals import post_save
@@ -12,17 +12,18 @@ from django.utils import timezone
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 
-from observations.utils import civil_twilight
+from .utils import civil_twilight
 import datetime
 import logging
 import os
 
 logger = logging.getLogger(__name__)
 
+
 class ObservationBase(models.Model):
     """
-    TODO 
-    This class can be replaced if inheriting from 
+    TODO
+    This class can be replaced if inheriting from
     swingers.models.auth.Audit. clean_field() method below is from there.
     """
 
@@ -66,7 +67,7 @@ class Site(geo_models.Model):
     location = geo_models.PointField()
 
     def __str__(self):
-        return "{} ({})".format( self.name, ', '.join([c.name.encode("ascii") for c in self.camera_set.all()]) )
+        return "{} ({})".format(self.name, ', '.join([c.name.encode("ascii") for c in self.camera_set.all()]))
 
     class Meta:
         ordering = ['name']
@@ -155,7 +156,9 @@ class Video(ObservationBase):
 
     @classmethod
     def import_folder(cls, folder="beach_return_cams"):
-        videos = default_storage.listdir(folder)[1]
+        VIDEO_FORMATS = ('.mp4', '.avi', '.mkv')
+        videos = [v for v in default_storage.listdir(folder)[1] if v.endswith(VIDEO_FORMATS)]
+        count = 0
         for video in videos:
             print("checking {0}".format(video))
             nameparts = video.split("_tl_")
@@ -179,6 +182,9 @@ class Video(ObservationBase):
             camera = Camera.objects.get(name__istartswith=camstr.split("_")[0])
             cls.objects.create(date=date, start_time=start_time, end_time=end_time,
                                camera=camera, file=os.path.join(folder, video))
+            count += 1
+
+        return count
 
     class Meta:
         ordering = ['-date']
