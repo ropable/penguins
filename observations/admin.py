@@ -187,8 +187,6 @@ class VideoAdmin(DetailAdmin):
         obj.views += 1
         obj.save()
 
-        list_per_page = 15
-
         if not self.has_view_permission(request, obj):
             raise PermissionDenied
 
