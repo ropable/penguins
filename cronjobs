@@ -1,0 +1,1 @@
+01 09 * * 1-5 www-data curl "http://localhost:8270/cronjobs/video-import/" > /dev/null 2>&1
