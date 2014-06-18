@@ -161,7 +161,7 @@ class Video(ObservationBase):
         count = 0
         for video in videos:
             print("checking {0}".format(video))
-            nameparts = video.split("_tl_")
+            nameparts = video.split("_")
             if len(nameparts) != 2:
                 print("can't parse {0}".format(nameparts))
                 continue
