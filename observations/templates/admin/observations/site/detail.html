@@ -49,8 +49,23 @@
 {% endif %}{% endif %}
 {% endblock %}
 
+
+{{ select_date.as_p }}
 {% for camera in original.camera_set.all %}
-<h3>{{ camera.name }} videos</h3>
+<h3>{{ camera.name }} camera videos</h3>
+<table id="id_table_camera_{{ camera.pk }}" data-id="{{ camera.pk }}" class="table table-striped camera_table">
+  <thead>
+    <tr>
+      <th>Date</th>
+      <th>Start time</th>
+      <th>End time</th>
+      <th>Views</th>
+    </tr>
+  </thead>
+  <tbody>
+ </tbody>
+</table>
+{% comment %}
 {% regroup camera.video_set.all by date as video_list %}
 <table class="table table-striped">
   <thead>
@@ -72,7 +87,9 @@
   {% endfor %}
   </tbody>
 </table>
+{% endcomment %}
 {% endfor %}
+
 
 <div class="row">
   <div class="col-xs-6 col-md-6">
@@ -109,4 +126,77 @@
   {% endfor %}
   </tbody>
 </table>
+{% endblock %}
+
+{% block extrajs %}
+<script type="text/javascript">
+    function updateCameraTables(cameraID, selectDate, table) {
+        //console.log(table);
+        var baseAPIURL = "/api/videos/";
+        var videoURL   = "/observations/video/";
+        $.ajax({
+            type: "GET",
+            url: baseAPIURL,
+            data: {"format": "json", "camera": cameraID, "date": selectDate},
+            success: function(data) {
+                //console.log("Response: " + data[0].file);
+
+                if(data.length > 0 ) {
+                  for(var i=0; i<data.length; i++) {
+                    var str = '<a href="' + videoURL + data[i].id + '/">' + data[i].date + '</a>';
+
+                    $(".table.camera_table").find('tbody')
+                      .show()
+                      .append('<tr>')
+                      .append('<td> ' +  str + ' </td>')
+                      .append('<td> ' +  data[i].start_time + ' </td>')
+                      .append('<td> ' +  data[i].end_time + ' </td>')
+                      .append('<td> ' +  data[i].views + ' </td>')
+                      .append('</tr>')
+                  }
+                } else {
+
+                    console.log('Data length ' + data.length)
+                    $(".table.camera_table").find('tbody')
+                      .show()
+                      .append('<tr>')
+                      .append('<td><font color=red><b> No videos found for date: ' + selectDate  + '</b> </td>')
+                      .append('</tr>')
+                }
+            }
+        });
+    };
+    // ------------------------------------
+    $(function() {
+        var selectDate = $("#id_select_date").val();
+
+        if (selectDate) {
+            $("table.camera_table").each(function() {
+                cameraId = $(this).data("id");
+                updateCameraTables(cameraId, selectDate, $(this));
+            });
+        };
+
+        $("#id_select_date").change(function() {
+            selectDate = $("#id_select_date").val();
+            console.log("new date: " + selectDate);
+            $(".table.camera_table").find('tr').remove();
+            $(".table.camera_table").find('td').remove();
+            $("table.camera_table").each(function() {
+                cameraId = $(this).data("id");
+                console.log("cameraId " + cameraId);
+                updateCameraTables(cameraId, selectDate, $(this));
+            });
+        });
+    });
+
+/*
+    $(function() {
+      $("#id_select_date").change(function(){
+        $(this).datepicker({ dateFormat: "yy-mm-dd" });
+      });
+    });
+*/
+
+</script>
 {% endblock %}

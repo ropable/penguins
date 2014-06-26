@@ -1,6 +1,12 @@
 from __future__ import unicode_literals
 
-from django.conf import settings
+import datetime
+import logging
+#import os
+#import subprocess
+import unicodecsv
+
+#from django.conf import settings
 from django.contrib.admin import ModelAdmin
 from django.contrib.admin.util import unquote
 from django.core.exceptions import PermissionDenied
@@ -10,14 +16,11 @@ from django.utils.html import escape
 from django.utils.translation import ugettext as _, ugettext_lazy
 from django.core.urlresolvers import reverse
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
+
 from swingers.admin import DetailAdmin
 from leaflet.admin import LeafletGeoAdmin
-
-import datetime
-import logging
-import os
-import subprocess
-import unicodecsv
+from observations.models import Video
+from observations.forms import SelectDateForm
 
 logger = logging.getLogger(__name__)
 
@@ -54,8 +57,14 @@ class SiteAdmin(DetailAdmin, LeafletGeoAdmin):
 
         observations = obj.penguinobservation_set.filter(site=obj)[:10]
 
+        # Define a set of videos to pass into the view on load.
+        # All cameras, today's date.
+        cams = obj.camera_set.all()
+        initial_videos = Video.objects.filter(camera__in=cams, date=datetime.date.today())
         context = {
             'title': obj.name,
+            'select_date': SelectDateForm,
+            'initial_videos': initial_videos,
             'recent_observations': observations
         }
         context.update(extra_context or {})
