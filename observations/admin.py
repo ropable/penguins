@@ -26,6 +26,9 @@ logger = logging.getLogger(__name__)
 
 
 class BaseAdmin(ModelAdmin):
+
+    list_per_page = 15
+
     def changelist_view(self, request, extra_context=None):
         context = {
             'title': self.get_title(request)
@@ -105,6 +108,8 @@ class PenguinCountAdmin(ModelAdmin):
                     'ninety_to_one_oh_five', 'one_oh_five_to_one_twenty',
                     'total_penguins', 'outlier', 'comments')
 
+    list_per_page = 15
+
     def export_to_csv(self, request, queryset):
         response = HttpResponse(content_type="text/csv")
         response['Content-Disposition'] = "attachment; filename=export.csv"
@@ -172,7 +177,7 @@ class PenguinObservationAdmin(BaseAdmin):
 
 
 class VideoAdmin(DetailAdmin):
-    list_display = ('camera', 'name', 'start_time', 'end_time')
+    list_display = ('camera', 'name', 'start_time', 'end_time', 'views')
     exclude = ('views',)
 
     fieldsets = (
@@ -181,10 +186,15 @@ class VideoAdmin(DetailAdmin):
         }),
     )
 
+    list_per_page = 15
+
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts
 
         obj = self.get_object(request, unquote(object_id))
+
+        obj.views += 1
+        obj.save()
 
         if not self.has_view_permission(request, obj):
             raise PermissionDenied

@@ -15,6 +15,11 @@ TEMPLATE_DEBUG = DEBUG
 ALLOWED_HOSTS = ['*']
 INTERNAL_IPS = ('127.0.0.1',)
 
+# Email settings
+ADMINS = ('asi@dpaw.wa.gov.au',)
+EMAIL_HOST = 'alerts.corporateict.domain'
+EMAIL_PORT = 25
+
 # Application definition
 INSTALLED_APPS = (
     'django.contrib.admin',
