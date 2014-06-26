@@ -180,8 +180,7 @@
         $("#id_select_date").change(function() {
             selectDate = $("#id_select_date").val();
             console.log("new date: " + selectDate);
-            $(".table.camera_table").find('tr').remove();
-            $(".table.camera_table").find('td').remove();
+            $(".table.camera_table").find('tbody').empty();
             $("table.camera_table").each(function() {
                 cameraId = $(this).data("id");
                 console.log("cameraId " + cameraId);
