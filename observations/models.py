@@ -156,34 +156,41 @@ class Video(ObservationBase):
 
     @classmethod
     def import_folder(cls, folder="beach_return_cams"):
+        logger = logging.getLogger('videos')
+        logger.debug('Started import_folder method.')
         VIDEO_FORMATS = ('.mp4', '.avi', '.mkv')
         videos = [v for v in default_storage.listdir(folder)[1] if v.endswith(VIDEO_FORMATS)]
         count = 0
         for video in videos:
-            print("checking {0}".format(video))
-            nameparts = video.split("_")
-            if len(nameparts) != 2:
-                print("can't parse {0}".format(nameparts))
-                continue
+            logger.debug("Checking {0}".format(video))
+            nameparts = video.split("_", 3)
+            #if len(nameparts) != 2:
+            #    logger.debug("Error: can't parse {0}".format(nameparts))
+            #    continue
             filename = os.path.join(folder, video)
             if cls.objects.filter(file=filename).exists():
                 continue
             # If video doesn't exist, and filename splits nicely
             # create it
-            print("importing {0}".format(video))
-            datestr, camstr = nameparts
-            camstr = camstr.split(".")[0]
+            logger.debug("Importing {0}".format(video))
+            datestr = '_'.join(nameparts[0:2])
             video_datetime = datetime.datetime.strptime(datestr, "%d-%m-%Y_%H")
             date = video_datetime.date()
             start_time = video_datetime.time()
+            camstr = nameparts[-1]
+            camstr = camstr.split(".")[0]  # Remove the extension.
             # assume each video is 60 mins long (video times are inaccurate/halved?)
             end_time = (video_datetime + datetime.timedelta(minutes=60)).time()
-            print("Finding camera name closest to {}".format(camstr))
-            camera = Camera.objects.get(name__istartswith=camstr.split("_")[0])
-            cls.objects.create(date=date, start_time=start_time, end_time=end_time,
-                               camera=camera, file=os.path.join(folder, video))
-            count += 1
+            logger.debug("Finding camera name closest to {}".format(camstr))
+            try:
+                camera = Camera.objects.get(name__istartswith=camstr.split("_")[0])
+                cls.objects.create(date=date, start_time=start_time, end_time=end_time,
+                                   camera=camera, file=os.path.join(folder, video))
+                count += 1
+            except:
+                logger.error('No camera found, skipping video name {}'.format(nameparts[-1]))
 
+        logger.debug("Import task completed.")
         return count
 
     class Meta:
