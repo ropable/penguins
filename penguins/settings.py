@@ -41,6 +41,7 @@ INSTALLED_APPS = (
     'observations'
 )
 
+ANONYMOUS_USER_ID=1
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
