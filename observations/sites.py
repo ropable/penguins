@@ -4,6 +4,8 @@ from django.contrib.auth.models import User
 from django.db.models import Avg
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.flatpages.admin import FlatPageAdmin
+from django.contrib.flatpages.models import FlatPage
 
 from observations.admin import (SiteAdmin, CameraAdmin, PenguinCountAdmin,
                                 PenguinObservationAdmin, VideoAdmin)
@@ -81,3 +83,5 @@ site.register(PenguinCount, PenguinCountAdmin)
 site.register(PenguinObservation, PenguinObservationAdmin)
 site.register(Video, VideoAdmin)
 site.register(Camera, CameraAdmin)
+site.register(FlatPage, FlatPageAdmin)
+#site.register()
