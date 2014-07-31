@@ -181,7 +181,7 @@ class VideoAdmin(DetailAdmin):
 
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts
-
+        
         obj = self.get_object(request, unquote(object_id))
 
         if not self.has_view_permission(request, obj):

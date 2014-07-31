@@ -1,0 +1,18 @@
+#regex syntax
+^.emv$
+\.pyc$
+\.swp$
+\.swo$
+\.orig$
+^virtualenv/
+^venv/
+^media/
+^media$
+^static/
+^.ropeproject/
+\.svn$
+\.git$
+\.csv$
+\.log$
+debug$
+^dajaxice

@@ -14,6 +14,7 @@ django-nose
 django-leaflet
 django-swingers
 django-jenkins
+django-daterange-filter
 pep8
 flake8
 factory-boy

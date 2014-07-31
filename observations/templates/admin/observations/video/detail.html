@@ -90,16 +90,17 @@
       <th>Penguins seen</th>
       <th>Comments</th>
       <th>Position</th>
+      <th>Action</th>
     </tr>
   <thead>
   <tbody>
   {% for observation in user_observations %}
-    <tr>
+    <tr id="row_{{ observation.pk }}">
       <td>{{ observation.date|localtime|time:"H:i" }}</td>
       <td>{{ observation.seen }}</td>
       <td>{{ observation.comments }}</td>
       <td><a onClick="flowplayer().seek( {{ observation.position }} );">{{ observation.position }}</a></td>
-
+      <td><a onClick="deleteObservation({{ observation.pk }})" class="btn btn-danger">Delete</a>
     </tr>
   {% endfor %}
   </tbody>
@@ -224,7 +225,7 @@
           data: data
         }).done(function() {
           $('#addform').modal('hide');
-          $('#observations tbody').append("<tr><td>" + $('#id_time').val() + "</td><td>" + $('#id_seen').val() + "</td>" + "<td>" + $('#id_comments').val() + "</td><td><a href='javascript:flowplayer().seek(" +$('#id_position').val()+ ")'>"+$('#id_position').val()+"</a></td></tr>");
+          $('#observations tbody').append("<tr><td>" + $('#id_time').val() + "</td><td>" + $('#id_seen').val() + "</td>" + "<td>" + $('#id_comments').val() + "</td><td><a href='javascript:flowplayer().seek(" +$('#id_position').val()+ ")'>"+$('#id_position').val()+"</a></td><td><a href='?'>Reload page to delete this record</a></td></tr>");
           $('#add-form').parsley().reset();
           $('#add-form').find('input:text, textarea').val('');
           $('#id_time').data("DateTimePicker").setDate('{{ original.start_time|time:"H:i" }}');
@@ -234,7 +235,6 @@
         });
       }
     });
-
       window.setInterval(function(){
         var f = flowplayer();
         if (f.video.time > 0) {
@@ -244,8 +244,6 @@
           $('#counter').html('Video not started');
         }
     },100);
-
-  
   });
 
 function formFillin() {
@@ -260,5 +258,18 @@ function formFillin() {
         }
         $('#counter').html('Video is paused');
 }
+
+function deleteObservation(pk) {
+$.ajax({
+    url: '/api/observations/'+pk+'/',
+    type: 'DELETE',
+    success: function(result) {
+      $('#row_'+pk).hide();
+    }
+});
+
+
+}
+
 </script>
 {% endblock %}
