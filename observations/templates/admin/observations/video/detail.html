@@ -58,17 +58,28 @@
    <video preload="none">
    <source type="video/mp4" src="{{ original.file.url }}"></video>
 </div>
+<div id="counter">Video Not started</div>
 </div>
 
 </br>
 <a href="{{ original.file.url }}">Download Video</a>
+
+
+<script>
+
+
+
+</script>
+
+
+
 <div class="row">
   <div class="col-xs-6 col-md-6">
     <h3>Your observations for this video</h3>
   </div>
   <div class="col-xs-6 col-md-6 object-tools">
     <span class="pull-right">
-  <button type="button" class="btn btn-primary" role="button" data-target="#addform" data-toggle="modal"><span class="glyphicon glyphicon-plus"></span> Add observation</button>
+  <button type="button" class="btn btn-primary" role="button" data-target="#addform" data-toggle="modal" onClick="formFillin();"><span class="glyphicon glyphicon-plus"></span> Add observation</button>
     </span>
   </div>
 </div>
@@ -78,14 +89,17 @@
       <th>Time</th>
       <th>Penguins seen</th>
       <th>Comments</th>
+      <th>Position</th>
     </tr>
   <thead>
   <tbody>
   {% for observation in user_observations %}
     <tr>
-      <td>{{ observation.date|localtime|time:"H:i" }}</th>
-      <td>{{ observation.seen }}</th>
-      <td>{{ observation.comments }}</th>
+      <td>{{ observation.date|localtime|time:"H:i" }}</td>
+      <td>{{ observation.seen }}</td>
+      <td>{{ observation.comments }}</td>
+      <td><a onClick="flowplayer().seek( {{ observation.position }} );">{{ observation.position }}</a></td>
+
     </tr>
   {% endfor %}
   </tbody>
@@ -111,13 +125,27 @@
           <div class="form-group">
             <label for="id_seen" class="col-sm-2 control-label required">Penguins seen</label>
             <div class="col-sm-10">
-              <input type="text" class="form-control" id="id_seen" min="1" max="100" required>
+               <div class="input-group">
+                <input type="text" class="form-control" id="id_seen" min="1" max="100" required  autocomplete="off">
+                <span class="input-group-addon glyphicon glyphicon-eye-open"></span>
+              </div>
             </div>
           </div>
           <div class="form-group">
             <label for="id_comments" class="col-sm-2 control-label">Comments</label>
             <div class="col-sm-10">
               <textarea id="id_comments" class="form-control" rows="3"></textarea>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label for="id_position" class="col-sm-2 control-label">Video Position</label>
+            <div class="col-sm-10">
+              <div class="input-group">
+                <input id="id_position" class="form-control" type="text">
+                <span class="input-group-addon glyphicon glyphicon-camera"></span>
+                <input id="id_video" type="hidden" name="video" value="{{ original.pk }}">
+              </div>
             </div>
           </div>
         </form>
@@ -138,6 +166,11 @@
 <script src="{% static 'js/parsley.min.js' %}"></script>
 <script src="//cdn.jsdelivr.net/flowplayer/5.4.3/flowplayer.min.js"></script>
 <script>
+  //Global
+
+  var time = 0;
+
+
   $(function() {
     /* Setup CSRF protection. */
     var csrftoken = $.cookie('csrftoken');
@@ -180,7 +213,9 @@
           'camera': {{ original.camera.id }},
           'site': {{ original.camera.site.id }},
           'seen': $('#id_seen').val(),
-          'comments': $('#id_comments').val()
+          'comments': $('#id_comments').val(),
+          'video': {{ original.id }},
+          'position': $('#id_position').val()
         };
 
         $.ajax({
@@ -189,7 +224,7 @@
           data: data
         }).done(function() {
           $('#addform').modal('hide');
-          $('#observations tbody').append("<tr><td>" + $('#id_time').val() + "</td><td>" + $('#id_seen').val() + "</td>" + "<td>" + $('#id_comments').val() + "</td>" + "</tr>");
+          $('#observations tbody').append("<tr><td>" + $('#id_time').val() + "</td><td>" + $('#id_seen').val() + "</td>" + "<td>" + $('#id_comments').val() + "</td><td><a href='javascript:flowplayer().seek(" +$('#id_position').val()+ ")'>"+$('#id_position').val()+"</a></td></tr>");
           $('#add-form').parsley().reset();
           $('#add-form').find('input:text, textarea').val('');
           $('#id_time').data("DateTimePicker").setDate('{{ original.start_time|time:"H:i" }}');
@@ -199,6 +234,31 @@
         });
       }
     });
+
+      window.setInterval(function(){
+        var f = flowplayer();
+        if (f.video.time > 0) {
+          time = f.video.time;
+          $('#counter').html(time+" seconds");
+        } else {
+          $('#counter').html('Video not started');
+        }
+    },100);
+
+  
   });
+
+function formFillin() {
+        var f = flowplayer();
+        f.pause();
+
+        if (f.video.time > 0) {
+          time = f.video.time;
+          $('#id_position').val(time);
+        } else {
+          $('#id_position').val(0);
+        }
+        $('#counter').html('Video is paused');
+}
 </script>
 {% endblock %}

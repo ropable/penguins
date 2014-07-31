@@ -94,6 +94,7 @@ class Video(models.Model):
     end_time = models.TimeField(_("End time"),
         help_text=_("The end time of the recording (usually 1h after start)."))
     views = models.IntegerField(default=0)
+    mark_complete = models.BooleanField(default=False,help_text=_("Has this been viewed in its entirity by a reviewer"))
 
     def __str__(self):
         return "%s - %s" % (self.camera.name, self.name)
@@ -134,7 +135,6 @@ class PenguinVideoObservation(models.Model):
     video = models.ForeignKey(Video)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
-
     def __str__(self):
         return "<seen in %s> (%s-%s)" % (
             self.video.name, self.start_time, self.end_time)
@@ -190,6 +190,9 @@ class PenguinObservation(models.Model):
         verbose_name=_("Moon phase"), blank=True, null=True)
     raining = models.BooleanField(_("Raining?"), default=False,
         help_text=_("Was it raining at the time of the observation?"))
+    position = models.FloatField(default=0,null=True,verbose_name=_("Position in video"))
+    video = models.ForeignKey(Video,default=None,null=True,verbose_name=_("Video filename"))
+
 
     def __str__(self):
         return "%s penguins seen on %s by %s" % (

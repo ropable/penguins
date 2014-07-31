@@ -20,3 +20,26 @@
   <li><a href="{% url "admin:auth_user_changelist" %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>
 </ul>
 {% endblock %}
+{% block extrahead %}
+{{ block.super }}
+<style>
+
+    #changelist-filter {
+        width:15%; !important
+        display:inline-block;
+        float:right;
+        position:relative !important;
+        padding-left: 6px;
+    }
+
+    .sortpriority {
+        display: inline-block;
+        float:left;
+        color:#005;
+        font-size:x-small;\
+    }
+    table {
+        width:100% !important;
+    }
+</style>
+{% endblock %}

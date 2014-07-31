@@ -30,6 +30,7 @@ INSTALLED_APPS = (
     'django_jenkins',
     'django_extensions',
     'debug_toolbar',
+    'daterange_filter',
     'compressor',
     'south',
     'storages',
@@ -85,6 +86,7 @@ STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
     'compressor.finders.CompressorFinder',
 )
+#import ipdb; ipdb.set_trace()
 
 if os.environ.get('USE_AWS', False):
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'

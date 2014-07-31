@@ -12,15 +12,15 @@ from django.core.urlresolvers import reverse
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from swingers.admin import DetailAdmin
 from leaflet.admin import LeafletGeoAdmin
-
+from django.utils.safestring import mark_safe
 import datetime
 import logging
 import os
 import subprocess
 import unicodecsv
+from daterange_filter.filter import DateRangeFilter
 
 logger = logging.getLogger(__name__)
-
 
 class BaseAdmin(ModelAdmin):
     def changelist_view(self, request, extra_context=None):
@@ -117,9 +117,9 @@ class PenguinCountAdmin(ModelAdmin):
 
 
 class PenguinObservationAdmin(BaseAdmin):
-    actions = None
-    list_display = ('date', 'site', 'camera', 'observer', 'seen', 'comments')
-    list_filter = ('site', 'camera')
+    actions = ['delete','export_to_csv']
+    list_display = ('date', 'site', 'camera', 'observer', 'seen', 'comments','link_to_video','position')
+    list_filter = (('date', DateRangeFilter),'site', 'camera',)
     fieldsets = (
         (None, {
             'fields': ('date', 'site', 'camera', 'seen', 'comments')
@@ -131,6 +131,13 @@ class PenguinObservationAdmin(BaseAdmin):
         })
     )
     exclude = ('observer',)
+
+    def link_to_video(self,obj):
+        if (obj.video):
+            #return mark_safe("<a href='/observations/video/"+str(obj.video.pk)+"'>"+str(obj.video)+"</a>")
+            return mark_safe("<a href='"+reverse("admin:observations_video_detail",args=(obj.video.pk,))+"'>"+str(obj.video)+"</a>")
+        else:
+            return "No video"
 
     def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
         if db_field.name == 'camera':
@@ -186,10 +193,12 @@ class VideoAdmin(DetailAdmin):
                 'name': force_text(opts.verbose_name),
                 'key': escape(object_id)})
 
+
         observations = obj.camera.penguinobservation_set.filter(
             observer=request.user,
             date__range=(datetime.datetime.combine(obj.date, obj.start_time),
                          datetime.datetime.combine(obj.date, obj.end_time)))
+
 
         context = {
             'title': "View video",

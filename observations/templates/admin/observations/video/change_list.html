@@ -1,6 +1,5 @@
 {% extends "admin/change_list.html" %}
 {% load i18n %}
-
 {% if not is_popup %}
 {% block breadcrumbs %}
 <ol class="breadcrumb">
@@ -11,6 +10,7 @@
 {% endif %}
 
 {% block navbar %}
+
 <ul class="nav navbar-nav">
   <li><a href="{% url "admin:index" %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
   <li><a href="{% url "admin:observations_site_changelist" %}"><span class="glyphicon glyphicon-map-marker"></span> Sites</a></li>
