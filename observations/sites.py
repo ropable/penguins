@@ -4,8 +4,10 @@ from django.contrib.auth.models import User
 from django.db.models import Avg
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-from django.contrib.flatpages.admin import FlatPageAdmin
-from django.contrib.flatpages.models import FlatPage
+#from django.contrib.flatpages.admin import FlatPageAdmin
+#from django.contrib.flatpages.models import FlatPage
+from flatpages_x.admin import FlatPageAdmin
+from flatpages_x.models import FlatPage
 
 from observations.admin import (SiteAdmin, CameraAdmin, PenguinCountAdmin,
                                 PenguinObservationAdmin, VideoAdmin)

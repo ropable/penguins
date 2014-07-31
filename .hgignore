@@ -9,6 +9,7 @@
 ^media/
 ^media$
 ^static/
+^staticfiles/
 ^.ropeproject/
 \.svn$
 \.git$

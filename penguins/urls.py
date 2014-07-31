@@ -14,6 +14,7 @@ router.register(r'observations', PenguinObservationViewSet)
 urlpatterns = patterns('',
     url(r'^api/', include(router.urls)),
     url(r'^api/auth/', include('rest_framework.urls', namespace='rest_framework')),
+    url(r'^markitup/', include('markitup.urls')),
     url(r'^help/', include('django.contrib.flatpages.urls')),
     url(r'', include(site.urls)),
 )

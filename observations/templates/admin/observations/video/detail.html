@@ -53,12 +53,12 @@
 {% endif %}{% endif %}
 {% endblock %}
 
-<div id=video>
+<div id="video">
 <div data-embed="false" class="flowplayer is-splash color-alt no-background no-volume no-mute">
    <video preload="none">
-   <source type="video/mp4" src="{{ original.file.url }}"></video>
+   <source src="{{ original.file.url }}"></video>
 </div>
-<div id="counter">Video Not started</div>
+<div class="well" id="counter">Video Not started</div>
 </div>
 
 </br>
@@ -79,6 +79,7 @@
   </div>
   <div class="col-xs-6 col-md-6 object-tools">
     <span class="pull-right">
+    <button id ="markdone" type="button" class="btn btn-success" role="button" style="display:none" onClick="markDone"><span class="glyphicon glyphicon-plus"></span>Mark Finished</button>
   <button type="button" class="btn btn-primary" role="button" data-target="#addform" data-toggle="modal" onClick="formFillin();"><span class="glyphicon glyphicon-plus"></span> Add observation</button>
     </span>
   </div>
@@ -180,6 +181,11 @@
         // these HTTP methods do not require CSRF protection
         return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
     }
+    flowplayer().bind("finish", function() {
+                    $('#markdone').show();
+                });
+
+    alert ("This doesnt work :(");
 
     $.ajaxSetup({
         crossDomain: false, // obviates need for sameOrigin test

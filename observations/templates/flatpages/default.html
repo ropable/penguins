@@ -1,5 +1,6 @@
 {% extends "admin/base_site.html" %}
 {% load i18n admin_static %}
+{% load markitup_tags %}
 
 {% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />{% endblock %}
 
@@ -12,7 +13,7 @@
 {% block bodyclass %}dashboard{% endblock %}
 
 {% block breadcrumbs %}{% endblock %}
-
+{% block title %}{{flatpage.title}}{% endblock %}
 {% block navbar %}
 <ul class="nav navbar-nav">
   <li class="active"><a href="{% url "admin:index" %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
@@ -37,7 +38,8 @@
 <div class="container">
   <div class="row">
       <div class="span6">
-        {{ flatpage.content }}
+        {{ flatpage.content|render_markup|safe }}
+
       </div>
 </div>
 {% endblock %}

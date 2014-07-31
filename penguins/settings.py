@@ -25,7 +25,9 @@ INSTALLED_APPS = (
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'django.contrib.flatpages',
+    'markitup',
     'flatpages_x',
+    'sorl.thumbnail',
     'django.contrib.sites',
     'django.contrib.humanize',
     'django.contrib.gis',
@@ -162,6 +164,10 @@ EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
 EMAIL_PORT = os.environ.get('EMAIL_PORT', 25)
 
 COMPRESS_ENABLED = False
+
+MARKITUP_SET = 'markitup/sets/markdown'
+MARKITUP_SKIN = 'markitup/skins/markitup'
+MARKITUP_FILTER = ('markdown.markdown', {'safe_mode': True})
 
 SOUTH_TESTS_MIGRATE = False
 SKIP_SOUTH_TESTS = True

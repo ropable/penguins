@@ -16,6 +16,8 @@ django-swingers
 django-jenkins
 django-daterange-filter
 django-flatpages-x
+django-markitup
+sorl-thumbnail
 pep8
 flake8
 factory-boy
