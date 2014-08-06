@@ -48,6 +48,8 @@ INSTALLED_APPS = (
 
 ANONYMOUS_USER_ID=1
 
+AUTH_USER_MODEL = "observations.PenguinUser"
+
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',

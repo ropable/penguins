@@ -1,7 +1,11 @@
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.admin import UserAdmin
-from django.contrib.auth.models import User
-from django.db.models import Avg
+from django.contrib.auth import get_user_model
+User = get_user_model()
+
+#from django.contrib.auth.models import User
+from django.db.models import Avg,Aggregate,Count
+from django.db import models
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 #from django.contrib.flatpages.admin import FlatPageAdmin
@@ -12,7 +16,8 @@ from flatpages_x.models import FlatPage
 from observations.admin import (SiteAdmin, CameraAdmin, PenguinCountAdmin,
                                 PenguinObservationAdmin, VideoAdmin)
 from observations.models import (Site, Camera, PenguinCount,
-                                 PenguinObservation, Video)
+                                 PenguinObservation, Video,PenguinUser)
+
 
 from arrow import Arrow
 import logging
@@ -24,8 +29,13 @@ class PenguinUserAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
-        (_('Permissions'), {'fields': ('is_active', 'last_login')}),
+        (_('Permissions'), {'fields': ('is_active','is_superuser','last_login')}),
+        (_('Statistics'),  {'fields': ('observation_count','completion_count')}),
     )
+    list_display = ('username','email','first_name','last_name','is_superuser'
+        ,'observation_count','completion_count','completion_hours')
+
+    list_filter = ('is_superuser',)
 
     add_fieldsets = (
         (None, {
@@ -35,11 +45,60 @@ class PenguinUserAdmin(UserAdmin):
         (_('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
     )
 
-    readonly_fields = ('last_login',)
+    def changelist_view(self, request, extra_context=None):
+        context = {
+        }
+        context.update(extra_context or {})
+        return super(PenguinUserAdmin, self).changelist_view(request, context)
+
+    readonly_fields = ('last_login','observation_count','completion_count')
 
     def response_add(self, request, obj, post_url_continue=None):
-        return super(UserAdmin, self).response_add(request, obj,
+        return super(PenguinUserAdmin, self).response_add(request, obj,
                                                    post_url_continue)
+    #class Meta:
+    #    model = get_user_model()
+
+
+class MedianSQL(models.sql.aggregates.Aggregate):
+    sql_function = 'median'
+
+class Median(models.Aggregate):
+    """
+
+    Migration 0008 adds the following;-
+
+    CREATE OR REPLACE FUNCTION _final_median(numeric[])
+       RETURNS numeric AS
+    $$
+       SELECT AVG(val)
+       FROM (
+         SELECT val
+         FROM unnest($1) val
+         ORDER BY 1
+         LIMIT  2 - MOD(array_upper($1, 1), 2)
+         OFFSET CEIL(array_upper($1, 1) / 2.0) - 1
+       ) sub;
+    $$
+    LANGUAGE 'sql' IMMUTABLE;
+     
+    DROP AGGREGATE IF EXISTS median(numeric)
+
+    CREATE AGGREGATE median(numeric) (
+      SFUNC=array_append,
+      STYPE=numeric[],
+      FINALFUNC=_final_median,
+      INITCOND='{}'
+    );
+    """
+
+    name='Median'
+    def add_to_query(self, query, alias, col, source, is_summary):
+        aggregate = MedianSQL(col,
+                                       source=source,
+                                       is_summary=is_summary,
+                                       **self.extra)
+        query.aggregates[alias] = aggregate   
 
 class PenguinSite(AdminSite):
 
@@ -62,15 +121,20 @@ class PenguinSite(AdminSite):
             for start, end in Arrow.span_range('month', last_year, today):
                 average = site.penguincount_set.filter(
                     date__gte=start.date(), date__lte=end.date()
-                ).aggregate(penguins=Avg('total_penguins'))
-
+                ).aggregate(penguins=Median('total_penguins'))
                 site_dataset[site.name].append({
                     'date': start.date(),
-                    'value': "%0.2f" % average['penguins'] if average['penguins'] else 0
+                    'value': "%0.2f" % average['penguins'] if (average['penguins']>0) else 0
                 })
+        sites = []
 
+        if request.user.is_superuser:
+            sites = Site.objects.annotate(video_count=Count('camera__video'))
+        else:
+            sites = Site.objects.annotate(video_count=Count('camera__video')).filter(video_count__gt=0)
+        #import ipdb; ipdb.set_trace()
         context = {
-            'sites': Site.objects.all(),
+            'sites': sites,
             'site_dataset': site_dataset,
             'title': _("Penguin island sites")
         }
@@ -78,12 +142,11 @@ class PenguinSite(AdminSite):
         return super(PenguinSite, self).index(request, context)
 
 site = PenguinSite()
-
-site.register(User, PenguinUserAdmin)
+site.register(PenguinUser, PenguinUserAdmin)
 site.register(Site, SiteAdmin)
 site.register(PenguinCount, PenguinCountAdmin)
 site.register(PenguinObservation, PenguinObservationAdmin)
 site.register(Video, VideoAdmin)
 site.register(Camera, CameraAdmin)
 site.register(FlatPage, FlatPageAdmin)
-#site.register()
+

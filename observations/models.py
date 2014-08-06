@@ -3,20 +3,57 @@ from __future__ import unicode_literals
 from django.db import models
 from django.db.models.signals import post_save
 from django.dispatch import receiver
-from django.contrib.auth.models import User, Group
+from django.contrib.auth.models import User, BaseUserManager, Group
 from django.contrib.gis.db import models as geo_models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.core.files.storage import default_storage
+from django.conf import settings
 from django.utils import timezone
+from django.contrib.auth import get_user_model
+
+
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
-
+from django.contrib.auth.models import AbstractUser
 from observations.utils import civil_twilight
 import datetime
 import logging
 import os
 
+
+
 logger = logging.getLogger(__name__)
+
+
+class PenguinUserManager(BaseUserManager):
+    def __init__(self):
+        super(BaseUserManager, self).__init__()
+        #self.model = PenguinUser
+
+
+class PenguinUser(AbstractUser):
+
+    @property
+    def completion_count(self):
+        return self.videos_seen.count()
+
+    @property
+    def observation_count(self):
+        return self.observations.count()
+
+    @property
+    def completion_hours(self):
+        from datetime import timedelta
+        t = timedelta()
+        for i in self.videos_seen.all():
+            t += i.duration
+        return t
+
+    #objects = PenguinUserManager()
+
+    class Meta:
+        db_table = 'auth_user' #Leave it alone!
+        managed = False
 
 
 @python_2_unicode_compatible
@@ -84,7 +121,7 @@ class PenguinCount(models.Model):
 
 @python_2_unicode_compatible
 class Video(models.Model):
-    name = models.CharField(max_length=100)
+    name = models.CharField(max_length=100,null=True,blank=True,default="")
     date = models.DateField(_("Date"),
         help_text=_("The date of the recording."))
     camera = models.ForeignKey(Camera)
@@ -94,10 +131,19 @@ class Video(models.Model):
     end_time = models.TimeField(_("End time"),
         help_text=_("The end time of the recording (usually 1h after start)."))
     views = models.IntegerField(default=0)
-    mark_complete = models.BooleanField(default=False,help_text=_("Has this been viewed in its entirity by a reviewer"))
+    mark_complete = models.BooleanField(default=False,help_text=_("Has this been viewed in its entirety by a reviewer"))
+    completed_by = models.ManyToManyField(settings.AUTH_USER_MODEL,related_name="videos_seen",verbose_name="Users who have seen this video")
 
     def __str__(self):
         return "%s - %s" % (self.camera.name, self.name)
+
+
+    @property
+    def duration(self):
+        from datetime import timedelta
+        end = timedelta(hours=self.end_time.hour, minutes=self.end_time.minute, seconds=self.end_time.second)
+        start = timedelta(hours=self.start_time.hour, minutes=self.start_time.minute, seconds=self.start_time.second)
+        return end - start
 
     @classmethod
     def import_folder(cls, folder="beach_return_cams"):
@@ -172,7 +218,7 @@ class PenguinObservation(models.Model):
     date = models.DateTimeField(default=timezone.now)
     site = models.ForeignKey(Site)
     camera = models.ForeignKey(Camera, blank=True, null=True)
-    observer = models.ForeignKey(User)
+    observer = models.ForeignKey(settings.AUTH_USER_MODEL,related_name="observations")
     seen = models.PositiveSmallIntegerField(verbose_name='count',
         validators=[MinValueValidator(1), MaxValueValidator(100)])
     comments = models.TextField(blank=True, null=True)
@@ -236,6 +282,8 @@ def update_penguin_count(sender, instance, created, **kwargs):
     if new_count:
         penguin_count.civil_twilight = civil_twilight(instance.date.date(),
             instance.site.location.x, instance.site.location.y)
+
+    #import ipdb; ipdb.set_trace()
 
     time_stamp_1 = 0
     time_stamp_2 = 0
@@ -312,7 +360,7 @@ def update_penguin_count(sender, instance, created, **kwargs):
         outlier_stamp = calc_median(v.outlier_stamp)
 
     total = (time_stamp_1 + time_stamp_2 + time_stamp_3 + time_stamp_4 + time_stamp_5 +
-            time_stamp_6 + time_stamp_7 + time_stamp_8 + time_stamp_9)
+            time_stamp_6 + time_stamp_7 + time_stamp_8 + time_stamp_9 + outlier_stamp)
 
     penguin_count.sub_fifteen = time_stamp_1
     penguin_count.zero_to_fifteen = time_stamp_2
@@ -327,6 +375,8 @@ def update_penguin_count(sender, instance, created, **kwargs):
 
     penguin_count.total_penguins = (total)
     penguin_count.save()
+
+
 
 
 @receiver(post_save, sender=User)

@@ -37,9 +37,7 @@ class SiteAdmin(DetailAdmin, LeafletGeoAdmin):
 
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts
-
         obj = self.get_object(request, unquote(object_id))
-
         if not self.has_view_permission(request, obj):
             raise PermissionDenied
 
@@ -120,6 +118,8 @@ class PenguinObservationAdmin(BaseAdmin):
     actions = ['delete','export_to_csv']
     list_display = ('date', 'site', 'camera', 'observer', 'seen', 'comments','link_to_video','position')
     list_filter = (('date', DateRangeFilter),'site', 'camera',)
+    #readonly_fields = ('site',)
+    list_per_page = 25
     fieldsets = (
         (None, {
             'fields': ('date', 'site', 'camera', 'seen', 'comments')
