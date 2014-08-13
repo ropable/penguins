@@ -10,13 +10,13 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 #from django.contrib.flatpages.admin import FlatPageAdmin
 #from django.contrib.flatpages.models import FlatPage
-from flatpages_x.admin import FlatPageAdmin
+from flatpages_x.admin import FlatPageImage,Revision
 from flatpages_x.models import FlatPage
 
 from observations.admin import (SiteAdmin, CameraAdmin, PenguinCountAdmin,
-                                PenguinObservationAdmin, VideoAdmin)
+                                PenguinObservationAdmin, VideoAdmin,HelpCMS)
 from observations.models import (Site, Camera, PenguinCount,
-                                 PenguinObservation, Video,PenguinUser)
+                                 PenguinObservation, Video,PenguinUser,GraphForm)
 
 
 from arrow import Arrow
@@ -112,31 +112,74 @@ class PenguinSite(AdminSite):
         today = Arrow.fromdatetime(now())
         last_year = today.replace(months=-11)
 
-        site_dataset = {}
-        # For every site, aggregate the average number of returning penguins
-        # across the entire month. These calculations are the average over
-        # the median number of penguins observed each day.
-        for site in Site.objects.all():
-            site_dataset[site.name] = []
-            for start, end in Arrow.span_range('month', last_year, today):
-                average = site.penguincount_set.filter(
-                    date__gte=start.date(), date__lte=end.date()
-                ).aggregate(penguins=Median('total_penguins'))
-                site_dataset[site.name].append({
-                    'date': start.date(),
-                    'value': "%0.2f" % average['penguins'] if (average['penguins']>0) else 0
-                })
+        from collections import OrderedDict
+
+        site_dataset = OrderedDict()
+
         sites = []
 
         if request.user.is_superuser:
             sites = Site.objects.annotate(video_count=Count('camera__video'))
         else:
-            sites = Site.objects.annotate(video_count=Count('camera__video')).filter(video_count__gt=0)
+            sites = Site.objects.annotate(video_count=Count('camera__video')).filter(video_count__gt=0).exclude(pk=17)
         #import ipdb; ipdb.set_trace()
+
+        gf = GraphForm(request.GET)
+
+        startd = last_year
+        endd = today
+
+        if gf.is_valid():
+            startd = Arrow.fromdate(gf.cleaned_data['start_date'])
+            endd = Arrow.fromdate(gf.cleaned_data['end_date'])
+
+        difference = (endd-startd).days
+
+        period = 'month'
+
+        if difference < 31:
+            period = 'day'
+        elif difference < (30*6):
+            period = 'week'
+        else:
+            period = 'month'
+
+        # For every site, aggregate the average number of returning penguins
+        # across the entire month. These calculations are the average over
+        # the median number of penguins observed each day.
+
+        site_dataset['Total Penguins']= []
+        for site in sites:
+            site_dataset[site.name] = []
+            for start, end in Arrow.span_range(period,startd,endd):
+                average = site.penguincount_set.filter(
+                    date__gte=start.date(), date__lte=end.date()
+                ).aggregate(penguins=Avg('total_penguins'))
+                site_dataset[site.name].append({
+                    'date': start.date(),
+                    'value': "%0.2f" % average['penguins'] if (average['penguins']>0) else 0.0
+                })
+                for item in site_dataset['Total Penguins']:
+                    if item['date'] == start.date():
+                        item['value'] = "%0.2f" % (float(item['value']) + (average['penguins'] if (average['penguins']>0) else 0.0))
+                        break;
+                else:
+                    site_dataset['Total Penguins'].append({
+                        'date': start.date(),
+                        'value': "%0.2f" % average['penguins'] if (average['penguins']>0) else 0.0
+                    })
+
+
+
+        #import ipdb; ipdb.set_trace()
+
+
+
         context = {
             'sites': sites,
             'site_dataset': site_dataset,
-            'title': _("Penguin island sites")
+            'title': _("Penguin island sites"),
+            'gform':gf,
         }
         context.update(extra_context or {})
         return super(PenguinSite, self).index(request, context)
@@ -148,5 +191,7 @@ site.register(PenguinCount, PenguinCountAdmin)
 site.register(PenguinObservation, PenguinObservationAdmin)
 site.register(Video, VideoAdmin)
 site.register(Camera, CameraAdmin)
-site.register(FlatPage, FlatPageAdmin)
+site.register(FlatPage, HelpCMS)
+site.register(FlatPageImage)
+site.register(Revision)
 

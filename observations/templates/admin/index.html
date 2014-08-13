@@ -4,6 +4,9 @@
 {% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />
 
 <link rel="stylesheet" type="text/css" href="{% static 'leaflet/leaflet.css' %}" />
+
+    {{ gform.media }}
+
 {% endblock %}
 
 {% block extrajs %}
@@ -28,7 +31,11 @@
     var map = L.map('map').setView([-32.305497,115.690649], 16);
 
     // add an OpenStreetMap tile layer
-    L.tileLayer('http://{s}.tile.osm.org/{z}/{x}/{y}.png', {
+    tile = {};
+    tile[0] = 'http://{s}.tile.osm.org/{z}/{x}/{y}.png';
+    tile[1] = 'http://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.png';
+    tile[2] = 'http://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
+    L.tileLayer(tile[0], {
         attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
     }).addTo(map);
 
@@ -85,7 +92,10 @@
   {% if perms.observations.change_penguinobservation %}<li><a href="{% url "admin:observations_penguinobservation_changelist" %}"><span class="glyphicon glyphicon-eye-open"></span> Observations</a></li>{% endif %}
   {% if perms.observations.change_penguincount %}<li><a href="{% url "admin:observations_penguincount_changelist" %}"><span class="glyphicon glyphicon-check"></span> Penguin count</a></li>{% endif %}
   {% if perms.auth.change_user %}<li><a href="{% url "admin:observations_penguinuser_changelist" %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>{% endif %}
+
   {% endif %}
+            <li><a href="/help/"><span class="glyphicon glypthicon-question-sign"></span>Help </a>
+
 </ul>
 {% endblock %}
 
@@ -116,13 +126,21 @@
   </div>
 </div>
 <div class="row">
-  <div class="col-xs-12">
     <h3>Average daily returning penguins</h3>
-    <div id="line" style="height: 300px; width: 100%;">
+    <div class="col-xs-2">
+      <form class="form form-inline" role="form"><div class="form-group">
+        {{ gform }} <br />
+        <input type="submit" class="btn"> 
+      </div></form>
     </div>
-    <div class="well">
+    <div class="col-xs-10">
+      <div id="line" style="height: 300px; width: 100%;">
+      </div>
+    </div>
+
+
+</div>
+      <div class="well">
       This graph is based on the videos which have been viewed and tallied and may not be an accurate reflection of the total numbers.
     </div>
-  </div>
-</div>
 {% endblock %}

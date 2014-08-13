@@ -10,6 +10,8 @@
     <link rel="stylesheet" type="text/css" href="{% static "css/bootstrap-theme.min.css" %}" />
     <link rel="stylesheet" type="text/css" href="{% static "css/style.css" %}" />
     <link rel="shortcut icon" type="image/png" href="{{STATIC_URL}}favicon.ico"/>
+      <script src="{% static "js/jquery.min.js" %}"></script>
+  <script src="{% static "js/bootstrap.min.js" %}"></script> <!-- Loading JS at the end is an anti-pattern -->
     {% block extrastyle %}{% endblock %}
     <!--[if lte IE 7]><link rel="stylesheet" type="text/css" href="{% block stylesheet_ie %}{% static "admin/css/ie.css" %}{% endblock %}" /><![endif]-->
     {% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}" />{% endif %}
@@ -70,6 +72,7 @@
           {% if perms.observations.change_penguincount %}<li><a href="{% url "admin:observations_penguincount_changelist" %}"><span class="glyphicon glyphicon-check"></span> Penguin count</a></li>{% endif %}
           {% if perms.auth.change_user %}<li><a href="{% url "admin:observations_penguinuser_changelist" %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>{% endif %}
           {% endif %}
+          <li><a href="/help/"><span class="glyphicon glypthicon-question-sign"></span>Help </a>
         </ul>
         {% endblock %}
         {% endif %}
@@ -136,8 +139,7 @@
   <!-- END Content -->
 
   {% block footer %}<div id="footer"></div>{% endblock %}
-  <script src="{% static "js/jquery.min.js" %}"></script>
-  <script src="{% static "js/bootstrap.min.js" %}"></script>
+
   <script src="{% static "js/holder.js" %}"></script>
   {% block extrajs %}{% endblock %}
 </body>

@@ -36,6 +36,7 @@ INSTALLED_APPS = (
     'debug_toolbar',
     'daterange_filter',
     'compressor',
+    'datetimewidget',
     'south',
     'storages',
     'gunicorn',
@@ -100,6 +101,8 @@ if os.environ.get('USE_AWS', False):
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
     AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
     AWS_S3_HOST = os.environ['AWS_S3_HOST']
+
+FLATPAGES_X_PARSER= ["flatpages_x.markdown_parser.parse", {}]
 
 TEMPLATE_LOADERS = (
     ('django.template.loaders.cached.Loader', (
@@ -169,7 +172,7 @@ COMPRESS_ENABLED = False
 
 MARKITUP_SET = 'markitup/sets/markdown'
 MARKITUP_SKIN = 'markitup/skins/markitup'
-MARKITUP_FILTER = ('markdown.markdown', {'safe_mode': True})
+MARKITUP_FILTER = ('markdown.markdown', {'safe_mode': False})
 
 SOUTH_TESTS_MIGRATE = False
 SKIP_SOUTH_TESTS = True

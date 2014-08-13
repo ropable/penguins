@@ -10,7 +10,8 @@ from django.core.files.storage import default_storage
 from django.conf import settings
 from django.utils import timezone
 from django.contrib.auth import get_user_model
-
+from datetimewidget.widgets import DateWidget
+from django import forms
 
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
@@ -66,8 +67,9 @@ class Site(geo_models.Model):
     location = geo_models.PointField()
 
     def __str__(self):
-        return "{} ({})".format( self.name, ', '.join([c.name.encode("ascii") for c in self.camera_set.all()]) )
-
+        if  self.camera_set.count() > 0:
+            return "{} ({})".format( self.name, ', '.join([c.name.encode("ascii") for c in self.camera_set.all()]) )
+        else: return self.name
     class Meta:
         ordering = ['name']
 
@@ -372,11 +374,8 @@ def update_penguin_count(sender, instance, created, **kwargs):
     penguin_count.ninety_to_one_oh_five = time_stamp_8
     penguin_count.one_oh_five_to_one_twenty = time_stamp_9
     penguin_count.outlier = outlier_stamp
-
     penguin_count.total_penguins = (total)
     penguin_count.save()
-
-
 
 
 @receiver(post_save, sender=User)
@@ -386,3 +385,25 @@ def update_user(sender, instance, created, **kwargs):
         instance.is_staff = True
         instance.groups.add(group)
         instance.save()
+
+
+class GraphForm(forms.Form):
+#    'format': 'dd/mm/yyyy HH:ii P',
+    start_date = forms.DateField(widget=DateWidget(attrs={'id':"startTime",'width':'45%'}, usel10n = False, bootstrap_version=3))
+    end_date = forms.DateField(widget= DateWidget(attrs={'id':"endTime"}, usel10n = False, bootstrap_version=3))
+
+
+    def clean(self):
+        cleaned_data = super(GraphForm,self).clean()
+
+
+        start = cleaned_data.get("start_date")
+        end = cleaned_data.get("end_date")
+        if not start:
+            self._errors['start_date']=self.error_class(["Please enter a start date"])
+        if not end:
+            self._errors['end_date']=self.error_class(["Please enter an end date"])
+
+        if start and end and (end <= start):
+            raise forms.ValidationError ("The end date is before the start date!")
+        return cleaned_data

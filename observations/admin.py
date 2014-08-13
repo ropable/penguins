@@ -12,6 +12,7 @@ from django.core.urlresolvers import reverse
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
 from swingers.admin import DetailAdmin
 from leaflet.admin import LeafletGeoAdmin
+from flatpages_x.admin import FlatPageAdmin
 from django.utils.safestring import mark_safe
 import datetime
 import logging
@@ -87,12 +88,16 @@ class CameraAdmin(DetailAdmin):
 
 class PenguinCountAdmin(ModelAdmin):
     actions = ['export_to_csv']
-    list_display = ('date', 'site', 'civil_twilight', 'sub_fifteen',
+    list_display = ('date', 'sitelink', 'civil_twilight', 'sub_fifteen',
                     'zero_to_fifteen', 'fifteen_to_thirty',
                     'thirty_to_fourty_five', 'fourty_five_to_sixty',
                     'sixty_to_seventy_five', 'seventy_five_to_ninety',
                     'ninety_to_one_oh_five', 'one_oh_five_to_one_twenty',
                     'total_penguins', 'outlier', 'comments')
+
+    def sitelink (self,item):
+        return mark_safe('<a href="/observations/site/{0}/">{1}</a>'.format(item.site.pk,item.site.name))
+
 
     def export_to_csv(self, request, queryset):
         response = HttpResponse(content_type="text/csv")
@@ -206,3 +211,10 @@ class VideoAdmin(DetailAdmin):
         }
         context.update(extra_context or {})
         return super(VideoAdmin, self).detail_view(request, object_id, context)
+
+class HelpCMS(FlatPageAdmin):
+    fieldsets=((None, {'fields': ('url', 'title', 'content_md', 'sites')}),)
+    list_display = ('url', 'title')
+    list_filter = ('sites',)
+    search_fields = ('url', 'title')
+
