@@ -15,6 +15,11 @@ TEMPLATE_DEBUG = DEBUG
 ALLOWED_HOSTS = ['*']
 INTERNAL_IPS = ('127.0.0.1',)
 
+# Email settings
+ADMINS = ('asi@dpaw.wa.gov.au',)
+EMAIL_HOST = 'alerts.corporateict.domain'
+EMAIL_PORT = 25
+
 # Application definition
 INSTALLED_APPS = (
     'django.contrib.admin',
@@ -234,7 +239,15 @@ LOGGING = {
         'mail_admins': {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',
-        }
+        },
+        'video_file': {
+            'level': 'DEBUG',
+            'class': 'logging.handlers.RotatingFileHandler',
+            'filename': os.path.join(BASE_DIR, 'logs/videos.log'),
+            'maxBytes': 1024*1024*5,
+            'backupCount': 5,
+            'formatter': 'standard',
+        },
     },
     'loggers': {
         'django': {
@@ -250,6 +263,11 @@ LOGGING = {
         'observations': {
             'handlers': ['console', 'file'],
             'level': 'INFO',
+            'propagate': True
+        },
+        'videos': {
+            'handlers': ['console', 'video_file'],
+            'level': 'DEBUG',
             'propagate': True
         }
     }
@@ -274,6 +292,11 @@ if DEBUG:
             'level': 'DEBUG',
             'propagate': True
         },
+        'videos': {
+            'handlers': ['console', 'video_file'],
+            'level': 'DEBUG',
+            'propagate': True
+        }
     }
 
     TEMPLATE_LOADERS = (

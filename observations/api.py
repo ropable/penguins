@@ -1,4 +1,5 @@
 from rest_framework import viewsets
+from rest_framework import filters
 
 from observations.models import PenguinCount, PenguinObservation, Video
 from utils import RetrievePartialUpdateDestroyAPIView;
@@ -7,12 +8,15 @@ from utils import RetrievePartialUpdateDestroyAPIView;
 class PenguinCountViewSet(viewsets.ReadOnlyModelViewSet):
     model = PenguinCount
 
+
 class PenguinObservationViewSet(viewsets.ModelViewSet):
     model = PenguinObservation
 
+
 class VideoViewSet(viewsets.ModelViewSet):
     model = Video
-
+    filter_backends = (filters.DjangoFilterBackend,)
+    filter_fields = ('camera', 'date')
 
     def partial_update(self, request, pk=None):
         if request.DATA.has_key('mark_complete'):

@@ -1,4 +1,4 @@
-from __future__ import unicode_literals
+from __future__ import unicode_literals, absolute_import
 
 from django.db import models
 from django.db.models.signals import post_save
@@ -6,6 +6,7 @@ from django.dispatch import receiver
 from django.contrib.auth.models import User, BaseUserManager, Group
 from django.contrib.gis.db import models as geo_models
 from django.core.validators import MinValueValidator, MaxValueValidator
+from django.forms import ValidationError
 from django.core.files.storage import default_storage
 from django.conf import settings
 from django.utils import timezone
@@ -25,6 +26,42 @@ import os
 
 logger = logging.getLogger(__name__)
 
+
+class ObservationBase(models.Model):
+    """
+    TODO
+    This class can be replaced if inheriting from
+    swingers.models.auth.Audit. clean_field() method below is from there.
+    """
+
+    def clean_fields(self, exclude=None):
+        """
+        Override clean_fields to do what model validation should have done
+        in the first place -- call clean_FIELD during model validation.
+        """
+        errors = {}
+
+        for f in self._meta.fields:
+            if f.name in exclude:
+                continue
+            if hasattr(self, "clean_%s" % f.attname):
+                try:
+                    getattr(self, "clean_%s" % f.attname)()
+                except ValidationError as e:
+                    # TODO: Django 1.6 introduces new features to
+                    # ValidationError class, update it to use e.error_list
+                    errors[f.name] = e.messages
+
+        try:
+            super(ObservationBase, self).clean_fields(exclude)
+        except ValidationError as e:
+            errors = e.update_error_dict(errors)
+
+        if errors:
+            raise ValidationError(errors)
+
+    class Meta:
+        abstract = True
 
 class PenguinUserManager(BaseUserManager):
     def __init__(self):
@@ -89,7 +126,7 @@ class Camera(models.Model):
 
 
 @python_2_unicode_compatible
-class PenguinCount(models.Model):
+class PenguinCount(ObservationBase):
     site = models.ForeignKey(Site)
     date = models.DateField(default=timezone.now)
     comments = models.TextField(null=True, blank=True)
@@ -117,6 +154,16 @@ class PenguinCount(models.Model):
     outlier = models.DecimalField(
         _("outlying times"), default=0, max_digits=5, decimal_places=2)
 
+    def clean_date(self):
+        if self.date > datetime.date.today():
+            raise ValidationError("The 'Date' cannot be in the future!")
+
+    def clean_civil_twilight(self):
+        if self.civil_twilight is None:
+            raise ValidationError("This field is required!")
+        if self.civil_twilight > timezone.now():
+            raise ValidationError("The 'Civil Twilight Date' cannot be in the future!")
+
     def __str__(self):
         return "%s" % self.date
 
@@ -136,9 +183,13 @@ class Video(models.Model):
     mark_complete = models.BooleanField(default=False,help_text=_("Has this been viewed in its entirety by a reviewer"))
     completed_by = models.ManyToManyField(settings.AUTH_USER_MODEL,related_name="videos_seen",verbose_name="Users who have seen this video")
 
-    def __str__(self):
-        return "%s - %s" % (self.camera.name, self.name)
+    def clean_date(self):
+        if self.date > datetime.date.today():
+            raise ValidationError("The 'Date' cannot be in the future!")
 
+    def clean_end_time(self):
+        if self.end_time < self.start_time:
+            raise ValidationError("The 'End Time' cannot be before the 'Start Time'!")
 
     @property
     def duration(self):
@@ -147,32 +198,47 @@ class Video(models.Model):
         start = timedelta(hours=self.start_time.hour, minutes=self.start_time.minute, seconds=self.start_time.second)
         return end - start
 
+    def __str__(self):
+        return "%s - %s" % (self.camera.name, self.name)
+
     @classmethod
     def import_folder(cls, folder="beach_return_cams"):
-        videos = default_storage.listdir(folder)[1]
+        logger = logging.getLogger('videos')
+        logger.debug('Started import_folder method.')
+        VIDEO_FORMATS = ('.mp4', '.avi', '.mkv')
+        videos = [v for v in default_storage.listdir(folder)[1] if v.endswith(VIDEO_FORMATS)]
+        count = 0
         for video in videos:
-            print("checking {0}".format(video))
-            nameparts = video.split("_tl_")
-            if len(nameparts) != 2:
-                print("can't parse {0}".format(nameparts))
-                continue
+            logger.debug("Checking {0}".format(video))
+            nameparts = video.split("_", 3)
+            #if len(nameparts) != 2:
+            #    logger.debug("Error: can't parse {0}".format(nameparts))
+            #    continue
             filename = os.path.join(folder, video)
             if cls.objects.filter(file=filename).exists():
                 continue
             # If video doesn't exist, and filename splits nicely
             # create it
-            print("importing {0}".format(video))
-            datestr, camstr = nameparts
-            camstr = camstr.split(".")[0]
+            logger.debug("Importing {0}".format(video))
+            datestr = '_'.join(nameparts[0:2])
             video_datetime = datetime.datetime.strptime(datestr, "%d-%m-%Y_%H")
             date = video_datetime.date()
             start_time = video_datetime.time()
+            camstr = nameparts[-1]
+            camstr = camstr.split(".")[0]  # Remove the extension.
             # assume each video is 60 mins long (video times are inaccurate/halved?)
             end_time = (video_datetime + datetime.timedelta(minutes=60)).time()
-            print("Finding camera name closest to {}".format(camstr))
-            camera = Camera.objects.get(name__istartswith=camstr.split("_")[0])
-            cls.objects.create(date=date, start_time=start_time, end_time=end_time,
-                               camera=camera, file=os.path.join(folder, video))
+            logger.debug("Finding camera name closest to {}".format(camstr))
+            try:
+                camera = Camera.objects.get(name__istartswith=camstr.split("_")[0])
+                cls.objects.create(date=date, start_time=start_time, end_time=end_time,
+                                   camera=camera, file=os.path.join(folder, video))
+                count += 1
+            except:
+                logger.error('No camera found, skipping video name {}'.format(nameparts[-1]))
+
+        logger.debug("Import task completed.")
+        return count
 
     class Meta:
         ordering = ['-date']
@@ -183,13 +249,14 @@ class PenguinVideoObservation(models.Model):
     video = models.ForeignKey(Video)
     start_time = models.DateTimeField()
     end_time = models.DateTimeField()
+
     def __str__(self):
         return "<seen in %s> (%s-%s)" % (
             self.video.name, self.start_time, self.end_time)
 
 
 @python_2_unicode_compatible
-class PenguinObservation(models.Model):
+class PenguinObservation(ObservationBase):
     DIRECTION_CHOICES = (
         (1, _("N")),
         (2, _("NNW")),
@@ -241,6 +308,9 @@ class PenguinObservation(models.Model):
     position = models.FloatField(default=0,null=True,verbose_name=_("Position in video"))
     video = models.ForeignKey(Video,default=None,null=True,verbose_name=_("Video filename"))
 
+    def clean_date(self):
+        if self.date > timezone.now():
+            raise ValidationError("The 'Date' cannot be in the future!")
 
     def __str__(self):
         return "%s penguins seen on %s by %s" % (
@@ -284,8 +354,6 @@ def update_penguin_count(sender, instance, created, **kwargs):
     if new_count:
         penguin_count.civil_twilight = civil_twilight(instance.date.date(),
             instance.site.location.x, instance.site.location.y)
-
-    #import ipdb; ipdb.set_trace()
 
     time_stamp_1 = 0
     time_stamp_2 = 0
@@ -374,6 +442,7 @@ def update_penguin_count(sender, instance, created, **kwargs):
     penguin_count.ninety_to_one_oh_five = time_stamp_8
     penguin_count.one_oh_five_to_one_twenty = time_stamp_9
     penguin_count.outlier = outlier_stamp
+
     penguin_count.total_penguins = (total)
     penguin_count.save()
 

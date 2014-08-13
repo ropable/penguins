@@ -10,6 +10,7 @@ from django.utils.html import escape
 from django.utils.translation import ugettext as _, ugettext_lazy
 from django.core.urlresolvers import reverse
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
+
 from swingers.admin import DetailAdmin
 from leaflet.admin import LeafletGeoAdmin
 from flatpages_x.admin import FlatPageAdmin
@@ -19,11 +20,18 @@ import logging
 import os
 import subprocess
 import unicodecsv
+rom observations.models import Video
+from observations.forms import SelectDateForm
+
 from daterange_filter.filter import DateRangeFilter
 
 logger = logging.getLogger(__name__)
 
+
 class BaseAdmin(ModelAdmin):
+
+    list_per_page = 15
+
     def changelist_view(self, request, extra_context=None):
         context = {
             'title': self.get_title(request)
@@ -38,7 +46,9 @@ class SiteAdmin(DetailAdmin, LeafletGeoAdmin):
 
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts
+
         obj = self.get_object(request, unquote(object_id))
+
         if not self.has_view_permission(request, obj):
             raise PermissionDenied
 
@@ -50,8 +60,14 @@ class SiteAdmin(DetailAdmin, LeafletGeoAdmin):
 
         observations = obj.penguinobservation_set.filter(site=obj)[:10]
 
+        # Define a set of videos to pass into the view on load.
+        # All cameras, today's date.
+        cams = obj.camera_set.all()
+        initial_videos = Video.objects.filter(camera__in=cams, date=datetime.date.today())
         context = {
             'title': obj.name,
+            'select_date': SelectDateForm,
+            'initial_videos': initial_videos,
             'recent_observations': observations
         }
         context.update(extra_context or {})
@@ -95,6 +111,7 @@ class PenguinCountAdmin(ModelAdmin):
                     'ninety_to_one_oh_five', 'one_oh_five_to_one_twenty',
                     'total_penguins', 'outlier', 'comments')
 
+    list_per_page = 15
     def sitelink (self,item):
         return mark_safe('<a href="/observations/site/{0}/">{1}</a>'.format(item.site.pk,item.site.name))
 
@@ -184,10 +201,15 @@ class VideoAdmin(DetailAdmin):
         }),
     )
 
+    list_per_page = 15
+
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts
         
         obj = self.get_object(request, unquote(object_id))
+
+        obj.views += 1
+        obj.save()
 
         if not self.has_view_permission(request, obj):
             raise PermissionDenied
