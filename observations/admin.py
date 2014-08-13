@@ -20,7 +20,7 @@ import logging
 import os
 import subprocess
 import unicodecsv
-rom observations.models import Video
+from observations.models import Video
 from observations.forms import SelectDateForm
 
 from daterange_filter.filter import DateRangeFilter
