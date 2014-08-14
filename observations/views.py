@@ -15,8 +15,8 @@ class VideoImport(View):
     '''
     def get(self, request, *args, **kwargs):
         # Only allow requests to this view from localhost.
-        if request.META['SERVER_NAME'].lower() != 'localhost':
-            return HttpResponseForbidden()
+        #if request.META['SERVER_NAME'].lower() != 'localhost':
+        #    return HttpResponseForbidden()
         # Localhost - proceed.
         v = Video.objects.all()[0]  # Get any random video object.
         count = v.import_folder()
