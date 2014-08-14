@@ -15,6 +15,7 @@ django-leaflet
 django-swingers
 django-jenkins
 django-daterange-filter
+django-datetime-widget
 django-flatpages-x
 django-markitup
 sorl-thumbnail
