@@ -170,8 +170,7 @@ class Video(ObservationBase):
             filename = os.path.join(folder, video)
             if cls.objects.filter(file=filename).exists():
                 continue
-            # If video doesn't exist, and filename splits nicely
-            # create it
+            # If video doesn't exist and filename splits nicely, create it.
             logger.debug("Importing {0}".format(video))
             datestr = '_'.join(nameparts[0:2])
             video_datetime = datetime.datetime.strptime(datestr, "%d-%m-%Y_%H")
@@ -188,7 +187,7 @@ class Video(ObservationBase):
                                    camera=camera, file=os.path.join(folder, video))
                 count += 1
             except:
-                logger.error('No camera found, skipping video name {}'.format(nameparts[-1]))
+                logger.error('No matching camera found, skipping video name {}'.format(nameparts[-1]))
 
         logger.debug("Import task completed.")
         return count
