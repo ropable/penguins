@@ -118,6 +118,7 @@ class Camera(models.Model):
     penguin observations are to be recorded.
     """
     name = models.CharField(max_length=100)
+    camera_key = models.CharField(max_length=100,default='')
     site = models.ForeignKey(Site, blank=True, null=True)
     ip_address = models.CharField(max_length=100, blank=True, null=True)
 
@@ -220,21 +221,28 @@ class Video(models.Model):
             # If video doesn't exist and filename splits nicely, create it.
             logger.debug("Importing {0}".format(video))
             datestr = '_'.join(nameparts[0:2])
-            video_datetime = datetime.datetime.strptime(datestr, "%d-%m-%Y_%H")
+            print "============>"+str(datestr)
+            #import ipdb; ipdb.set_trace()
+            try:
+                video_datetime = datetime.datetime.strptime(datestr, "%d-%m-%Y_%H")
+            except:
+                datestr = '_'.join(nameparts[0:1])
+                video_datetime = datetime.datetime.strptime(datestr, "%d-%m-%Y")
             date = video_datetime.date()
             start_time = video_datetime.time()
             camstr = nameparts[-1]
             camstr = camstr.split(".")[0]  # Remove the extension.
             # assume each video is 60 mins long (video times are inaccurate/halved?)
             end_time = (video_datetime + datetime.timedelta(minutes=60)).time()
-            logger.debug("Finding camera name closest to {}".format(camstr))
+            logger.debug("Finding camera name closest to {} str:{}*".format(camstr,camstr.split("_")[0]))
             try:
-                camera = Camera.objects.get(name__istartswith=camstr.split("_")[0])
+                camera = Camera.objects.filter(camera_key__icontains=camstr.split("_")[0])[0] #use filter()[0] rather than get if theres dupes in the db.
                 cls.objects.create(date=date, start_time=start_time, end_time=end_time,
                                    camera=camera, file=os.path.join(folder, video))
                 count += 1
             except:
                 logger.error('No matching camera found, skipping video name {}'.format(nameparts[-1]))
+                import ipdb; ipdb.set_trace()
 
         logger.debug("Import task completed.")
         return count

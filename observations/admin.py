@@ -75,8 +75,14 @@ class SiteAdmin(DetailAdmin, LeafletGeoAdmin):
 
 
 class CameraAdmin(DetailAdmin):
+
+    def videocount(self,item):
+        count = Video.objects.filter(camera_id = item.pk).count()
+        return str(count)
+
+
     actions = None
-    list_display = ('name', 'site', 'ip_address')
+    list_display = ('name', 'site','camera_key', 'ip_address','videocount')
 
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts

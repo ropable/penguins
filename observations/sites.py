@@ -121,7 +121,7 @@ class PenguinSite(AdminSite):
         if request.user.is_superuser:
             sites = Site.objects.annotate(video_count=Count('camera__video'))
         else:
-            sites = Site.objects.annotate(video_count=Count('camera__video')).filter(video_count__gt=0).exclude(pk=17)
+            sites = Site.objects.annotate(video_count=Count('camera__video')).filter(id__lte=2).exclude(pk=17)
         #import ipdb; ipdb.set_trace()
 
         gf = GraphForm(request.GET)
