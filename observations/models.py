@@ -222,7 +222,6 @@ class Video(models.Model):
             logger.debug("Importing {0}".format(video))
             datestr = '_'.join(nameparts[0:2])
             print "============>"+str(datestr)
-            #import ipdb; ipdb.set_trace()
             try:
                 video_datetime = datetime.datetime.strptime(datestr, "%d-%m-%Y_%H")
             except:
@@ -242,7 +241,6 @@ class Video(models.Model):
                 count += 1
             except:
                 logger.error('No matching camera found, skipping video name {}'.format(nameparts[-1]))
-                import ipdb; ipdb.set_trace()
 
         logger.debug("Import task completed.")
         return count
