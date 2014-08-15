@@ -198,7 +198,7 @@ class PenguinObservationAdmin(BaseAdmin):
 
 
 class VideoAdmin(DetailAdmin):
-    list_display = ('camera', 'name', 'start_time', 'end_time')
+    list_display = ('camera_expanded','file', 'date', 'start_time', 'end_time')
     exclude = ('views',)
 
     fieldsets = (
@@ -208,6 +208,9 @@ class VideoAdmin(DetailAdmin):
     )
 
     list_per_page = 15
+
+    def camera_expanded(self,item):
+        return mark_safe("<a href='/observations/video/{0}/change'>{1}</a>".format(item.pk,item.camera.site))
 
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts
