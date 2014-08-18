@@ -221,7 +221,6 @@ class Video(models.Model):
             # If video doesn't exist and filename splits nicely, create it.
             logger.debug("Importing {0}".format(video))
             datestr = '_'.join(nameparts[0:2])
-            print "============>"+str(datestr)
             try:
                 video_datetime = datetime.datetime.strptime(datestr, "%d-%m-%Y_%H")
             except:

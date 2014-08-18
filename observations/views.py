@@ -51,7 +51,14 @@ class VideoImport(View):
 
 @receiver(post_init,sender=FlatPage)
 def FlatPageInterceptor(sender, instance,  **kwargs):
+    '''
+    Amazon S3 expires its content on a fairly short turn-around. This means that its somewhat
+    incompatible with html caching. This function, unfortunate as it is, intercepts the cache loads
+    and regenerates it. It assumes html help pages are a minescule impact on the database in the scheme of things
+    and only adds two SQL queries to the load. The code is largely copied from flatpages_x hence the 
+    possibly extraneous use of function currying 
 
+    '''
     sourcePage = Revision.objects.filter(flatpage=instance).order_by('-updated').first()
     render_func = curry(load_path_attr(PARSER[0], **PARSER[1]))
     instance.content =  render_func(sourcePage.content_source)

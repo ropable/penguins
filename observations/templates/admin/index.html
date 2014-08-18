@@ -1,4 +1,4 @@
-{% extends "admin/base_site.html" %}
+  {% extends "admin/base_site.html" %}
 {% load i18n admin_static %}
 
 {% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />
@@ -125,10 +125,9 @@
       {% if perms.observations.add_penguinobservation %}<a class="list-group-item" href="{% url 'admin:observations_penguinobservation_add' %}"><span class="glyphicon glyphicon-plus"></span> Add a penguin observation</a>{% endif %}
 
     </div>
-    <div id="map" style="height:400px;">
+     <div id="map" style="height:400px;">
     </div>
-
-
+....
   </div>
 </div>
 <div class="row">
