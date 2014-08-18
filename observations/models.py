@@ -1,7 +1,7 @@
 from __future__ import unicode_literals, absolute_import
 
 from django.db import models
-from django.db.models.signals import post_save
+from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
 from django.contrib.auth.models import User, BaseUserManager, Group
 from django.contrib.gis.db import models as geo_models
@@ -345,6 +345,11 @@ def calc_median(unsortedlist):
         return (sortedlist[length / 2] + sortedlist[length / 2 - 1]) / 2
     return sortedlist[length / 2]
 
+@receiver(pre_delete, sender=PenguinObservation)
+def trigger_recount_prior_to_delete(sender, instance, **kwargs):
+    instance.seen = 0
+    instance.save() #TRIGGER THE APOCALYPSE
+
 
 @receiver(post_save, sender=PenguinObservation)
 def update_penguin_count(sender, instance, created, **kwargs):
@@ -352,6 +357,7 @@ def update_penguin_count(sender, instance, created, **kwargs):
     Loop over all penguin observations for a particular day and update the
     count, and bucket them relative to the civil twilight time.
     """
+
     penguin_count, new_count = PenguinCount.objects.get_or_create(
         date=instance.date.date(), site=instance.site)
 
