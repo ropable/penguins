@@ -29,10 +29,10 @@ class PenguinUserAdmin(UserAdmin):
     fieldsets = (
         (None, {'fields': ('username', 'password')}),
         (_('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
-        (_('Permissions'), {'fields': ('is_active','is_superuser','last_login')}),
+        (_('Permissions'), {'fields': ('is_active','is_superuser','is_staff','last_login')}),
         (_('Statistics'),  {'fields': ('observation_count','completion_count')}),
     )
-    list_display = ('username','email','first_name','last_name','is_superuser'
+    list_display = ('username','email','first_name','last_name','is_superuser','is_staff','is_active'
         ,'observation_count','completion_count','completion_hours')
 
     list_filter = ('is_superuser',)
