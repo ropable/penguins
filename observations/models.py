@@ -202,7 +202,7 @@ class Video(models.Model):
         return end - start
 
     def __str__(self):
-        return "%s - %s" % (self.camera.name, self.name)
+        return "%s - %s @ %s" % (self.camera.name, self.name, str(self.date))
 
     @classmethod
     def import_folder(cls, folder="beach_return_cams"):
@@ -350,6 +350,7 @@ def update_penguin_count(sender, instance, created, **kwargs):
             instance.site.location.x, instance.site.location.y)
     date = instance.date.date()
     observations = PenguinObservation.objects.filter(seen__gt=0,
+                    site=instance.site,
         date__range=(datetime.datetime.combine(date, datetime.time.min),
                      datetime.datetime.combine(date, datetime.time.max)))
     observers = {}
@@ -374,7 +375,7 @@ def update_penguin_count(sender, instance, created, **kwargs):
         even = (0 if len(rangelist) % 2 else 1) + 1
         half = (len(rangelist) - 1) / 2
         time_stamp[r] = sum(sorted(rangelist)[half:half + even]) / float(even)
-    # --funroll-loops (google it)
+    # Denormalize...
     penguin_count.sub_fifteen = time_stamp[0]
     penguin_count.zero_to_fifteen = time_stamp[1]
     penguin_count.fifteen_to_thirty = time_stamp[2]

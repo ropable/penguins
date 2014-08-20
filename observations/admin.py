@@ -159,6 +159,47 @@ class PenguinObservationAdmin(BaseAdmin):
     )
     exclude = ('observer',)
 
+
+
+    def export_to_csv(self,request,queryset):
+        response = HttpResponse(content_type="text/csv")
+        response['Content-Disposition'] = "attachment; filename=export.csv"
+
+        writer = unicodecsv.writer(response, quoting=unicodecsv.QUOTE_ALL)        
+        writer.writerow([
+                'date'
+                ,'site'
+                ,'camera'
+                ,'observer'
+                ,'Count'
+                ,'wind direction'
+                ,'wind speed'
+                ,'wave height'
+                ,'wave period'
+                ,'moon phase'
+                ,'raining'
+                ,'position'
+                ,'video'])
+
+        for item in queryset:
+            writer.writerow([
+                item.date,
+                item.site,
+                item.camera,
+                item.observer.username,
+                item.seen,
+                item.wind_direction,
+                item.wind_speed,
+                item.wave_height,
+                item.wave_period,
+                item.moon_phase,
+                item.raining,
+                item.position,
+                item.video
+                ])
+        return response
+    export_to_csv.short_description = ugettext_lazy("Export to CSV")
+   
     def link_to_video(self,obj):
         if (obj.video):
             #return mark_safe("<a href='/observations/video/"+str(obj.video.pk)+"'>"+str(obj.video)+"</a>")
