@@ -174,6 +174,8 @@ class PenguinObservationAdmin(BaseAdmin):
             db_field, request, **kwargs)
 
     def save_model(self, request, obj, form, change):
+#        import ipdb; ipdb.set_trace()
+
         obj.observer = request.user
         obj.save()
 

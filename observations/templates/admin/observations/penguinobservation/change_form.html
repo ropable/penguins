@@ -87,8 +87,11 @@
       function() {
         site_id = $('#id_site').val();
         if (site_id > 0) {
-          $('#id_site').attr('disabled','true');
-          $('#add_id_site').hide();
+          //$('#id_site').attr('disabled','true');
+          //$('#add_id_site').hide();
+
+          $('#id_site option:not(:selected)').attr('disabled',true);
+
         }
 
     }
