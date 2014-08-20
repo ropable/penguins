@@ -168,6 +168,8 @@ class PenguinCount(ObservationBase):
     def __str__(self):
         return "%s" % self.date
 
+    class Meta:
+        ordering = ['-date']
 
 @python_2_unicode_compatible
 class Video(models.Model):

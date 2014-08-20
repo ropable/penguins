@@ -116,7 +116,7 @@ class PenguinCountAdmin(ModelAdmin):
                     'sixty_to_seventy_five', 'seventy_five_to_ninety',
                     'ninety_to_one_oh_five', 'one_oh_five_to_one_twenty',
                     'total_penguins', 'outlier', 'comments')
-
+    sort_order=('-date')
     list_per_page = 15
     def sitelink (self,item):
         return mark_safe('<a href="/observations/site/{0}/">{1}</a>'.format(item.site.pk,item.site.name))
