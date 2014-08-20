@@ -323,27 +323,11 @@ class PenguinObservation(ObservationBase):
 
 class ObserverCounter:
     def __init__(self):
-        self.time_stamp_1 = []
-        self.time_stamp_2 = []
-        self.time_stamp_3 = []
-        self.time_stamp_4 = []
-        self.time_stamp_5 = []
-        self.time_stamp_6 = []
-        self.time_stamp_7 = []
-        self.time_stamp_8 = []
-        self.time_stamp_9 = []
-        self.outlier_stamp = []
         self.total = 0
+        self.timestamps ={}
+        for x in xrange(0,10):
+            self.timestamps[x] = 0
 
-
-def calc_median(unsortedlist):
-    sortedlist = sorted(unsortedlist)
-    length = len(sortedlist)
-    if length == 0:
-        return 0
-    if not length % 2:
-        return (sortedlist[length / 2] + sortedlist[length / 2 - 1]) / 2
-    return sortedlist[length / 2]
 
 @receiver(pre_delete, sender=PenguinObservation)
 def trigger_recount_prior_to_delete(sender, instance, **kwargs):
@@ -357,107 +341,50 @@ def update_penguin_count(sender, instance, created, **kwargs):
     Loop over all penguin observations for a particular day and update the
     count, and bucket them relative to the civil twilight time.
     """
-
-    #import ipdb; ipdb.set_trace()
-
     penguin_count, new_count = PenguinCount.objects.get_or_create(
         date=instance.date.date(), site=instance.site)
-
     if new_count:
         penguin_count.civil_twilight = civil_twilight(instance.date.date(),
             instance.site.location.x, instance.site.location.y)
-
-    time_stamp_1 = 0
-    time_stamp_2 = 0
-    time_stamp_3 = 0
-    time_stamp_4 = 0
-    time_stamp_5 = 0
-    time_stamp_6 = 0
-    time_stamp_7 = 0
-    time_stamp_8 = 0
-    time_stamp_9 = 0
-    outlier_stamp = 0
-    total = 0
-
-    # Get all the penguin observations in a particular day. This will be
-    # easier to do once custom field lookups are implemented.
     date = instance.date.date()
     observations = PenguinObservation.objects.filter(
         date__range=(datetime.datetime.combine(date, datetime.time.min),
                      datetime.datetime.combine(date, datetime.time.max)))
-
-    obslist = {}
-
-    for observation in observations:
-        if (observation.observer not in obslist):
-            obslist[observation.observer] = ObserverCounter()
-        logger.info(observation)
-        offset = observation.date - penguin_count.civil_twilight
-        offset = offset.total_seconds() / 60  # in minutes
-        if (offset > -15 and offset < 0):
-            obslist[observation.observer].time_stamp_1.append(observation.seen)
-        if (offset >= 0 and offset < 15):
-            obslist[observation.observer].time_stamp_2.append(observation.seen)
-        if (offset >= 15 and offset < 30):
-            obslist[observation.observer].time_stamp_3.append(observation.seen)
-        if (offset >= 30 and offset < 45):
-            obslist[observation.observer].time_stamp_4.append(observation.seen)
-        if (offset >= 45 and offset < 60):
-            obslist[observation.observer].time_stamp_5.append(observation.seen)
-        if (offset >= 60 and offset < 75):
-            obslist[observation.observer].time_stamp_6.append(observation.seen)
-        if (offset >= 75 and offset < 90):
-            obslist[observation.observer].time_stamp_7.append(observation.seen)
-        if (offset >= 90 and offset < 105):
-            obslist[observation.observer].time_stamp_8.append(observation.seen)
-        if (offset >= 105 and offset < 120):
-            obslist[observation.observer].time_stamp_9.append(observation.seen)
-        if (offset < -15):
-            obslist[observation.observer].outlier_stamp.append(observation.seen)
-        if (offset > 120):
-            obslist[observation.observer].outlier_stamp.append(observation.seen)
-            #outlier
-        obslist[observation.observer].total += observation.seen - calc_median(obslist[observation.observer].outlier_stamp)
-
-    for k, v in obslist.items():
-        v.time_stamp_1.sort()
-        v.time_stamp_2.sort()
-        v.time_stamp_3.sort()
-        v.time_stamp_4.sort()
-        v.time_stamp_5.sort()
-        v.time_stamp_6.sort()
-        v.time_stamp_7.sort()
-        v.time_stamp_8.sort()
-        v.time_stamp_9.sort()
-
-        time_stamp_1 = calc_median(v.time_stamp_1)
-        time_stamp_2 = calc_median(v.time_stamp_2)
-        time_stamp_3 = calc_median(v.time_stamp_3)
-        time_stamp_4 = calc_median(v.time_stamp_4)
-        time_stamp_5 = calc_median(v.time_stamp_5)
-        time_stamp_6 = calc_median(v.time_stamp_6)
-        time_stamp_7 = calc_median(v.time_stamp_7)
-        time_stamp_8 = calc_median(v.time_stamp_8)
-        time_stamp_9 = calc_median(v.time_stamp_9)
-        outlier_stamp = calc_median(v.outlier_stamp)
-
-    total = (time_stamp_1 + time_stamp_2 + time_stamp_3 + time_stamp_4 + time_stamp_5 +
-            time_stamp_6 + time_stamp_7 + time_stamp_8 + time_stamp_9 + outlier_stamp)
-
-    penguin_count.sub_fifteen = time_stamp_1
-    penguin_count.zero_to_fifteen = time_stamp_2
-    penguin_count.fifteen_to_thirty = time_stamp_3
-    penguin_count.thirty_to_fourty_five = time_stamp_4
-    penguin_count.fourty_five_to_sixty = time_stamp_5
-    penguin_count.sixty_to_seventy_five = time_stamp_6
-    penguin_count.seventy_five_to_ninety = time_stamp_7
-    penguin_count.ninety_to_one_oh_five = time_stamp_8
-    penguin_count.one_oh_five_to_one_twenty = time_stamp_9
-    penguin_count.outlier = outlier_stamp
-
-    penguin_count.total_penguins = (total)
+    observers = {}
+    for o in observations.distinct('observer'):
+        observers[o.observer.pk] = ObserverCounter()
+        user_observations = observations.filter(observer=o.observer)
+        for observation in user_observations:
+            offset = observation.date - penguin_count.civil_twilight
+            offset = offset.total_seconds() / 60  # in minutes
+            range_pointer = int(offset /15) + 1
+            if range_pointer >= 0 and range_pointer <= 9:
+                observers[o.observer.pk].timestamps[range_pointer] += observation.seen
+            else:
+                observers[o.observer.pk].timestamps[9] += observation.seen
+            observers[o.observer.pk].total = sum(observers[o.observer.pk].timestamps.values())
+    range_iiterator = xrange(0,10)
+    time_stamp = {}
+    for r in range_iiterator:
+        rangelist = []
+        for k,o in observers.items():
+            rangelist.append(o.timestamps[r])
+        even = (0 if len(rangelist) % 2 else 1) + 1
+        half = (len(rangelist) - 1) / 2
+        time_stamp[r] = sum(sorted(rangelist)[half:half + even]) / float(even)
+    # --funroll-loops (google it)
+    penguin_count.sub_fifteen = time_stamp[0]
+    penguin_count.zero_to_fifteen = time_stamp[1]
+    penguin_count.fifteen_to_thirty = time_stamp[2]
+    penguin_count.thirty_to_fourty_five = time_stamp[3]
+    penguin_count.fourty_five_to_sixty = time_stamp[4]
+    penguin_count.sixty_to_seventy_five = time_stamp[5]
+    penguin_count.seventy_five_to_ninety = time_stamp[6]
+    penguin_count.ninety_to_one_oh_five = time_stamp[7]
+    penguin_count.one_oh_five_to_one_twenty = time_stamp[8]
+    penguin_count.outlier = time_stamp[9]
+    penguin_count.total_penguins=sum(time_stamp.values())
     penguin_count.save()
-
 
 @receiver(post_save, sender=User)
 def update_user(sender, instance, created, **kwargs):
