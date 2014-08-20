@@ -358,7 +358,7 @@ def update_penguin_count(sender, instance, created, **kwargs):
     count, and bucket them relative to the civil twilight time.
     """
 
-    import ipdb; ipdb.set_trace()
+    #import ipdb; ipdb.set_trace()
 
     penguin_count, new_count = PenguinCount.objects.get_or_create(
         date=instance.date.date(), site=instance.site)
