@@ -349,7 +349,7 @@ def update_penguin_count(sender, instance, created, **kwargs):
         penguin_count.civil_twilight = civil_twilight(instance.date.date(),
             instance.site.location.x, instance.site.location.y)
     date = instance.date.date()
-    observations = PenguinObservation.objects.filter(
+    observations = PenguinObservation.objects.filter(seen__gt=0,
         date__range=(datetime.datetime.combine(date, datetime.time.min),
                      datetime.datetime.combine(date, datetime.time.max)))
     observers = {}
