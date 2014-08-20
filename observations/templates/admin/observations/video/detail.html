@@ -250,6 +250,7 @@
           data: data
         }).done(function() {
           $('#addform').modal('hide');
+          $('.modal-backdrop').remove();
           $('#observations tbody').append("<tr><td>" + $('#id_time').val() + "</td><td>" + $('#id_seen').val() + "</td>" + "<td>" + $('#id_comments').val() + "</td><td><a href='javascript:flowplayer().seek(" +$('#id_position').val()+ ")'>"+$('#id_position').val()+"</a></td><td><a href='?'>Reload page to delete this record</a></td></tr>");
           $('#add-form').parsley().reset();
           $('#add-form').find('input:text, textarea').val('');
