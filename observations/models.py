@@ -313,7 +313,7 @@ class PenguinObservation(ObservationBase):
         help_text=_("Was it raining at the time of the observation?"))
     position = models.FloatField(default=0,null=True,verbose_name=_("Position in video"))
     video = models.ForeignKey(Video,default=None,null=True,verbose_name=_("Video filename"))
-    validated = models.BooleanField(default=True,verbose_name=_('Validated observation'))
+    validated = models.BooleanField(default=True,verbose_name=_('Confirmed'))
     def clean_date(self):
         if self.date > timezone.now():
             raise ValidationError("The 'Date' cannot be in the future!")

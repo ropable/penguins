@@ -143,8 +143,8 @@ class PenguinCountAdmin(ModelAdmin):
 
 class PenguinObservationAdmin(BaseAdmin):
     actions = ['delete','export_to_csv']
-    list_display = ('date', 'site', 'camera', 'observer', 'seen', 'comments','link_to_video','position')
-    list_filter = (('date', DateRangeFilter),'site', 'camera',)
+    list_display = ('date', 'site', 'camera', 'observer', 'seen', 'comments','validated','link_to_video','position')
+    list_filter = (('date', DateRangeFilter),'site', 'camera','validated')
     #readonly_fields = ('site',)
     list_per_page = 25
     fieldsets = (
