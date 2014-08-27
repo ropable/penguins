@@ -313,7 +313,7 @@ class PenguinObservation(ObservationBase):
         help_text=_("Was it raining at the time of the observation?"))
     position = models.FloatField(default=0,null=True,verbose_name=_("Position in video"))
     video = models.ForeignKey(Video,default=None,null=True,verbose_name=_("Video filename"))
-
+    validated = models.BooleanField(default=True,verbose_name=_('Validated observation'))
     def clean_date(self):
         if self.date > timezone.now():
             raise ValidationError("The 'Date' cannot be in the future!")
@@ -350,7 +350,7 @@ def update_penguin_count(sender, instance, created, **kwargs):
             instance.site.location.x, instance.site.location.y)
     date = instance.date.date()
     observations = PenguinObservation.objects.filter(seen__gt=0,
-                    site=instance.site,
+                    site=instance.site, validated = True,
         date__range=(datetime.datetime.combine(date, datetime.time.min),
                      datetime.datetime.combine(date, datetime.time.max)))
     observers = {}

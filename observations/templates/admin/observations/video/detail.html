@@ -46,6 +46,10 @@
 {% endblock %}
 
 {% block content %}
+<div class="alert alert-info">
+   <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <b>Please note:</b> Video observations will NOT be counted until you have finished watching the video until the end and pressed the "Mark Finished" button. If you recieve an error saying the video file can not be found, try reloading the page one or two times, or try a different browser. There are known issues with firefox's video playback.
+</div>
 {% block object-tools %}
 {% if change %}{% if not is_popup %}
   <div class="btn-toolbar">
@@ -126,12 +130,18 @@
   {% endfor %}
   </tbody>
 </table>
+
 <div id="addform" class="modal fade">
   <div class="modal-dialog">
     <div class="modal-content">
       <div class="modal-header">
         <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>
         <h4 class="modal-title">Add an observation</h4>
+        {% if user in original.completed_by.all %}
+                  <div class="alert alert-success"><b>Please note</b>: This video will automatically be marked as valid as  you have already marked this video as viewed. Please ensure you are not doubling up observations!!!!!</div>
+        {% else %}
+          <div class="alert alert-info"><b>Please note</b>: You will need to watch the ENTIRE video, and press the "Mark watched" button at the end, or these observations will NOT be counted in the final research.</div>
+        {% endif %}
       </div>
       <div class="modal-body">
         <form class="form-horizontal" id="add-form" role="form" data-parsley-validate>{% csrf_token %}
@@ -193,6 +203,12 @@
   var time = 0;
 
 
+{% if user in original.completed_by.all %}
+  var isFinished = true;
+{% else %}
+  var isFinished = false;
+{% endif %}
+
   $(function() {
     /* Setup CSRF protection. */
     var csrftoken = $.cookie('csrftoken');
@@ -241,8 +257,9 @@
           'seen': $('#id_seen').val(),
           'comments': $('#id_comments').val(),
           'video': {{ original.id }},
-          'position': $('#id_position').val()
-        };
+          'position': $('#id_position').val(),
+          'validated': isFinished
+        }; 
 
         $.ajax({
           type: "POST",

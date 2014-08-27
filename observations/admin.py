@@ -149,7 +149,7 @@ class PenguinObservationAdmin(BaseAdmin):
     list_per_page = 25
     fieldsets = (
         (None, {
-            'fields': ('date', 'site', 'camera', 'seen', 'comments')
+            'fields': ('date', 'site', 'camera', 'seen', 'comments','validated')
         }),
         (ugettext_lazy("Environmental conditions (optional)"), {
             'fields': (('wind_direction', 'wind_speed'),
