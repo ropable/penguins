@@ -9,11 +9,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 SECRET_KEY = os.environ['SECRET_KEY']
 
-DEBUG = os.environ.get('DEBUG', False)
+DEBUG = True #os.environ.get('DEBUG', False)
+
 TEMPLATE_DEBUG = DEBUG
 
 ALLOWED_HOSTS = ['*']
-INTERNAL_IPS = ('127.0.0.1',)
+#INTERNAL_IPS = ('*',) #'127.0.0.1',)
 
 # Email settings
 ADMINS = ('asi@dpaw.wa.gov.au',)

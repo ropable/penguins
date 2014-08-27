@@ -31,7 +31,8 @@ logger = logging.getLogger(__name__)
 class BaseAdmin(ModelAdmin):
 
     list_per_page = 15
-
+    def has_view_permission(self, request, obj=None):
+        return True
     def changelist_view(self, request, extra_context=None):
         context = {
             'title': self.get_title(request)
@@ -43,14 +44,21 @@ class BaseAdmin(ModelAdmin):
 class SiteAdmin(DetailAdmin, LeafletGeoAdmin):
     actions = None
     list_display = ('name', 'location')
+    #Horrible hack, but seemingly necessary :(
+    def has_view_permission(self, request, obj=None):
+        return True
+    #def has_change_permission(self, request, obj=None):
+    #    return True
+    #def has_delete_permission(self, request, obj=None):
+    #    return True
 
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts
 
         obj = self.get_object(request, unquote(object_id))
 
-        if not self.has_view_permission(request, obj):
-            raise PermissionDenied
+        #if not self.has_view_permission(request, obj):
+        #    raise PermissionDenied
 
         if obj is None:
             raise Http404(_('%(name)s object with primary key %(key)r does '
@@ -250,6 +258,14 @@ class VideoAdmin(DetailAdmin):
     )
 
     list_per_page = 15
+
+    def has_view_permission(self, request, obj=None):
+        return True
+    def has_change_permission(self, request, obj=None):
+        return True
+    def has_delete_permission(self, request, obj=None):
+        return True
+
 
     def camera_expanded(self,item):
         return mark_safe("<a href='/observations/video/{0}/change'>{1}</a>".format(item.pk,item.camera.site))
