@@ -187,7 +187,8 @@ class PenguinObservationAdmin(BaseAdmin):
                 ,'moon phase'
                 ,'raining'
                 ,'position'
-                ,'video'])
+                ,'video'
+                ,'validated'])
 
         for item in queryset:
             writer.writerow([
@@ -203,7 +204,8 @@ class PenguinObservationAdmin(BaseAdmin):
                 item.moon_phase,
                 item.raining,
                 item.position,
-                item.video
+                item.video,
+                item.validated
                 ])
         return response
     export_to_csv.short_description = ugettext_lazy("Export to CSV")

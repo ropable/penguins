@@ -343,6 +343,7 @@ def update_penguin_count(sender, instance, created, **kwargs):
     Loop over all penguin observations for a particular day and update the
     count, and bucket them relative to the civil twilight time.
     """
+    print "Pre-save observation interceptor triggered"
     penguin_count, new_count = PenguinCount.objects.get_or_create(
         date=instance.date.date(), site=instance.site)
     if new_count:
