@@ -22,6 +22,10 @@ class VideoViewSet(viewsets.ModelViewSet):
         if request.DATA.has_key('mark_complete'):
             if request.DATA['mark_complete']:
                 self.get_object().completed_by.add(request.user)
+
+                PenguinObservation.objects.filter(video=self.get_object(),
+                                               observer=request.user).update(validated=True)
+
             else:
                 self.get_object().completed_by.remove(request.user)
         response =super(VideoViewSet,self).partial_update(request,pk)
