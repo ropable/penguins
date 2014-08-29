@@ -149,7 +149,7 @@
             <label for="id_time" class="col-sm-2 control-label required">Time</label>
             <div class="col-sm-10">
               <div class="input-group bootstrap-timepicker">
-                <input type="text" class="form-control" id="id_time" required>
+                <input type="text" class="form-control" id="id_time" data-date-format="HH:mm" required>
                 <span class="input-group-addon glyphicon glyphicon-time"></span>
               </div>
             </div>
@@ -233,9 +233,11 @@
 
     $('#id_time').datetimepicker({
       pickDate: false,
+      pick12HourFormat: false,
       useSeconds: false,
       minuteStepping: 1,
-      defaultDate: '{{ original.start_time|time:"H:i" }}'
+      timeFormat:"HH mm",
+      defaultDate: '{{ original.start_time|time:"H" }}'
     });
 
     $('#save').on('click', function () {
@@ -262,22 +264,28 @@
         }; 
 
         $.ajax({
-          type: "POST",
           url: "/api/observations/",
+          type: "POST",
           data: data
         }).done(function() {
           $('#addform').modal('hide');
           $('.modal-backdrop').remove();
           $('#observations tbody').append("<tr><td>" + $('#id_time').val() + "</td><td>" + $('#id_seen').val() + "</td>" + "<td>" + $('#id_comments').val() + "</td><td><a href='javascript:flowplayer().seek(" +$('#id_position').val()+ ")'>"+$('#id_position').val()+"</a></td><td><a href='?'>Reload page to delete this record</a></td></tr>");
           $('#add-form').parsley().reset();
+          
           $('#add-form').find('input:text, textarea').val('');
-          $('#id_time').data("DateTimePicker").setDate('{{ original.start_time|time:"H:i" }}');
+
+          $('#id_time').data("DateTimePicker").setDate('{{ original.start_time|time:"H" }}');
         }).fail(function(msg) {
         }).always(function() {
           btn.button('reset');
         });
+
       }
+
     });
+
+
       window.setInterval(function(){
         var f = flowplayer();
         if (f.video.time > 0) {
@@ -294,7 +302,7 @@ function formFillin() {
         f.pause();
 
         if (f.video.time > 0) {
-          time = f.video.time;
+          time = f.video.time; 
           $('#id_position').val(time);
         } else {
           $('#id_position').val(0);
