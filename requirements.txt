@@ -1,7 +1,7 @@
 Django==1.6.4
 psycopg2==2.5.2
 Pillow==2.4.0
-gunicorn==18.0
+django-wsgiserver==0.8.0rc1
 honcho==0.5.0
 South==0.8.4
 dj-database-url==0.3.0

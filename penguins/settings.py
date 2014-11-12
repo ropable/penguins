@@ -9,7 +9,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 SECRET_KEY = os.environ['SECRET_KEY']
 
-DEBUG = True #os.environ.get('DEBUG', False)
+DEBUG = os.environ.get('DEBUG', False)
 
 TEMPLATE_DEBUG = DEBUG
 
@@ -45,7 +45,7 @@ INSTALLED_APPS = (
     'datetimewidget',
     'south',
     'storages',
-    'gunicorn',
+    'django_wsgiserver',
     'django_nose',
     'rest_framework',
     'leaflet',
