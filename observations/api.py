@@ -28,6 +28,15 @@ class VideoViewSet(viewsets.ModelViewSet):
                 for obs in pobs:
                     obs.validated = True
                     obs.save()
+                if pobs.count() == 0:
+                    p = PenguinObservation( video=self.get_object(),
+                                            observer=request.user,
+                                            site = self.get_object().camera.site,
+                                            seen=0,
+                                            comments="[default]No penguins reported",
+                                            validated=True
+                                           )
+                    p.save()
             else:
                 self.get_object().completed_by.remove(request.user)
         response =super(VideoViewSet,self).partial_update(request,pk)

@@ -53,7 +53,7 @@ INSTALLED_APPS = (
     'observations'
 )
 
-ANONYMOUS_USER_ID=1
+ANONYMOUS_USER_ID = 1
 
 AUTH_USER_MODEL = "observations.PenguinUser"
 
@@ -107,6 +107,7 @@ if os.environ.get('USE_AWS', False):
     AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
     AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
     AWS_S3_HOST = os.environ['AWS_S3_HOST']
+    AWS_QUERYSTRING_AUTH = False
 
 FLATPAGES_X_PARSER= ["flatpages_x.markdown_parser.parse", {}]
 
