@@ -100,6 +100,7 @@
   {% if perms.auth.change_user %}<li><a href="{% url "admin:observations_penguinuser_changelist" %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>{% endif %}
     <li><a href="{% url "admin:observations_camera_changelist" %}"><span class="glyphicon glyphicon-camera"></span> Cameras</a></li>
   {% endif %}
+  {% if perms.auth.change_user %}<li><a href="{% url "s3_view" %}"><span class="glyphicon glyphicon-user"></span> S3 View</a></li>{% endif %}
             <li><a href="/help/"><span class="glyphicon glypthicon-question-sign"></span>Help </a>
 
 </ul>

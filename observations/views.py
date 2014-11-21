@@ -3,7 +3,7 @@ from __future__ import absolute_import
 from django.conf import settings
 from django.core.mail import EmailMultiAlternatives
 from django.http import HttpResponse, HttpResponseForbidden
-from django.views.generic import View
+from django.views.generic import View, TemplateView
     
 from django.contrib.flatpages.models import FlatPage
 
@@ -17,6 +17,8 @@ from .models import Video
 from django.utils.functional import curry
 from flatpages_x.settings import PARSER
 from flatpages_x.utils import load_path_attr
+
+from django.core.files.storage import default_storage
 
 
 class VideoImport(View):
@@ -47,6 +49,41 @@ class VideoImport(View):
         msg.attach_alternative(html_content, 'text/html')
         msg.send()
         return HttpResponse('{} videos have been successfully imported.'.format(count))
+
+
+class S3View(TemplateView):
+    template_name = 's3_view.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(S3View, self).get_context_data(**kwargs)
+
+        if self.request.POST.get('limit'):
+            limit = int(self.request.POST.get('limit'))
+        else:
+            limit = 0
+
+        folder="beach_return_cams_2"
+        #folder="jm_temp"
+        VIDEO_FORMATS = ('.mp4', '.avi', '.mkv')
+        videos = [v for v in default_storage.listdir(folder)[1] if v.endswith(VIDEO_FORMATS)]
+        vlist=[]
+        unimported=[]
+        for video in videos:
+            item = {}
+            imported = True if Video.objects.filter(file__icontains=video) else False
+            item['video']=video
+            item['imported']=imported
+            vlist.append(item)
+
+            if not imported:
+                unimported.append(video)
+
+        context['title'] = 'S3 Amazon - Beach Return Cams View'
+        context['videos'] = videos
+        context['video_list'] = vlist[:limit] if limit else vlist
+        context['unimported_videos'] = unimported
+        #import ipdb; ipdb.set_trace()
+        return context
 
 
 @receiver(post_init,sender=FlatPage)

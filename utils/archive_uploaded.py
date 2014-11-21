@@ -65,10 +65,27 @@ def compare_all():
             logger.debug('File not on S3 Server {}. FILE NOT MOVED.'.format(local_file))
 
 
-if os.path.exists(uploaded):
-    #compare_single()
-    compare_all()
-else:
-    logger.debug('Folder Does not exist: {}'.format(uploaded))
+def copy_files_on_s3_server():
+    # copies file between folders on S3 server
+    
+    src  = 's3://penguinsdpawwagovau/beach_return_cams/'
+    dest = 's3://penguinsdpawwagovau/beach_return_cams_2/'
+    s3_files = subprocess.check_output([s3cmd, 'ls', s3path])
+    s3_files = s3_files.strip().split('\n')
+    s3_files = [i.split('/')[-1] for i in s3_files if i.endswith('.mp4')]
+
+    for filename in s3_files:
+        nameparts = filename.split("_", 3)
+        dateparts = nameparts[0].split('-')
+        newdate_fmt = '-'. join(dateparts[::-1]) # reverse the date format to %Y-%m-%d
+        new_filename = newdate_fmt + '_' + '_'.join(nameparts[1:])
+        ret = subprocess.call([s3cmd, 'cp', src + filename, dest + new_filename])
+        if ret != 0:
+            logger.debug('File rename failed: {0} to {1} '.format(filename, new_filename))
+
+
+#compare_single()
+#compare_all()
+copy_files_on_s3_server()
 
 

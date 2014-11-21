@@ -6,7 +6,7 @@ from rest_framework.routers import DefaultRouter
 
 from observations.sites import site
 from observations.api import PenguinCountViewSet, PenguinObservationViewSet, VideoViewSet
-from observations.views import VideoImport
+from observations.views import VideoImport, S3View
 
 
 router = DefaultRouter()
@@ -21,5 +21,6 @@ urlpatterns = patterns('',
     url(r'^markitup/', include('markitup.urls')),
     url(r'^help/', include('django.contrib.flatpages.urls')),
     url(r'^cronjobs/video-import/$', VideoImport.as_view(), name='cronjobs_video_import'),
+    url(r'^observations/s3/$', S3View.as_view(), name='s3_view'),
     url(r'', include(site.urls)),
 )

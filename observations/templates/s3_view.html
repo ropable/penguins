@@ -1,0 +1,31 @@
+{% extends "admin/base_site.html" %}
+{% load i18n admin_urls admin_static admin_modify tz %}
+
+{% block content %}
+
+<h3>Files found: {{ video_list | length }}. Unimported videos: {{unimported_videos | length}}</h3>
+<table id="s3_table" data-role='table' class="table table-striped">
+  <thead>
+    <tr>
+      <th></th>
+      <th>Name</th>
+      <th>Imported</th>
+    </tr>
+  <thead>
+  <tbody>
+  {% for item in video_list reversed %}
+    <tr>
+      <td>{{forloop.counter}}</td>
+      <td>{{ item.video }}</td>
+      <td>{% if item.imported %}<i class="icon-ok text-success"></i>{% else %}<i class="icon-remove" style="color:red"></i>{% endif %}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+
+{% endblock %}
+
+{% block extrajs %}
+<script>
+</script>
+{% endblock %}

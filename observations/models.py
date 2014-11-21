@@ -205,7 +205,7 @@ class Video(models.Model):
         return "%s - %s @ %s" % (self.camera.name, self.name, str(self.date))
 
     @classmethod
-    def import_folder(cls, folder="beach_return_cams"):
+    def import_folder(cls, folder="beach_return_cams_2"):
         logger = logging.getLogger('videos')
         logger.debug('Started import_folder method.')
         VIDEO_FORMATS = ('.mp4', '.avi', '.mkv')
@@ -224,10 +224,10 @@ class Video(models.Model):
             logger.debug("Importing {0}".format(video))
             datestr = '_'.join(nameparts[0:2])
             try:
-                video_datetime = datetime.datetime.strptime(datestr, "%d-%m-%Y_%H")
+                video_datetime = datetime.datetime.strptime(datestr, "%Y-%m-%d_%H")
             except:
                 datestr = '_'.join(nameparts[0:1])
-                video_datetime = datetime.datetime.strptime(datestr, "%d-%m-%Y")
+                video_datetime = datetime.datetime.strptime(datestr, "%Y-%m-%d")
             date = video_datetime.date()
             start_time = video_datetime.time()
             camstr = nameparts[-1]
