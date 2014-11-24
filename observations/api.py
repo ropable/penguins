@@ -3,6 +3,7 @@ from rest_framework import filters
 
 from observations.models import PenguinCount, PenguinObservation, Video
 from utils import RetrievePartialUpdateDestroyAPIView;
+import datetime
 
 
 class PenguinCountViewSet(viewsets.ReadOnlyModelViewSet):
@@ -29,12 +30,14 @@ class VideoViewSet(viewsets.ModelViewSet):
                     obs.validated = True
                     obs.save()
                 if pobs.count() == 0:
+                    d=self.get_object().date
                     p = PenguinObservation( video=self.get_object(),
                                             observer=request.user,
                                             site = self.get_object().camera.site,
                                             seen=0,
                                             comments="[default]No penguins reported",
-                                            validated=True
+                                            validated=True,
+                                            date=datetime.datetime(d.year, d.month, d.day)
                                            )
                     p.save()
             else:

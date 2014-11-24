@@ -26,11 +26,11 @@ from observations.forms import SelectDateForm
 from daterange_filter.filter import DateRangeFilter
 
 logger = logging.getLogger(__name__)
+list_per_page = 100
 
 
 class BaseAdmin(ModelAdmin):
 
-    list_per_page = 15
     def has_view_permission(self, request, obj=None):
         return True
     def changelist_view(self, request, extra_context=None):
@@ -124,7 +124,6 @@ class PenguinCountAdmin(ModelAdmin):
                     'sixty_to_seventy_five', 'seventy_five_to_ninety',
                     'ninety_to_one_oh_five', 'one_oh_five_to_one_twenty',
                     'total_penguins', 'outlier', 'comments')
-    list_per_page = 15
     def sitelink (self,item):
         return mark_safe('<a href="/observations/site/{0}/">{1}</a>'.format(item.site.pk,item.site.name))
 
@@ -154,7 +153,6 @@ class PenguinObservationAdmin(BaseAdmin):
     list_display = ('date', 'site', 'camera', 'observer', 'seen', 'comments','validated','link_to_video','position')
     list_filter = (('date', DateRangeFilter),'site', 'camera','validated')
     #readonly_fields = ('site',)
-    list_per_page = 25
     fieldsets = (
         (None, {
             'fields': ('date', 'site', 'camera', 'seen', 'comments','validated')
@@ -259,7 +257,6 @@ class VideoAdmin(DetailAdmin):
         }),
     )
 
-    list_per_page = 15
 
     def has_view_permission(self, request, obj=None):
         return True

@@ -295,7 +295,7 @@ class PenguinObservation(ObservationBase):
     camera = models.ForeignKey(Camera, blank=True, null=True)
     observer = models.ForeignKey(settings.AUTH_USER_MODEL,related_name="observations")
     seen = models.PositiveSmallIntegerField(verbose_name='count',
-        validators=[MinValueValidator(1), MaxValueValidator(100)])
+        validators=[MinValueValidator(0), MaxValueValidator(100)])
     comments = models.TextField(blank=True, null=True)
     wind_direction = models.PositiveSmallIntegerField(choices=DIRECTION_CHOICES,
         verbose_name=_("Wind direction"), blank=True, null=True)
