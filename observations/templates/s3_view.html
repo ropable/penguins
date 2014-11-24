@@ -17,7 +17,7 @@
     <tr>
       <td>{{forloop.counter}}</td>
       <td>{{ item.video }}</td>
-      <td>{% if item.imported %}<i class="icon-ok text-success"></i>{% else %}<i class="icon-remove" style="color:red"></i>{% endif %}</td>
+      <td>{% if item.imported %}<span class="glyphicon glyphicon-ok" style="color:green"></span>{% else %}<span class="glyphicon glyphicon-remove" style="color:red"></span>{% endif %}</td>
     </tr>
   {% endfor %}
   </tbody>
