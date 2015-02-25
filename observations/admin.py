@@ -7,6 +7,7 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.utils.encoding import force_text
 from django.utils.html import escape
+from django.utils.timezone import localtime
 from django.utils.translation import ugettext as _, ugettext_lazy
 from django.core.urlresolvers import reverse
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
@@ -138,11 +139,21 @@ class PenguinCountAdmin(ModelAdmin):
                          '91 - 105', '106 - 120', 'Total', 'outlier', 'Comments'])
 
         for item in queryset:
-            writer.writerow([item.date, item.civil_twilight,
-                item.sub_fifteen, item.zero_to_fifteen, item.fifteen_to_thirty, item.thirty_to_fourty_five,
-                item.fourty_five_to_sixty, item.sixty_to_seventy_five, item.seventy_five_to_ninety,
-                item.ninety_to_one_oh_five, item.one_oh_five_to_one_twenty, item.total_penguins,
-                item.outlier, item.comments])
+            writer.writerow([
+                localtime(item.date),
+                item.civil_twilight,
+                item.sub_fifteen,
+                item.zero_to_fifteen,
+                item.fifteen_to_thirty,
+                item.thirty_to_fourty_five,
+                item.fourty_five_to_sixty,
+                item.sixty_to_seventy_five,
+                item.seventy_five_to_ninety,
+                item.ninety_to_one_oh_five,
+                item.one_oh_five_to_one_twenty,
+                item.total_penguins,
+                item.outlier,
+                item.comments])
 
         return response
     export_to_csv.short_description = ugettext_lazy("Export to CSV")
@@ -171,26 +182,26 @@ class PenguinObservationAdmin(BaseAdmin):
         response = HttpResponse(content_type="text/csv")
         response['Content-Disposition'] = "attachment; filename=export.csv"
 
-        writer = unicodecsv.writer(response, quoting=unicodecsv.QUOTE_ALL)        
+        writer = unicodecsv.writer(response, quoting=unicodecsv.QUOTE_ALL)
         writer.writerow([
-                'date'
-                ,'site'
-                ,'camera'
-                ,'observer'
-                ,'Count'
-                ,'wind direction'
-                ,'wind speed'
-                ,'wave height'
-                ,'wave period'
-                ,'moon phase'
-                ,'raining'
-                ,'position'
-                ,'video'
-                ,'validated'])
+                'date',
+                'site',
+                'camera',
+                'observer',
+                'Count',
+                'wind direction',
+                'wind speed',
+                'wave height',
+                'wave period',
+                'moon phase',
+                'raining',
+                'position',
+                'video',
+                'validated'])
 
         for item in queryset:
             writer.writerow([
-                item.date,
+                localtime(item.date),
                 item.site,
                 item.camera,
                 item.observer.username,
@@ -207,7 +218,7 @@ class PenguinObservationAdmin(BaseAdmin):
                 ])
         return response
     export_to_csv.short_description = ugettext_lazy("Export to CSV")
-   
+
     def link_to_video(self,obj):
         if (obj.video):
             #return mark_safe("<a href='/observations/video/"+str(obj.video.pk)+"'>"+str(obj.video)+"</a>")
@@ -271,7 +282,7 @@ class VideoAdmin(DetailAdmin):
 
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts
-        
+
         obj = self.get_object(request, unquote(object_id))
 
         obj.views += 1
