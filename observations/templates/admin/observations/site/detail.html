@@ -60,6 +60,7 @@
       <th>Start time</th>
       <th>End time</th>
       <th>Views</th>
+      <th>Completed</th>
     </tr>
   </thead>
   <tbody>
@@ -69,6 +70,7 @@
       <td>{{ item.start_time }}</td>
       <td>{{ item.end_time }}</td>
       <td>{{ item.views }}</td>
+      <td>{% if item.mark_complete %}<span class="glyphicon glyphicon-ok" style="color:green"></span>{% else %}<span class="glyphicon glyphicon-remove" style="color:red"></span>{% endif %}</td>
     </tr>
   {% endfor %}
   </tbody>
