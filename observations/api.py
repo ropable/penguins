@@ -32,7 +32,7 @@ class VideoViewSet(viewsets.ModelViewSet):
                 if pobs.count() == 0:
                     d=self.get_object().date
                     hour=self.get_object().end_time.hour
-                    obervation_date=datetime.datetime(d.year, d.month, d.day, hour)
+                    observation_date=datetime.datetime(d.year, d.month, d.day, hour, 0)
                     p = PenguinObservation( video=self.get_object(),
                                             observer=request.user,
                                             site = self.get_object().camera.site,
