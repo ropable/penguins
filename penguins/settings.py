@@ -121,7 +121,7 @@ TEMPLATE_DIRS = (
 
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'ldap_email_auth.auth.EmailBackend',
+    'swingers.sauth.backends.EmailBackend',
 )
 
 LOGIN_URL = '/login/'
