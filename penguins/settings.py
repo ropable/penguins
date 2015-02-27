@@ -1,5 +1,9 @@
 import dj_database_url
+import ldap
 import os
+
+from django_auth_ldap.config import (LDAPSearch, GroupOfNamesType,
+                                     LDAPSearchUnion)
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
@@ -132,8 +136,41 @@ LOGOUT_REDIRECT_URL = LOGOUT_URL
 ANONYMOUS_USER_ID = -1
 
 # LDAP settings
-from ldap_email_auth import ldap_default_settings
-ldap_default_settings()
+AUTH_LDAP_SERVER_URI = os.environ.get('LDAP_SERVER_URI')
+AUTH_LDAP_BIND_DN = os.environ.get('LDAP_BIND_DN')
+AUTH_LDAP_BIND_PASSWORD = os.environ.get('LDAP_BIND_PASSWORD')
+
+AUTH_LDAP_ALWAYS_UPDATE_USER = False
+AUTH_LDAP_AUTHORIZE_ALL_USERS = True
+AUTH_LDAP_FIND_GROUP_PERMS = False
+AUTH_LDAP_MIRROR_GROUPS = False
+AUTH_LDAP_CACHE_GROUPS = False
+AUTH_LDAP_GROUP_CACHE_TIMEOUT = 300
+
+AUTH_LDAP_USER_SEARCH = LDAPSearchUnion(
+    LDAPSearch("DC=corporateict,DC=domain", ldap.SCOPE_SUBTREE,
+               "(sAMAccountName=%(user)s)"),
+    LDAPSearch("DC=corporateict,DC=domain", ldap.SCOPE_SUBTREE,
+               "(mail=%(user)s)"),
+)
+
+AUTH_LDAP_GROUP_SEARCH = LDAPSearch(
+    "DC=corporateict,DC=domain",
+    ldap.SCOPE_SUBTREE, "(objectClass=group)"
+)
+
+AUTH_LDAP_GLOBAL_OPTIONS = {
+    ldap.OPT_X_TLS_REQUIRE_CERT: False,
+    ldap.OPT_REFERRALS: False,
+}
+
+AUTH_LDAP_GROUP_TYPE = GroupOfNamesType(name_attr="cn")
+
+AUTH_LDAP_USER_ATTR_MAP = {
+    'first_name': "givenName",
+    'last_name': "sn",
+    'email': "mail",
+}
 
 # Misc settings
 EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
@@ -159,7 +196,7 @@ DEBUG_TOOLBAR_CONFIG = {
 }
 
 # Application version number
-APPLICATION_VERSION_NO = '1.0rc'
+APPLICATION_VERSION_NO = '0.1a'
 
 JENKINS_TASKS = (
     'django_jenkins.tasks.with_coverage',
