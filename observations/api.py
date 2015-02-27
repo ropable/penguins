@@ -31,13 +31,15 @@ class VideoViewSet(viewsets.ModelViewSet):
                     obs.save()
                 if pobs.count() == 0:
                     d=self.get_object().date
+                    hour=self.get_object().end_time.hour
+                    obervation_date=datetime.datetime(d.year, d.month, d.day, hour)
                     p = PenguinObservation( video=self.get_object(),
                                             observer=request.user,
                                             site = self.get_object().camera.site,
                                             seen=0,
                                             comments="[default]No penguins reported",
                                             validated=True,
-                                            date=datetime.datetime(d.year, d.month, d.day)
+                                            date=observation_date
                                            )
                     p.save()
             else:
