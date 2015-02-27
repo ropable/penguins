@@ -8,7 +8,6 @@ from django_auth_ldap.config import (LDAPSearch, GroupOfNamesType,
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 SECRET_KEY = os.environ['SECRET_KEY']
-S3_FOLDER = os.environ['S3_FOLDER']
 
 DEBUG = os.environ.get('DEBUG', False)
 

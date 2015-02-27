@@ -62,7 +62,7 @@ class S3View(TemplateView):
         else:
             limit = 0
 
-        folder= settings.S3_FOLDER #"beach_return_cams_2"
+        folder="beach_return_cams_2"
         #folder="jm_temp"
         VIDEO_FORMATS = ('.mp4', '.avi', '.mkv')
         videos = [v for v in default_storage.listdir(folder)[1] if v.endswith(VIDEO_FORMATS)]
