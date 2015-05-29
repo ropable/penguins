@@ -1,6 +1,5 @@
 from __future__ import unicode_literals
 
-from django.conf import settings
 from django.contrib.admin import ModelAdmin
 from django.contrib.admin.util import unquote
 from django.core.exceptions import PermissionDenied
@@ -18,8 +17,6 @@ from flatpages_x.admin import FlatPageAdmin
 from django.utils.safestring import mark_safe
 import datetime
 import logging
-import os
-import subprocess
 import unicodecsv
 from observations.models import Video
 from observations.forms import SelectDateForm
@@ -34,6 +31,7 @@ class BaseAdmin(ModelAdmin):
 
     def has_view_permission(self, request, obj=None):
         return True
+
     def changelist_view(self, request, extra_context=None):
         context = {
             'title': self.get_title(request)
@@ -45,17 +43,13 @@ class BaseAdmin(ModelAdmin):
 class SiteAdmin(DetailAdmin, LeafletGeoAdmin):
     actions = None
     list_display = ('name', 'location')
-    #Horrible hack, but seemingly necessary :(
+
     def has_view_permission(self, request, obj=None):
+        #Horrible hack, but seemingly necessary :(
         return True
-    #def has_change_permission(self, request, obj=None):
-    #    return True
-    #def has_delete_permission(self, request, obj=None):
-    #    return True
 
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts
-
         obj = self.get_object(request, unquote(object_id))
 
         #if not self.has_view_permission(request, obj):
@@ -84,14 +78,12 @@ class SiteAdmin(DetailAdmin, LeafletGeoAdmin):
 
 
 class CameraAdmin(DetailAdmin):
-
-    def videocount(self,item):
-        count = Video.objects.filter(camera_id = item.pk).count()
-        return str(count)
-
-
     actions = None
-    list_display = ('name', 'site','camera_key', 'ip_address','videocount')
+    list_display = ('name', 'site', 'camera_key', 'ip_address', 'videocount')
+
+    def videocount(self, item):
+        count = Video.objects.filter(camera_id=item.pk).count()
+        return str(count)
 
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts
@@ -125,9 +117,9 @@ class PenguinCountAdmin(ModelAdmin):
                     'sixty_to_seventy_five', 'seventy_five_to_ninety',
                     'ninety_to_one_oh_five', 'one_oh_five_to_one_twenty',
                     'total_penguins', 'outlier', 'comments')
-    def sitelink (self,item):
-        return mark_safe('<a href="/observations/site/{0}/">{1}</a>'.format(item.site.pk,item.site.name))
 
+    def sitelink(self, item):
+        return mark_safe('<a href="/observations/site/{0}/">{1}</a>'.format(item.site.pk,item.site.name))
 
     def export_to_csv(self, request, queryset):
         response = HttpResponse(content_type="text/csv")
@@ -160,13 +152,13 @@ class PenguinCountAdmin(ModelAdmin):
 
 
 class PenguinObservationAdmin(BaseAdmin):
-    actions = ['delete','export_to_csv']
-    list_display = ('date', 'site', 'camera', 'observer', 'seen', 'comments','validated','link_to_video','position')
-    list_filter = (('date', DateRangeFilter),'site', 'camera','validated')
+    actions = ['delete', 'export_to_csv']
+    list_display = ('date', 'site', 'camera', 'observer', 'seen', 'comments', 'validated', 'link_to_video', 'position')
+    list_filter = (('date', DateRangeFilter), 'site', 'camera', 'validated')
     #readonly_fields = ('site',)
     fieldsets = (
         (None, {
-            'fields': ('date', 'site', 'camera', 'seen', 'comments','validated')
+            'fields': ('date', 'site', 'camera', 'seen', 'comments', 'validated')
         }),
         (ugettext_lazy("Environmental conditions (optional)"), {
             'fields': (('wind_direction', 'wind_speed'),
@@ -176,28 +168,26 @@ class PenguinObservationAdmin(BaseAdmin):
     )
     exclude = ('observer',)
 
-
-
-    def export_to_csv(self,request,queryset):
+    def export_to_csv(self, request, queryset):
         response = HttpResponse(content_type="text/csv")
         response['Content-Disposition'] = "attachment; filename=export.csv"
 
         writer = unicodecsv.writer(response, quoting=unicodecsv.QUOTE_ALL)
         writer.writerow([
-                'date',
-                'site',
-                'camera',
-                'observer',
-                'Count',
-                'wind direction',
-                'wind speed',
-                'wave height',
-                'wave period',
-                'moon phase',
-                'raining',
-                'position',
-                'video',
-                'validated'])
+            'date',
+            'site',
+            'camera',
+            'observer',
+            'Count',
+            'wind direction',
+            'wind speed',
+            'wave height',
+            'wave period',
+            'moon phase',
+            'raining',
+            'position',
+            'video',
+            'validated'])
 
         for item in queryset:
             writer.writerow([
@@ -214,15 +204,15 @@ class PenguinObservationAdmin(BaseAdmin):
                 item.raining,
                 item.position,
                 item.video,
-                item.validated
-                ])
+                item.validated])
         return response
     export_to_csv.short_description = ugettext_lazy("Export to CSV")
 
-    def link_to_video(self,obj):
+    def link_to_video(self, obj):
         if (obj.video):
-            #return mark_safe("<a href='/observations/video/"+str(obj.video.pk)+"'>"+str(obj.video)+"</a>")
-            return mark_safe("<a href='"+reverse("admin:observations_video_detail",args=(obj.video.pk,))+"'>"+str(obj.video)+"</a>")
+            return mark_safe(
+                "<a href='{}'>{}</a>".format(
+                    reverse("admin:observations_video_detail", args=(obj.video.pk,)), obj.video))
         else:
             return "No video"
 
@@ -233,8 +223,6 @@ class PenguinObservationAdmin(BaseAdmin):
             db_field, request, **kwargs)
 
     def save_model(self, request, obj, form, change):
-#        import ipdb; ipdb.set_trace()
-
         obj.observer = request.user
         obj.save()
 
@@ -259,7 +247,7 @@ class PenguinObservationAdmin(BaseAdmin):
 
 
 class VideoAdmin(DetailAdmin):
-    list_display = ('camera_expanded','file', 'date', 'start_time', 'end_time')
+    list_display = ('camera_expanded', 'file', 'date', 'start_time', 'end_time')
     exclude = ('views',)
 
     fieldsets = (
@@ -268,23 +256,21 @@ class VideoAdmin(DetailAdmin):
         }),
     )
 
-
     def has_view_permission(self, request, obj=None):
         return True
+
     def has_change_permission(self, request, obj=None):
         return True
+
     def has_delete_permission(self, request, obj=None):
         return True
 
-
-    def camera_expanded(self,item):
-        return mark_safe("<a href='/observations/video/{0}/change'>{1}</a>".format(item.pk,item.camera.site))
+    def camera_expanded(self, item):
+        return mark_safe("<a href='/observations/video/{}/change'>{}</a>".format(item.pk, item.camera.site))
 
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts
-
         obj = self.get_object(request, unquote(object_id))
-
         obj.views += 1
         obj.save()
 
@@ -297,12 +283,11 @@ class VideoAdmin(DetailAdmin):
                 'name': force_text(opts.verbose_name),
                 'key': escape(object_id)})
 
-
         observations = obj.camera.penguinobservation_set.filter(
             observer=request.user,
-            date__range=(datetime.datetime.combine(obj.date, obj.start_time),
-                         datetime.datetime.combine(obj.date, obj.end_time)))
-
+            date__range=(
+                datetime.datetime.combine(obj.date, obj.start_time),
+                datetime.datetime.combine(obj.date, obj.end_time)))
 
         context = {
             'title': "View video",
@@ -311,9 +296,9 @@ class VideoAdmin(DetailAdmin):
         context.update(extra_context or {})
         return super(VideoAdmin, self).detail_view(request, object_id, context)
 
+
 class HelpCMS(FlatPageAdmin):
-    fieldsets=((None, {'fields': ('url', 'title', 'content_md', 'sites')}),)
+    fieldsets = ((None, {'fields': ('url', 'title', 'content_md', 'sites')}),)
     list_display = ('url', 'title')
     list_filter = ('sites',)
     search_fields = ('url', 'title')
-

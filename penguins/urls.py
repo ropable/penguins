@@ -1,7 +1,5 @@
 from __future__ import absolute_import
-
 from django.conf.urls import patterns, include, url
-
 from rest_framework.routers import DefaultRouter
 
 from observations.sites import site
@@ -12,8 +10,7 @@ from observations.views import VideoImport, S3View
 router = DefaultRouter()
 router.register(r'count', PenguinCountViewSet)
 router.register(r'observations', PenguinObservationViewSet)
-router.register(r'videos',VideoViewSet)
-#router.register(r'observation',PenguinObservationView)
+router.register(r'videos', VideoViewSet)
 
 urlpatterns = patterns('',
     url(r'^api/', include(router.urls)),

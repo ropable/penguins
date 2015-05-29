@@ -46,6 +46,7 @@ def main():
     process_videos()
     logger.info('S3 Upload ...')
     confirm_s3_upload()
+    delete_old_videos()
 
 
 def path_exists():
@@ -110,6 +111,19 @@ def archive_mov_videos(filename):
 
     return 0
 
+def delete_old_videos(ndays='+7'):
+    """ Delete files older than ndays """
+    filetypes = {'mov': ['*.mov', archive_mov], 'mp4': ['*.mp4', uploaded]}
+    for i in filetypes:
+        filetype = filetypes[i][0]
+        folder = filetypes[i][1]
+        cmd_delete = 'find "' +  folder + '" -name ' + filetype + ' -mtime ' + ndays + ' -exec rm {} \;'
+        print cmd_delete
+        ret_del = subprocess.call(cmd_delete, shell=True)
+
+    # Remove empty directories
+    cmd_rmdir = 'find "' + archive_mov + '" -type d -empty -exec rmdir {} \;'
+    ret_rm = subprocess.call(cmd_rmdir, shell=True)
 
 def process_videos():
     files = subprocess.check_output(["find", source, "-name", "*.mov"])
