@@ -8,12 +8,23 @@ from django_auth_ldap.config import (LDAPSearch, GroupOfNamesType,
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 SECRET_KEY = os.environ['SECRET_KEY']
-
-DEBUG = os.environ.get('DEBUG', False)
-
+S3_FOLDER = os.environ['S3_FOLDER']
+DEBUG = True if os.environ.get('DEBUG', False) == 'True' else False
 TEMPLATE_DEBUG = DEBUG
+CSRF_COOKIE_SECURE = True if os.environ.get('CSRF_COOKIE_SECURE', False) == 'True' else False
+SESSION_COOKIE_SECURE = True if os.environ.get('SESSION_COOKIE_SECURE', False) == 'True' else False
 
-ALLOWED_HOSTS = ['*']
+if not DEBUG:
+    # Localhost, UAT and Production hosts
+    ALLOWED_HOSTS = [
+        'localhost',
+        '127.0.0.1',
+        'kens-xenmate-dev',
+        'penguins.dpaw.wa.gov.au',
+        'penguins.dpaw.wa.gov.au.',
+        'penguins-test.dpaw.wa.gov.au',
+        'penguins-test.dpaw.wa.gov.au.',
+    ]
 INTERNAL_IPS = ('127.0.0.1', '::1')
 
 # Email settings
