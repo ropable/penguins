@@ -1,27 +1,25 @@
 from __future__ import unicode_literals, absolute_import
 
+import datetime
+from datetimewidget.widgets import DateWidget
 from django.db import models
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from django.contrib.auth.models import User, BaseUserManager, Group
+from django.contrib.auth.models import Group
 from django.contrib.gis.db import models as geo_models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.forms import ValidationError
 from django.core.files.storage import default_storage
 from django.conf import settings
 from django.utils import timezone
-from django.contrib.auth import get_user_model
-from datetimewidget.widgets import DateWidget
 from django import forms
-
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import AbstractUser
-from observations.utils import civil_twilight
-import datetime
 import logging
 import os
 
+from observations.utils import civil_twilight
 
 
 logger = logging.getLogger(__name__)
@@ -63,11 +61,6 @@ class ObservationBase(models.Model):
     class Meta:
         abstract = True
 
-class PenguinUserManager(BaseUserManager):
-    def __init__(self):
-        super(BaseUserManager, self).__init__()
-        #self.model = PenguinUser
-
 
 class PenguinUser(AbstractUser):
 
@@ -87,8 +80,6 @@ class PenguinUser(AbstractUser):
             t += i.duration
         return t
 
-    #objects = PenguinUserManager()
-
     class Meta:
         db_table = 'auth_user' #Leave it alone!
         managed = False
@@ -104,9 +95,11 @@ class Site(geo_models.Model):
     location = geo_models.PointField()
 
     def __str__(self):
-        if  self.camera_set.count() > 0:
-            return "{} ({})".format( self.name, ', '.join([c.name.encode("ascii") for c in self.camera_set.all()]) )
-        else: return self.name
+        if self.camera_set.count() > 0:
+            return "{} ({})".format(self.name, ', '.join([c.name.encode("ascii") for c in self.camera_set.all()]))
+        else:
+            return self.name
+
     class Meta:
         ordering = ['name']
 
@@ -118,7 +111,7 @@ class Camera(models.Model):
     penguin observations are to be recorded.
     """
     name = models.CharField(max_length=100)
-    camera_key = models.CharField(max_length=100,default='')
+    camera_key = models.CharField(max_length=100, default='')
     site = models.ForeignKey(Site, blank=True, null=True)
     ip_address = models.CharField(max_length=100, blank=True, null=True)
 
@@ -171,9 +164,10 @@ class PenguinCount(ObservationBase):
     class Meta:
         ordering = ['-date']
 
+
 @python_2_unicode_compatible
 class Video(models.Model):
-    name = models.CharField(max_length=100,null=True,blank=True,default="")
+    name = models.CharField(max_length=100, null=True, blank=True, default="")
     date = models.DateField(_("Date"),
         help_text=_("The date of the recording."))
     camera = models.ForeignKey(Camera)
@@ -183,8 +177,11 @@ class Video(models.Model):
     end_time = models.TimeField(_("End time"),
         help_text=_("The end time of the recording (usually 1h after start)."))
     views = models.IntegerField(default=0)
-    mark_complete = models.BooleanField(default=False,help_text=_("Has this been viewed in its entirety by a reviewer"))
-    completed_by = models.ManyToManyField(settings.AUTH_USER_MODEL,related_name="videos_seen",verbose_name="Users who have seen this video")
+    mark_complete = models.BooleanField(
+        default=False, help_text=_("Has this been viewed in its entirety by a reviewer"))
+    completed_by = models.ManyToManyField(
+        settings.AUTH_USER_MODEL, related_name="videos_seen",
+        verbose_name="Users who have seen this video")
 
     def clean_date(self):
         if self.date > datetime.date.today():
@@ -293,7 +290,7 @@ class PenguinObservation(ObservationBase):
     date = models.DateTimeField(default=timezone.now)
     site = models.ForeignKey(Site)
     camera = models.ForeignKey(Camera, blank=True, null=True)
-    observer = models.ForeignKey(settings.AUTH_USER_MODEL,related_name="observations")
+    observer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="observations")
     seen = models.PositiveSmallIntegerField(verbose_name='count',
         validators=[MinValueValidator(0), MaxValueValidator(100)])
     comments = models.TextField(blank=True, null=True)
@@ -311,9 +308,10 @@ class PenguinObservation(ObservationBase):
         verbose_name=_("Moon phase"), blank=True, null=True)
     raining = models.BooleanField(_("Raining?"), default=False,
         help_text=_("Was it raining at the time of the observation?"))
-    position = models.FloatField(default=0,null=True,verbose_name=_("Position in video"))
-    video = models.ForeignKey(Video,default=None,null=True,verbose_name=_("Video filename"))
-    validated = models.BooleanField(default=True,verbose_name=_('Confirmed'))
+    position = models.FloatField(default=0, null=True, verbose_name=_("Position in video"))
+    video = models.ForeignKey(Video, default=None, null=True, verbose_name=_("Video filename"))
+    validated = models.BooleanField(default=True, verbose_name=_('Confirmed'))
+
     def clean_date(self):
         if self.date > timezone.now():
             raise ValidationError("The 'Date' cannot be in the future!")
@@ -326,8 +324,8 @@ class PenguinObservation(ObservationBase):
 class ObserverCounter:
     def __init__(self):
         self.total = 0
-        self.timestamps ={}
-        for x in xrange(0,10):
+        self.timestamps = {}
+        for x in xrange(0, 10):
             self.timestamps[x] = 0
 
 
@@ -351,7 +349,7 @@ def update_penguin_count(sender, instance, created, **kwargs):
             instance.site.location.x, instance.site.location.y)
     date = instance.date.date()
     observations = PenguinObservation.objects.filter(seen__gt=0,
-                    site=instance.site, validated = True,
+                    site=instance.site, validated=True,
         date__range=(datetime.datetime.combine(date, datetime.time.min),
                      datetime.datetime.combine(date, datetime.time.max)))
     observers = {}
@@ -361,17 +359,17 @@ def update_penguin_count(sender, instance, created, **kwargs):
         for observation in user_observations:
             offset = observation.date - penguin_count.civil_twilight
             offset = offset.total_seconds() / 60  # in minutes
-            range_pointer = int(offset /15) + 1
+            range_pointer = int(offset / 15) + 1
             if range_pointer >= 0 and range_pointer <= 9:
                 observers[o.observer.pk].timestamps[range_pointer] += observation.seen
             else:
                 observers[o.observer.pk].timestamps[9] += observation.seen
             observers[o.observer.pk].total = sum(observers[o.observer.pk].timestamps.values())
-    range_iiterator = xrange(0,10)
+    range_iiterator = xrange(0, 10)
     time_stamp = {}
     for r in range_iiterator:
         rangelist = []
-        for k,o in observers.items():
+        for k, o in observers.items():
             rangelist.append(o.timestamps[r])
         even = (0 if len(rangelist) % 2 else 1) + 1
         half = (len(rangelist) - 1) / 2
@@ -387,10 +385,11 @@ def update_penguin_count(sender, instance, created, **kwargs):
     penguin_count.ninety_to_one_oh_five = time_stamp[7]
     penguin_count.one_oh_five_to_one_twenty = time_stamp[8]
     penguin_count.outlier = time_stamp[9]
-    penguin_count.total_penguins=sum(time_stamp.values())
+    penguin_count.total_penguins = sum(time_stamp.values())
     penguin_count.save()
 
-@receiver(post_save, sender=User)
+
+@receiver(post_save, sender=PenguinUser)
 def update_user(sender, instance, created, **kwargs):
     if created:
         group, created = Group.objects.get_or_create(name="Observers")
@@ -400,22 +399,17 @@ def update_user(sender, instance, created, **kwargs):
 
 
 class GraphForm(forms.Form):
-#    'format': 'dd/mm/yyyy HH:ii P',
-    start_date = forms.DateField(widget=DateWidget(attrs={'id':"startTime",'width':'45%'}, usel10n = False, bootstrap_version=3))
-    end_date = forms.DateField(widget= DateWidget(attrs={'id':"endTime"}, usel10n = False, bootstrap_version=3))
-
+    start_date = forms.DateField(widget=DateWidget(attrs={'id': "startTime", 'width': '45%'}, usel10n=False, bootstrap_version=3))
+    end_date = forms.DateField(widget=DateWidget(attrs={'id': "endTime"}, usel10n=False, bootstrap_version=3))
 
     def clean(self):
-        cleaned_data = super(GraphForm,self).clean()
-
-
+        cleaned_data = super(GraphForm, self).clean()
         start = cleaned_data.get("start_date")
         end = cleaned_data.get("end_date")
         if not start:
-            self._errors['start_date']=self.error_class(["Please enter a start date"])
+            self._errors['start_date'] = self.error_class(["Please enter a start date"])
         if not end:
-            self._errors['end_date']=self.error_class(["Please enter an end date"])
-
+            self._errors['end_date'] = self.error_class(["Please enter an end date"])
         if start and end and (end <= start):
-            raise forms.ValidationError ("The end date is before the start date!")
+            raise forms.ValidationError("The end date is before the start date!")
         return cleaned_data
