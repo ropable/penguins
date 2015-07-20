@@ -11,10 +11,10 @@ from flatpages_x.admin import FlatPageImage, Revision
 from flatpages_x.models import FlatPage
 import logging
 
-from observations.admin import (SiteAdmin, CameraAdmin, PenguinCountAdmin,
-                                PenguinObservationAdmin, VideoAdmin, HelpCMS)
-from observations.models import (Site, Camera, PenguinCount,
-                                 PenguinObservation, Video, PenguinUser, GraphForm)
+from .admin import (SiteAdmin, CameraAdmin, PenguinCountAdmin,
+                    PenguinObservationAdmin, VideoAdmin, HelpCMS)
+from .models import (Site, Camera, PenguinCount, PenguinObservation,
+                     Video, PenguinUser, GraphForm)
 
 
 logger = logging.getLogger(__name__)

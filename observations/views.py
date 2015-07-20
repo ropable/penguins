@@ -1,36 +1,27 @@
 from __future__ import absolute_import
 
 from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
-from django.http import HttpResponse, HttpResponseForbidden
-from django.views.generic import View, TemplateView
-    
 from django.contrib.flatpages.models import FlatPage
+from django.core.files.storage import default_storage
+from django.core.mail import EmailMultiAlternatives
+from django.db.models.signals import post_init
+from django.dispatch import receiver
+from django.http import HttpResponse
+from django.utils.functional import curry
+from django.views.generic import View, TemplateView
 
 from flatpages_x.models import Revision
-
-from django.db.models.signals import post_init,pre_init
-from django.dispatch import receiver
-
-from .models import Video
-
-from django.utils.functional import curry
 from flatpages_x.settings import PARSER
 from flatpages_x.utils import load_path_attr
 
-from django.core.files.storage import default_storage
+from .models import Video
 
 
 class VideoImport(View):
-    '''
-    Basic view to import all outstanding encoded.
+    '''Basic view to import all outstanding encoded.
     View is intended to be accessed locally using curl during cron tasks.
     '''
     def get(self, request, *args, **kwargs):
-        # Only allow requests to this view from localhost.
-        #if request.META['SERVER_NAME'].lower() != 'localhost':
-        #    return HttpResponseForbidden()
-        # Localhost - proceed.
         v = Video.objects.all()[0]  # Get any random video object.
         count = v.import_folder()
         # Email each of the admin users the result of the import.
@@ -45,10 +36,15 @@ class VideoImport(View):
             videos have been successfully imported by the Penguins Observations
             application.<br>This is an automatically-generated email - please do
             not reply.<br>'''.format(count)
-        msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
+        msg = EmailMultiAlternatives(
+            subject,
+            text_content,
+            from_email,
+            to_email)
         msg.attach_alternative(html_content, 'text/html')
         msg.send()
-        return HttpResponse('{} videos have been successfully imported.'.format(count))
+        return HttpResponse(
+            '{} videos have been successfully imported.'.format(count))
 
 
 class S3View(TemplateView):
@@ -62,17 +58,18 @@ class S3View(TemplateView):
         else:
             limit = 0
 
-        folder="beach_return_cams_2"
-        #folder="jm_temp"
+        folder = "beach_return_cams_2"
         VIDEO_FORMATS = ('.mp4', '.avi', '.mkv')
-        videos = [v for v in default_storage.listdir(folder)[1] if v.endswith(VIDEO_FORMATS)]
-        vlist=[]
-        unimported=[]
+        videos = [
+            v for v in default_storage.listdir(folder)[1] if v.endswith(VIDEO_FORMATS)]
+        vlist = []
+        unimported = []
         for video in videos:
             item = {}
-            imported = True if Video.objects.filter(file__icontains=video) else False
-            item['video']=video
-            item['imported']=imported
+            imported = True if Video.objects.filter(
+                file__icontains=video) else False
+            item['video'] = video
+            item['imported'] = imported
             vlist.append(item)
 
             if not imported:
@@ -82,23 +79,19 @@ class S3View(TemplateView):
         context['videos'] = videos
         context['video_list'] = vlist[:limit] if limit else vlist
         context['unimported_videos'] = unimported
-        #import ipdb; ipdb.set_trace()
         return context
 
 
-@receiver(post_init,sender=FlatPage)
-def FlatPageInterceptor(sender, instance,  **kwargs):
-    '''
-    Amazon S3 expires its content on a fairly short turn-around. This means that its somewhat
+@receiver(post_init, sender=FlatPage)
+def FlatPageInterceptor(sender, instance, **kwargs):
+    '''Amazon S3 expires its content on a fairly short turn-around. This means that its somewhat
     incompatible with html caching. This function, unfortunate as it is, intercepts the cache loads
     and regenerates it. It assumes html help pages are a minescule impact on the database in the scheme of things
-    and only adds two SQL queries to the load. The code is largely copied from flatpages_x hence the 
-    possibly extraneous use of function currying 
-
+    and only adds two SQL queries to the load. The code is largely copied from flatpages_x hence the
+    possibly extraneous use of function currying
     '''
-    sourcePage = Revision.objects.filter(flatpage=instance).order_by('-updated').first()
+    sourcePage = Revision.objects.filter(
+        flatpage=instance).order_by('-updated').first()
     render_func = curry(load_path_attr(PARSER[0], **PARSER[1]))
-    instance.content =  render_func(sourcePage.content_source)
+    instance.content = render_func(sourcePage.content_source)
     instance.save()
-
-

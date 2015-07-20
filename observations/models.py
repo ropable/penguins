@@ -26,6 +26,7 @@ logger = logging.getLogger(__name__)
 
 
 class ObservationBase(models.Model):
+
     """
     TODO
     This class can be replaced if inheriting from
@@ -81,12 +82,13 @@ class PenguinUser(AbstractUser):
         return t
 
     class Meta:
-        db_table = 'auth_user' #Leave it alone!
+        db_table = 'auth_user'  # Leave it alone!
         managed = False
 
 
 @python_2_unicode_compatible
 class Site(geo_models.Model):
+
     """
     Represents a site that observations are recorded. It may or may not
     have multiple cameras associated with it.
@@ -96,7 +98,8 @@ class Site(geo_models.Model):
 
     def __str__(self):
         if self.camera_set.count() > 0:
-            return "{} ({})".format(self.name, ', '.join([c.name.encode("ascii") for c in self.camera_set.all()]))
+            return "{} ({})".format(
+                self.name, ', '.join([c.name.encode("ascii") for c in self.camera_set.all()]))
         else:
             return self.name
 
@@ -106,6 +109,7 @@ class Site(geo_models.Model):
 
 @python_2_unicode_compatible
 class Camera(models.Model):
+
     """
     A camera represents a single recording device at one of the sites that
     penguin observations are to be recorded.
@@ -156,7 +160,8 @@ class PenguinCount(ObservationBase):
         if self.civil_twilight is None:
             raise ValidationError("This field is required!")
         if self.civil_twilight > timezone.now():
-            raise ValidationError("The 'Civil Twilight Date' cannot be in the future!")
+            raise ValidationError(
+                "The 'Civil Twilight Date' cannot be in the future!")
 
     def __str__(self):
         return "%s" % self.date
@@ -169,16 +174,19 @@ class PenguinCount(ObservationBase):
 class Video(models.Model):
     name = models.CharField(max_length=100, null=True, blank=True, default="")
     date = models.DateField(_("Date"),
-        help_text=_("The date of the recording."))
+                            help_text=_("The date of the recording."))
     camera = models.ForeignKey(Camera)
     file = models.FileField(upload_to='videos/')
-    start_time = models.TimeField(_("Start time"),
+    start_time = models.TimeField(
+        _("Start time"),
         help_text=_("The start time of the recording."))
-    end_time = models.TimeField(_("End time"),
+    end_time = models.TimeField(
+        _("End time"),
         help_text=_("The end time of the recording (usually 1h after start)."))
     views = models.IntegerField(default=0)
     mark_complete = models.BooleanField(
-        default=False, help_text=_("Has this been viewed in its entirety by a reviewer"))
+        default=False,
+        help_text=_("Has this been viewed in its entirety by a reviewer"))
     completed_by = models.ManyToManyField(
         settings.AUTH_USER_MODEL, related_name="videos_seen",
         verbose_name="Users who have seen this video")
@@ -189,13 +197,20 @@ class Video(models.Model):
 
     def clean_end_time(self):
         if self.end_time < self.start_time:
-            raise ValidationError("The 'End Time' cannot be before the 'Start Time'!")
+            raise ValidationError(
+                "The 'End Time' cannot be before the 'Start Time'!")
 
     @property
     def duration(self):
         from datetime import timedelta
-        end = timedelta(hours=self.end_time.hour, minutes=self.end_time.minute, seconds=self.end_time.second)
-        start = timedelta(hours=self.start_time.hour, minutes=self.start_time.minute, seconds=self.start_time.second)
+        end = timedelta(
+            hours=self.end_time.hour,
+            minutes=self.end_time.minute,
+            seconds=self.end_time.second)
+        start = timedelta(
+            hours=self.start_time.hour,
+            minutes=self.start_time.minute,
+            seconds=self.start_time.second)
         return end - start
 
     def __str__(self):
@@ -206,12 +221,13 @@ class Video(models.Model):
         logger = logging.getLogger('videos')
         logger.debug('Started import_folder method.')
         VIDEO_FORMATS = ('.mp4', '.avi', '.mkv')
-        videos = [v for v in default_storage.listdir(folder)[1] if v.endswith(VIDEO_FORMATS)]
+        videos = [
+            v for v in default_storage.listdir(folder)[1] if v.endswith(VIDEO_FORMATS)]
         count = 0
         for video in videos:
             logger.debug("Checking {0}".format(video))
             nameparts = video.split("_", 3)
-            #if len(nameparts) != 2:
+            # if len(nameparts) != 2:
             #    logger.debug("Error: can't parse {0}".format(nameparts))
             #    continue
             filename = os.path.join(folder, video)
@@ -221,24 +237,39 @@ class Video(models.Model):
             logger.debug("Importing {0}".format(video))
             datestr = '_'.join(nameparts[0:2])
             try:
-                video_datetime = datetime.datetime.strptime(datestr, "%Y-%m-%d_%H")
+                video_datetime = datetime.datetime.strptime(
+                    datestr,
+                    "%Y-%m-%d_%H")
             except:
                 datestr = '_'.join(nameparts[0:1])
-                video_datetime = datetime.datetime.strptime(datestr, "%Y-%m-%d")
+                video_datetime = datetime.datetime.strptime(
+                    datestr,
+                    "%Y-%m-%d")
             date = video_datetime.date()
             start_time = video_datetime.time()
             camstr = nameparts[-1]
             camstr = camstr.split(".")[0]  # Remove the extension.
-            # assume each video is 60 mins long (video times are inaccurate/halved?)
+            # assume each video is 60 mins long (video times are
+            # inaccurate/halved?)
             end_time = (video_datetime + datetime.timedelta(minutes=60)).time()
-            logger.debug("Finding camera name closest to {} str:{}*".format(camstr,camstr.split("_")[0]))
+            logger.debug(
+                "Finding camera name closest to {} str:{}*".format(camstr, camstr.split("_")[0]))
             try:
-                camera = Camera.objects.filter(camera_key__icontains=camstr.split("_")[0])[0] #use filter()[0] rather than get if theres dupes in the db.
-                cls.objects.create(date=date, start_time=start_time, end_time=end_time,
-                                   camera=camera, file=os.path.join(folder, video))
+                # use filter()[0] rather than get if theres dupes in the db.
+                camera = Camera.objects.filter(
+                    camera_key__icontains=camstr.split("_")[0])[0]
+                cls.objects.create(
+                    date=date,
+                    start_time=start_time,
+                    end_time=end_time,
+                    camera=camera,
+                    file=os.path.join(
+                        folder,
+                        video))
                 count += 1
             except:
-                logger.error('No matching camera found, skipping video name {}'.format(nameparts[-1]))
+                logger.error(
+                    'No matching camera found, skipping video name {}'.format(nameparts[-1]))
 
         logger.debug("Import task completed.")
         return count
@@ -290,26 +321,57 @@ class PenguinObservation(ObservationBase):
     date = models.DateTimeField(default=timezone.now)
     site = models.ForeignKey(Site)
     camera = models.ForeignKey(Camera, blank=True, null=True)
-    observer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="observations")
-    seen = models.PositiveSmallIntegerField(verbose_name='count',
-        validators=[MinValueValidator(0), MaxValueValidator(100)])
+    observer = models.ForeignKey(
+        settings.AUTH_USER_MODEL,
+        related_name="observations")
+    seen = models.PositiveSmallIntegerField(
+        verbose_name='count',
+        validators=[
+            MinValueValidator(0),
+            MaxValueValidator(100)])
     comments = models.TextField(blank=True, null=True)
-    wind_direction = models.PositiveSmallIntegerField(choices=DIRECTION_CHOICES,
-        verbose_name=_("Wind direction"), blank=True, null=True)
-    wind_speed = models.DecimalField(max_digits=4, decimal_places=1,
-        verbose_name=_("Wind speed (km/h)"), blank=True, null=True)
-    wave_direction = models.PositiveSmallIntegerField(choices=DIRECTION_CHOICES,
-        verbose_name=_("Wave direction"), blank=True, null=True)
-    wave_height = models.DecimalField(max_digits=4, decimal_places=1,
-        verbose_name=_("Wave height (m)"), blank=True, null=True)
+    wind_direction = models.PositiveSmallIntegerField(
+        choices=DIRECTION_CHOICES,
+        verbose_name=_("Wind direction"),
+        blank=True,
+        null=True)
+    wind_speed = models.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        verbose_name=_("Wind speed (km/h)"),
+        blank=True,
+        null=True)
+    wave_direction = models.PositiveSmallIntegerField(
+        choices=DIRECTION_CHOICES,
+        verbose_name=_("Wave direction"),
+        blank=True,
+        null=True)
+    wave_height = models.DecimalField(
+        max_digits=4,
+        decimal_places=1,
+        verbose_name=_("Wave height (m)"),
+        blank=True,
+        null=True)
     wave_period = models.PositiveSmallIntegerField(
         verbose_name=_("Wave period (s)"), blank=True, null=True)
-    moon_phase = models.PositiveSmallIntegerField(choices=PHASE_CHOICES,
-        verbose_name=_("Moon phase"), blank=True, null=True)
-    raining = models.BooleanField(_("Raining?"), default=False,
+    moon_phase = models.PositiveSmallIntegerField(
+        choices=PHASE_CHOICES,
+        verbose_name=_("Moon phase"),
+        blank=True,
+        null=True)
+    raining = models.BooleanField(
+        _("Raining?"),
+        default=False,
         help_text=_("Was it raining at the time of the observation?"))
-    position = models.FloatField(default=0, null=True, verbose_name=_("Position in video"))
-    video = models.ForeignKey(Video, default=None, null=True, verbose_name=_("Video filename"))
+    position = models.FloatField(
+        default=0,
+        null=True,
+        verbose_name=_("Position in video"))
+    video = models.ForeignKey(
+        Video,
+        default=None,
+        null=True,
+        verbose_name=_("Video filename"))
     validated = models.BooleanField(default=True, verbose_name=_('Confirmed'))
 
     def clean_date(self):
@@ -322,6 +384,7 @@ class PenguinObservation(ObservationBase):
 
 
 class ObserverCounter:
+
     def __init__(self):
         self.total = 0
         self.timestamps = {}
@@ -332,7 +395,7 @@ class ObserverCounter:
 @receiver(pre_delete, sender=PenguinObservation)
 def trigger_recount_prior_to_delete(sender, instance, **kwargs):
     instance.seen = 0
-    instance.save() #TRIGGER THE APOCALYPSE
+    instance.save()  # TRIGGER THE APOCALYPSE
 
 
 @receiver(post_save, sender=PenguinObservation)
@@ -345,13 +408,16 @@ def update_penguin_count(sender, instance, created, **kwargs):
     penguin_count, new_count = PenguinCount.objects.get_or_create(
         date=instance.date.date(), site=instance.site)
     if new_count:
-        penguin_count.civil_twilight = civil_twilight(instance.date.date(),
-            instance.site.location.x, instance.site.location.y)
+        penguin_count.civil_twilight = civil_twilight(
+            instance.date.date(),
+            instance.site.location.x,
+            instance.site.location.y)
     date = instance.date.date()
-    observations = PenguinObservation.objects.filter(seen__gt=0,
-                    site=instance.site, validated=True,
-        date__range=(datetime.datetime.combine(date, datetime.time.min),
-                     datetime.datetime.combine(date, datetime.time.max)))
+    observations = PenguinObservation.objects.filter(
+        seen__gt=0, site=instance.site, validated=True, date__range=(
+            datetime.datetime.combine(
+                date, datetime.time.min), datetime.datetime.combine(
+                date, datetime.time.max)))
     observers = {}
     for o in observations.distinct('observer'):
         observers[o.observer.pk] = ObserverCounter()
@@ -361,10 +427,14 @@ def update_penguin_count(sender, instance, created, **kwargs):
             offset = offset.total_seconds() / 60  # in minutes
             range_pointer = int(offset / 15) + 1
             if range_pointer >= 0 and range_pointer <= 9:
-                observers[o.observer.pk].timestamps[range_pointer] += observation.seen
+                observers[o.observer.pk].timestamps[
+                    range_pointer] += observation.seen
             else:
                 observers[o.observer.pk].timestamps[9] += observation.seen
-            observers[o.observer.pk].total = sum(observers[o.observer.pk].timestamps.values())
+            observers[
+                o.observer.pk].total = sum(
+                observers[
+                    o.observer.pk].timestamps.values())
     range_iiterator = xrange(0, 10)
     time_stamp = {}
     for r in range_iiterator:
@@ -399,17 +469,31 @@ def update_user(sender, instance, created, **kwargs):
 
 
 class GraphForm(forms.Form):
-    start_date = forms.DateField(widget=DateWidget(attrs={'id': "startTime", 'width': '45%'}, usel10n=False, bootstrap_version=3))
-    end_date = forms.DateField(widget=DateWidget(attrs={'id': "endTime"}, usel10n=False, bootstrap_version=3))
+    start_date = forms.DateField(
+        widget=DateWidget(
+            attrs={
+                'id': "startTime",
+                'width': '45%'},
+            usel10n=False,
+            bootstrap_version=3))
+    end_date = forms.DateField(
+        widget=DateWidget(
+            attrs={
+                'id': "endTime"},
+            usel10n=False,
+            bootstrap_version=3))
 
     def clean(self):
         cleaned_data = super(GraphForm, self).clean()
         start = cleaned_data.get("start_date")
         end = cleaned_data.get("end_date")
         if not start:
-            self._errors['start_date'] = self.error_class(["Please enter a start date"])
+            self._errors['start_date'] = self.error_class(
+                ["Please enter a start date"])
         if not end:
-            self._errors['end_date'] = self.error_class(["Please enter an end date"])
+            self._errors['end_date'] = self.error_class(
+                ["Please enter an end date"])
         if start and end and (end <= start):
-            raise forms.ValidationError("The end date is before the start date!")
+            raise forms.ValidationError(
+                "The end date is before the start date!")
         return cleaned_data
