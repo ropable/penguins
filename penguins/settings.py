@@ -73,6 +73,7 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
     'django.core.context_processors.debug',
     'django.core.context_processors.i18n',
+    'penguins.context_processors.standard',
 )
 
 ROOT_URLCONF = 'penguins.urls'
