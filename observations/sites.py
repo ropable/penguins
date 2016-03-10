@@ -3,13 +3,11 @@ from collections import OrderedDict
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth import get_user_model
-from django.db import models
 from django.db.models import Avg, Count
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from flatpages_x.admin import FlatPageImage, Revision
 from flatpages_x.models import FlatPage
-import logging
 
 from .admin import (SiteAdmin, CameraAdmin, PenguinCountAdmin,
                     PenguinObservationAdmin, VideoAdmin, HelpCMS)
@@ -17,7 +15,6 @@ from .models import (Site, Camera, PenguinCount, PenguinObservation,
                      Video, PenguinUser, GraphForm)
 
 
-logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
@@ -68,54 +65,11 @@ class PenguinUserAdmin(UserAdmin):
                                                           post_url_continue)
 
 
-class MedianSQL(models.sql.aggregates.Aggregate):
-    sql_function = 'median'
-
-
-class Median(models.Aggregate):
-
-    """
-
-    Migration 0008 adds the following;-
-
-    CREATE OR REPLACE FUNCTION _final_median(numeric[])
-       RETURNS numeric AS
-    $$
-       SELECT AVG(val)
-       FROM (
-         SELECT val
-         FROM unnest($1) val
-         ORDER BY 1
-         LIMIT  2 - MOD(array_upper($1, 1), 2)
-         OFFSET CEIL(array_upper($1, 1) / 2.0) - 1
-       ) sub;
-    $$
-    LANGUAGE 'sql' IMMUTABLE;
-
-    DROP AGGREGATE IF EXISTS median(numeric)
-
-    CREATE AGGREGATE median(numeric) (
-      SFUNC=array_append,
-      STYPE=numeric[],
-      FINALFUNC=_final_median,
-      INITCOND='{}'
-    );
-    """
-
-    name = 'Median'
-
-    def add_to_query(self, query, alias, col, source, is_summary):
-        aggregate = MedianSQL(col,
-                              source=source,
-                              is_summary=is_summary,
-                              **self.extra)
-        query.aggregates[alias] = aggregate
-
-
 class PenguinSite(AdminSite):
 
     def has_permission(self, request):
-        return request.user.is_active
+        if hasattr(request, 'user'):
+            return request.user.is_active
 
     def index(self, request, extra_context=None):
         """

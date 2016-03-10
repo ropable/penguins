@@ -2,20 +2,19 @@ from rest_framework import viewsets
 from rest_framework import filters
 
 from observations.models import PenguinCount, PenguinObservation, Video
-from utils import RetrievePartialUpdateDestroyAPIView
 import datetime
 
 
 class PenguinCountViewSet(viewsets.ReadOnlyModelViewSet):
-    model = PenguinCount
+    queryset = PenguinCount.objects.all()
 
 
 class PenguinObservationViewSet(viewsets.ModelViewSet):
-    model = PenguinObservation
+    queryset = PenguinObservation.objects.all()
 
 
 class VideoViewSet(viewsets.ModelViewSet):
-    model = Video
+    queryset = Video.objects.all()
     filter_backends = (filters.DjangoFilterBackend,)
     filter_fields = ('camera', 'date')
 
