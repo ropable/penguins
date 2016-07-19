@@ -9,10 +9,10 @@ from django.utils.translation import ugettext_lazy as _
 from flatpages_x.admin import FlatPageImage, Revision
 from flatpages_x.models import FlatPage
 
-from .admin import (SiteAdmin, CameraAdmin, PenguinCountAdmin,
-                    PenguinObservationAdmin, VideoAdmin, HelpCMS)
-from .models import (Site, Camera, PenguinCount, PenguinObservation,
-                     Video, PenguinUser, GraphForm)
+from observations.admin import (SiteAdmin, CameraAdmin, PenguinCountAdmin,
+                                PenguinObservationAdmin, VideoAdmin, HelpCMS)
+from observations.models import (Site, Camera, PenguinCount,
+                                 PenguinObservation, Video, PenguinUser, GraphForm)
 
 
 User = get_user_model()
