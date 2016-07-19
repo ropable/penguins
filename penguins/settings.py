@@ -41,7 +41,6 @@ INSTALLED_APPS = (
     'django.contrib.humanize',
     'django.contrib.gis',
     'django_extensions',
-    'debug_toolbar',
     'daterange_filter',
     'compressor',
     'datetimewidget',
@@ -54,7 +53,6 @@ INSTALLED_APPS = (
     # actual app
     'observations'
 )
-
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
@@ -215,14 +213,4 @@ if DEBUG:
             'level': 'DEBUG',
             'propagate': True
         }
-    }
-
-    TEMPLATE_LOADERS = (
-        'django.template.loaders.filesystem.Loader',
-        'django.template.loaders.app_directories.Loader',
-    )
-
-    DEBUG_TOOLBAR_CONFIG = {
-        'HIDE_DJANGO_SQL': False,
-        'INTERCEPT_REDIRECTS': False,
     }
