@@ -217,7 +217,7 @@ class Video(models.Model):
         return "%s - %s @ %s" % (self.camera.name, self.name, str(self.date))
 
     @classmethod
-    def import_folder(cls, folder="beach_return_cams_2"):
+    def import_folder(cls, folder=settings.S3_FOLDER):
         logger = logging.getLogger('videos')
         logger.debug('Started import_folder method.')
         VIDEO_FORMATS = ('.mp4', '.avi', '.mkv')
