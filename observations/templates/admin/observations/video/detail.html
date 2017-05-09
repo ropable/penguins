@@ -252,7 +252,8 @@
         var time = moment('{{ original.date|date:"Y-m-d" }} ' + $('#id_time').val(), "YYYY-MM-DD h:m a");
 
         var data = {
-          'date': time.format(),
+          //'date': time.format(),
+          'date': time.format('YYYY-MM-DDTh:m:s+08:00'), // hack to override the browser timezone
           'observer': {{ user.id }},
           'camera': {{ original.camera.id }},
           'site': {{ original.camera.site.id }},

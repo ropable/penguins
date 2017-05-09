@@ -3,6 +3,7 @@
 *.swp
 *.swo
 *.orig
+*.pgdump
 media/
 staticfiles/
 venv/
