@@ -11,3 +11,9 @@ build/
 reports/
 src/
 logs/
+
+# Database/fixture dumps
+*.pgdump
+*.dump
+*.db
+*.sqlite3

@@ -45,15 +45,12 @@ class SiteAdmin(DetailAdmin, LeafletGeoAdmin):
     list_display = ('name', 'location')
 
     def has_view_permission(self, request, obj=None):
-        #Horrible hack, but seemingly necessary :(
+        # Horrible hack, but seemingly necessary :(
         return True
 
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts
         obj = self.get_object(request, unquote(object_id))
-
-        #if not self.has_view_permission(request, obj):
-        #    raise PermissionDenied
 
         if obj is None:
             raise Http404(_('%(name)s object with primary key %(key)r does '
@@ -66,7 +63,9 @@ class SiteAdmin(DetailAdmin, LeafletGeoAdmin):
         # Define a set of videos to pass into the view on load.
         # All cameras, today's date.
         cams = obj.camera_set.all()
-        initial_videos = Video.objects.filter(camera__in=cams, date=datetime.date.today())
+        initial_videos = Video.objects.filter(
+            camera__in=cams,
+            date=datetime.date.today())
         context = {
             'title': obj.name,
             'select_date': SelectDateForm,
@@ -119,16 +118,28 @@ class PenguinCountAdmin(ModelAdmin):
                     'total_penguins', 'outlier', 'comments')
 
     def sitelink(self, item):
-        return mark_safe('<a href="/observations/site/{0}/">{1}</a>'.format(item.site.pk,item.site.name))
+        return mark_safe(
+            '<a href="/observations/site/{0}/">{1}</a>'.format(item.site.pk, item.site.name))
 
     def export_to_csv(self, request, queryset):
         response = HttpResponse(content_type="text/csv")
         response['Content-Disposition'] = "attachment; filename=export.csv"
 
         writer = unicodecsv.writer(response, quoting=unicodecsv.QUOTE_ALL)
-        writer.writerow(['date', 'Civil Twilight Time', '-15 - 0', '1 - 15',
-                         '16 - 30', '31-45', '46 - 60', '61 - 75', '76 - 90',
-                         '91 - 105', '106 - 120', 'Total', 'outlier', 'Comments'])
+        writer.writerow(['date',
+                         'Civil Twilight Time',
+                         '-15 - 0',
+                         '1 - 15',
+                         '16 - 30',
+                         '31-45',
+                         '46 - 60',
+                         '61 - 75',
+                         '76 - 90',
+                         '91 - 105',
+                         '106 - 120',
+                         'Total',
+                         'outlier',
+                         'Comments'])
 
         for item in queryset:
             writer.writerow([
@@ -153,9 +164,17 @@ class PenguinCountAdmin(ModelAdmin):
 
 class PenguinObservationAdmin(BaseAdmin):
     actions = ['delete', 'export_to_csv']
-    list_display = ('date', 'site', 'camera', 'observer', 'seen', 'comments', 'validated', 'link_to_video', 'position')
+    list_display = (
+        'date',
+        'site',
+        'camera',
+        'observer',
+        'seen',
+        'comments',
+        'validated',
+        'link_to_video',
+        'position')
     list_filter = (('date', DateRangeFilter), 'site', 'camera', 'validated')
-    #readonly_fields = ('site',)
     fieldsets = (
         (None, {
             'fields': ('date', 'site', 'camera', 'seen', 'comments', 'validated')
@@ -212,7 +231,12 @@ class PenguinObservationAdmin(BaseAdmin):
         if (obj.video):
             return mark_safe(
                 "<a href='{}'>{}</a>".format(
-                    reverse("admin:observations_video_detail", args=(obj.video.pk,)), obj.video))
+                    reverse(
+                        "admin:observations_video_detail",
+                        args=(
+                            obj.video.pk,
+                        )),
+                    obj.video))
         else:
             return "No video"
 
@@ -237,17 +261,31 @@ class PenguinObservationAdmin(BaseAdmin):
         opts = self.model._meta
         site_id = request.GET.get('site', None)
         if site_id is not None:
-            post_url = reverse('admin:observations_site_detail',
-                args=(site_id,), current_app=self.admin_site.name)
+            post_url = reverse(
+                'admin:observations_site_detail',
+                args=(
+                    site_id,
+                ),
+                current_app=self.admin_site.name)
             preserved_filters = self.get_preserved_filters(request)
-            post_url = add_preserved_filters({'preserved_filters': preserved_filters, 'opts': opts}, post_url)
+            post_url = add_preserved_filters(
+                {'preserved_filters': preserved_filters, 'opts': opts}, post_url)
             return HttpResponseRedirect(post_url)
         else:
-            return super(PenguinObservationAdmin, self).response_post_save_add(request, obj)
+            return super(
+                PenguinObservationAdmin,
+                self).response_post_save_add(
+                request,
+                obj)
 
 
 class VideoAdmin(DetailAdmin):
-    list_display = ('camera_expanded', 'file', 'date', 'start_time', 'end_time')
+    list_display = (
+        'camera_expanded',
+        'file',
+        'date',
+        'start_time',
+        'end_time')
     exclude = ('views',)
 
     fieldsets = (
@@ -266,7 +304,8 @@ class VideoAdmin(DetailAdmin):
         return True
 
     def camera_expanded(self, item):
-        return mark_safe("<a href='/observations/video/{}/change'>{}</a>".format(item.pk, item.camera.site))
+        return mark_safe(
+            "<a href='/observations/video/{}/change'>{}</a>".format(item.pk, item.camera.site))
 
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts

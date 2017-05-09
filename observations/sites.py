@@ -9,15 +9,13 @@ from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
 from flatpages_x.admin import FlatPageImage, Revision
 from flatpages_x.models import FlatPage
-import logging
 
-from observations.admin import (SiteAdmin, CameraAdmin, PenguinCountAdmin,
-                                PenguinObservationAdmin, VideoAdmin, HelpCMS)
-from observations.models import (Site, Camera, PenguinCount,
-                                 PenguinObservation, Video, PenguinUser, GraphForm)
+from .admin import (SiteAdmin, CameraAdmin, PenguinCountAdmin,
+                    PenguinObservationAdmin, VideoAdmin, HelpCMS)
+from .models import (Site, Camera, PenguinCount, PenguinObservation,
+                     Video, PenguinUser, GraphForm)
 
 
-logger = logging.getLogger(__name__)
 User = get_user_model()
 
 
