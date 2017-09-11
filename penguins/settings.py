@@ -13,19 +13,14 @@ SESSION_COOKIE_SECURE = True if os.environ.get('SESSION_COOKIE_SECURE', False) =
 if not DEBUG:
     # Localhost, UAT and Production hosts
     ALLOWED_HOSTS = [
-        'localhost',
-        '127.0.0.1',
-        'kens-xenmate-dev',
-        'penguins.dpaw.wa.gov.au',
-        'penguins.dpaw.wa.gov.au.',
-        'penguins-test.dpaw.wa.gov.au',
-        'penguins-test.dpaw.wa.gov.au.',
+        '.dpaw.wa.gov.au',
+        '.dbca.wa.gov.au'
     ]
 INTERNAL_IPS = ('127.0.0.1', '::1')
 
 # Email settings
-ADMINS = ('asi@dpaw.wa.gov.au',)
-EMAIL_HOST = 'alerts.corporateict.domain'
+ADMINS = ('asi@dbca.wa.gov.au',)
+EMAIL_HOST = 'smtp.corporateict.domain'
 EMAIL_PORT = 25
 
 # Application definition
@@ -200,18 +195,19 @@ LOGGING = {
             'formatter': 'standard'
         },
         'file': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_DIR, 'logs/penguins.log'),
+            'maxBytes': 1024*1024*5,
+            'backupCount': 5,
             'formatter': 'standard',
-            'maxBytes': '16777216'
         },
         'mail_admins': {
             'level': 'ERROR',
             'class': 'django.utils.log.AdminEmailHandler',
         },
         'video_file': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.handlers.RotatingFileHandler',
             'filename': os.path.join(BASE_DIR, 'logs/videos.log'),
             'maxBytes': 1024*1024*5,
@@ -231,13 +227,13 @@ LOGGING = {
             'propagate': False,
         },
         'observations': {
-            'handlers': ['console', 'file'],
+            'handlers': ['file'],
             'level': 'INFO',
             'propagate': True
         },
         'videos': {
-            'handlers': ['console', 'video_file'],
-            'level': 'DEBUG',
+            'handlers': ['video_file'],
+            'level': 'INFO',
             'propagate': True
         }
     }
