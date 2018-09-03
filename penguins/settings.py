@@ -3,8 +3,8 @@ import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
-SECRET_KEY = os.environ['SECRET_KEY']
-S3_FOLDER = os.environ['S3_FOLDER']
+SECRET_KEY = os.environ['SECRET_KEY'] if os.environ.get('SECRET_KEY', False) else 'foo'
+S3_FOLDER = os.environ['S3_FOLDER'] if os.environ.get('S3_FOLDER', False) else 'foo'
 DEBUG = True if os.environ.get('DEBUG', False) == 'True' else False
 TEMPLATE_DEBUG = DEBUG
 CSRF_COOKIE_SECURE = True if os.environ.get('CSRF_COOKIE_SECURE', False) == 'True' else False
@@ -13,6 +13,7 @@ SESSION_COOKIE_SECURE = True if os.environ.get('SESSION_COOKIE_SECURE', False) =
 if not DEBUG:
     # Localhost, UAT and Production hosts
     ALLOWED_HOSTS = [
+        'localhost',
         '.dpaw.wa.gov.au',
         '.dbca.wa.gov.au'
     ]
@@ -20,8 +21,8 @@ INTERNAL_IPS = ('127.0.0.1', '::1')
 
 # Email settings
 ADMINS = ('asi@dbca.wa.gov.au',)
-EMAIL_HOST = 'smtp.corporateict.domain'
-EMAIL_PORT = 25
+EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp')
+EMAIL_PORT = os.environ.get('EMAIL_PORT', 25)
 
 # Application definition
 INSTALLED_APPS = (
@@ -136,8 +137,6 @@ ANONYMOUS_USER_ID = -1
 
 
 # Misc settings
-EMAIL_HOST = os.environ.get('EMAIL_HOST', 'localhost')
-EMAIL_PORT = os.environ.get('EMAIL_PORT', 25)
 
 COMPRESS_ENABLED = False
 
@@ -163,14 +162,9 @@ APPLICATION_VERSION_NO = '1.0'
 
 JENKINS_TASKS = (
     'django_jenkins.tasks.with_coverage',
-    #'django_jenkins.tasks.django_tests',   # select one django or
-    #'django_jenkins.tasks.dir_tests'      # directory tests discovery
     'django_jenkins.tasks.run_pep8',
     'django_jenkins.tasks.run_pyflakes',
-    #'django_jenkins.tasks.run_jslint',
-    #'django_jenkins.tasks.run_csslint',
     'django_jenkins.tasks.run_sloccount',
-    #'django_jenkins.tasks.lettuce_tests',
 )
 
 
@@ -179,6 +173,7 @@ LOGGING = {
     'version': 1,
     'disable_existing_loggers': True,
     'formatters': {
+        'console': {'format': '%(asctime)s %(name)-12s %(message)s'},
         'standard': {
             'format': '%(asctime)-.19s [%(process)d] [%(levelname)s] '
                       '%(message)s'
@@ -190,49 +185,27 @@ LOGGING = {
             'class': 'django.utils.log.NullHandler',
         },
         'console': {
-            'level': 'DEBUG',
+            'level': 'INFO',
             'class': 'logging.StreamHandler',
-            'formatter': 'standard'
-        },
-        'file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/penguins.log'),
-            'maxBytes': 1024*1024*5,
-            'backupCount': 5,
-            'formatter': 'standard',
-        },
-        'mail_admins': {
-            'level': 'ERROR',
-            'class': 'django.utils.log.AdminEmailHandler',
-        },
-        'video_file': {
-            'level': 'INFO',
-            'class': 'logging.handlers.RotatingFileHandler',
-            'filename': os.path.join(BASE_DIR, 'logs/videos.log'),
-            'maxBytes': 1024*1024*5,
-            'backupCount': 5,
-            'formatter': 'standard',
+            'formatter': 'console'
         },
     },
     'loggers': {
-        'django': {
-            'handlers': ['null'],
-            'propagate': True,
-            'level': 'INFO',
-        },
         'django.request': {
-            'handlers': ['mail_admins'],
-            'level': 'ERROR',
-            'propagate': False,
+            'handlers': ['console'],
+            'level': 'INFO'
+        },
+        'log': {
+            'handlers': ['console'],
+            'level': 'INFO'
         },
         'observations': {
-            'handlers': ['file'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True
         },
         'videos': {
-            'handlers': ['video_file'],
+            'handlers': ['console'],
             'level': 'INFO',
             'propagate': True
         }
@@ -244,22 +217,22 @@ if DEBUG:
     # going on
     LOGGING['loggers'] = {
         'django_auth_ldap': {
-            'handlers': ['file'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True
         },
         'django.request': {
-            'handlers': ['file'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True
         },
         'observations': {
-            'handlers': ['console', 'file'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True
         },
         'videos': {
-            'handlers': ['console', 'video_file'],
+            'handlers': ['console'],
             'level': 'DEBUG',
             'propagate': True
         }
