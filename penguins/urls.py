@@ -17,7 +17,7 @@ urlpatterns = patterns('',
     url(r'^api/auth/', include('rest_framework.urls', namespace='rest_framework')),
     url(r'^markitup/', include('markitup.urls')),
     url(r'^help/', include('django.contrib.flatpages.urls')),
-    url(r'^cronjobs/video-import/$', VideoImport.as_view(), name='cronjobs_video_import'),
+    #url(r'^cronjobs/video-import/$', VideoImport.as_view(), name='cronjobs_video_import'),
     url(r'^observations/s3/$', S3View.as_view(), name='s3_view'),
     url(r'', include(site.urls)),
 )

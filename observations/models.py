@@ -204,12 +204,12 @@ class Video(models.Model):
     @classmethod
     def import_folder(cls, folder="beach_return_cams_2"):
         logger = logging.getLogger('videos')
-        logger.debug('Started import_folder method.')
+        logger.info('Started Video.import_folder method')
         VIDEO_FORMATS = ('.mp4', '.avi', '.mkv')
         videos = [v for v in default_storage.listdir(folder)[1] if v.endswith(VIDEO_FORMATS)]
         count = 0
         for video in videos:
-            logger.debug("Checking {0}".format(video))
+            #logger.info("Checking {}".format(video))
             nameparts = video.split("_", 3)
             #if len(nameparts) != 2:
             #    logger.debug("Error: can't parse {0}".format(nameparts))
@@ -218,7 +218,7 @@ class Video(models.Model):
             if cls.objects.filter(file=filename).exists():
                 continue
             # If video doesn't exist and filename splits nicely, create it.
-            logger.debug("Importing {0}".format(video))
+            logger.info("Importing {}".format(video))
             datestr = '_'.join(nameparts[0:2])
             try:
                 video_datetime = datetime.datetime.strptime(datestr, "%Y-%m-%d_%H")
@@ -231,16 +231,16 @@ class Video(models.Model):
             camstr = camstr.split(".")[0]  # Remove the extension.
             # assume each video is 60 mins long (video times are inaccurate/halved?)
             end_time = (video_datetime + datetime.timedelta(minutes=60)).time()
-            logger.debug("Finding camera name closest to {} str:{}*".format(camstr,camstr.split("_")[0]))
+            logger.info("Finding camera name closest to {} str:{}*".format(camstr,camstr.split("_")[0]))
             try:
                 camera = Camera.objects.filter(camera_key__icontains=camstr.split("_")[0])[0] #use filter()[0] rather than get if theres dupes in the db.
                 cls.objects.create(date=date, start_time=start_time, end_time=end_time,
                                    camera=camera, file=os.path.join(folder, video))
                 count += 1
             except:
-                logger.error('No matching camera found, skipping video name {}'.format(nameparts[-1]))
+                logger.warning('No matching camera found, skipping video name {}'.format(nameparts[-1]))
 
-        logger.debug("Import task completed.")
+        logger.info("Import task completed")
         return count
 
     class Meta:
