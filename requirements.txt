@@ -44,7 +44,8 @@ django-nose==1.2
 django-redis==4.0.0
 django-redis-sessions==0.4.0
 django-reversion==1.8.7
--e hg+https://bitbucket.org/david/django-storages@f153a70ba254dc129d9403546809a02256ef75b5#egg=django_storages-dev
+# Manually added storages dependency to repo.
+#-e hg+https://bitbucket.org/david/django-storages@f153a70ba254dc129d9403546809a02256ef75b5#egg=django_storages-dev
 django-swingers==1.1.1
 django-wsgiserver==0.8.0rc1
 djangorestframework==2.3.13
