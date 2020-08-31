@@ -3,6 +3,7 @@
 *.swp
 *.swo
 *.orig
+*.pgdump
 media/
 staticfiles/
 venv/
@@ -10,3 +11,9 @@ build/
 reports/
 src/
 logs/
+
+# Database/fixture dumps
+*.pgdump
+*.dump
+*.db
+*.sqlite3
