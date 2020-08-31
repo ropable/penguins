@@ -157,7 +157,8 @@ DEBUG_TOOLBAR_CONFIG = {
 }
 
 # Application version number
-APPLICATION_VERSION_NO = '1.0'
+APPLICATION_VERSION_NO = '1.0.1'
+SITE_URL = os.environ.get('SITE_URL', 'https://penguins.dbca.wa.gov.au')
 
 JENKINS_TASKS = (
     'django_jenkins.tasks.with_coverage',
