@@ -1,8 +1,6 @@
-from confy import env, database
+import dj_database_url
 import os
 
-# Project paths
-# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
 
 SECRET_KEY = os.environ['SECRET_KEY'] if os.environ.get('SECRET_KEY', False) else 'foo'
@@ -42,7 +40,9 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.humanize',
     'django.contrib.gis',
+    'django_jenkins',
     'django_extensions',
+    'debug_toolbar',
     'daterange_filter',
     'compressor',
     'datetimewidget',
@@ -52,9 +52,13 @@ INSTALLED_APPS = (
     'django_nose',
     'rest_framework',
     'leaflet',
-    # actual app
     'observations'
 )
+
+ANONYMOUS_USER_ID = 1
+
+AUTH_USER_MODEL = "observations.PenguinUser"
+
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
     'django.contrib.messages.context_processors.messages',
@@ -67,16 +71,13 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'penguins.context_processors.standard',
 )
 
-# Email settings
-ADMINS = ('asi@dpaw.wa.gov.au',)
-EMAIL_HOST = env('EMAIL_HOST', 'email.host')
-EMAIL_PORT = env('EMAIL_PORT', 25)
+ROOT_URLCONF = 'penguins.urls'
 
-# Database configuration
-DATABASES = {
-    # Defined in the DATABASE_URL env variable.
-    'default': database.config(),
-}
+WSGI_APPLICATION = 'penguins.wsgi.application'
+
+# Database
+DATABASES = {'default': dj_database_url.config()}
+CONN_MAX_AGE = None
 
 # Internationalization
 SITE_ID = 1
@@ -87,9 +88,6 @@ USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
-# Ensure that the media directory exists:
-if not os.path.exists(os.path.join(BASE_DIR, 'media')):
-    os.mkdir(os.path.join(BASE_DIR, 'media'))
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -100,12 +98,12 @@ STATICFILES_FINDERS = (
     'compressor.finders.CompressorFinder',
 )
 
-if env('USE_AWS', False):
+if os.environ.get('USE_AWS', False):
     DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    AWS_ACCESS_KEY_ID = env('AWS_ACCESS_KEY_ID')
-    AWS_SECRET_ACCESS_KEY = env('AWS_SECRET_ACCESS_KEY')
-    AWS_STORAGE_BUCKET_NAME = env('AWS_STORAGE_BUCKET_NAME')
-    AWS_S3_HOST = env('AWS_S3_HOST')
+    AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
+    AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
+    AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
+    AWS_S3_HOST = os.environ['AWS_S3_HOST']
     AWS_QUERYSTRING_AUTH = False
 
 FLATPAGES_X_PARSER = ["flatpages_x.markdown_parser.parse", {}]
@@ -122,12 +120,13 @@ TEMPLATE_DIRS = (
 )
 
 # Authentication
-AUTH_USER_MODEL = "observations.PenguinUser"
 from ldap_email_auth import ldap_default_settings
 ldap_default_settings()
+
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
     'ldap_email_auth.auth.EmailBackend')
+
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL_FAILURE = LOGIN_URL
@@ -139,15 +138,24 @@ ANONYMOUS_USER_ID = -1
 # Misc settings
 
 COMPRESS_ENABLED = False
+
 MARKITUP_SET = 'markitup/sets/markdown'
 MARKITUP_SKIN = 'markitup/skins/markitup'
 MARKITUP_FILTER = ('markdown.markdown', {'safe_mode': False})
+
 SOUTH_TESTS_MIGRATE = False
 SKIP_SOUTH_TESTS = True
 TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
+
 LEAFLET_CONFIG = {
     'SCALE': 'metric',
 }
+
+DEBUG_TOOLBAR_CONFIG = {
+    'HIDE_DJANGO_SQL': False,
+    'INTERCEPT_REDIRECTS': False,
+}
+
 # Application version number
 APPLICATION_VERSION_NO = '1.0'
 
@@ -166,7 +174,8 @@ LOGGING = {
     'formatters': {
         'console': {'format': '%(asctime)s %(name)-12s %(message)s'},
         'standard': {
-            'format': '%(asctime)s %(levelname)s %(message)s'
+            'format': '%(asctime)-.19s [%(process)d] [%(levelname)s] '
+                      '%(message)s'
         },
     },
     'handlers': {
@@ -227,3 +236,8 @@ if DEBUG:
             'propagate': True
         }
     }
+
+    TEMPLATE_LOADERS = (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )
