@@ -57,7 +57,7 @@
         {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
         <a href="{% add_preserved_filters history_url %}" class="btn btn-default"><span class="glyphicon glyphicon-time"></span> {% trans "History" %}</a>
     {% if has_absolute_url %}<li><a href="{% url 'admin:view_on_site' content_type_id original.pk %}" class="viewsitelink">{% trans "View on site" %}</a></li>{% endif%}
-    {% endblock %}  
+    {% endblock %}
   </div>
 {% endif %}{% endif %}
 {% endblock %}
@@ -262,7 +262,7 @@
           'video': {{ original.id }},
           'position': $('#id_position').val(),
           'validated': isFinished
-        }; 
+        };
 
         $.ajax({
           url: "/api/observations/",
@@ -273,7 +273,7 @@
           $('.modal-backdrop').remove();
           $('#observations tbody').append("<tr><td>" + $('#id_time').val() + "</td><td>" + $('#id_seen').val() + "</td>" + "<td>" + $('#id_comments').val() + "</td><td><a href='javascript:flowplayer().seek(" +$('#id_position').val()+ ")'>"+$('#id_position').val()+"</a></td><td><a href='?'>Reload page to delete this record</a></td></tr>");
           $('#add-form').parsley().reset();
-          
+
           $('#add-form').find('input:text, textarea').val('');
 
           $('#id_time').data("DateTimePicker").setDate('{{ original.start_time|time:"H" }}');
@@ -303,7 +303,7 @@ function formFillin() {
         f.pause();
 
         if (f.video.time > 0) {
-          time = f.video.time; 
+          time = f.video.time;
           $('#id_position').val(time);
         } else {
           $('#id_position').val(0);
