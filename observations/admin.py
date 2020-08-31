@@ -6,7 +6,6 @@ from django.core.exceptions import PermissionDenied
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.utils.encoding import force_text
 from django.utils.html import escape
-from django.utils.timezone import localtime
 from django.utils.translation import ugettext as _, ugettext_lazy
 from django.core.urlresolvers import reverse
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
@@ -143,7 +142,7 @@ class PenguinCountAdmin(ModelAdmin):
 
         for item in queryset:
             writer.writerow([
-                localtime(item.date),
+                item.date,
                 item.civil_twilight,
                 item.sub_fifteen,
                 item.zero_to_fifteen,
@@ -210,7 +209,7 @@ class PenguinObservationAdmin(BaseAdmin):
 
         for item in queryset:
             writer.writerow([
-                localtime(item.date),
+                item.date,
                 item.site,
                 item.camera,
                 item.observer.username,
