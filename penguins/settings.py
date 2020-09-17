@@ -40,7 +40,6 @@ INSTALLED_APPS = (
     'django.contrib.sites',
     'django.contrib.humanize',
     'django.contrib.gis',
-    'django_jenkins',
     'django_extensions',
     'debug_toolbar',
     'daterange_filter',
@@ -157,14 +156,8 @@ DEBUG_TOOLBAR_CONFIG = {
 }
 
 # Application version number
-APPLICATION_VERSION_NO = '1.0'
-
-JENKINS_TASKS = (
-    'django_jenkins.tasks.with_coverage',
-    'django_jenkins.tasks.run_pep8',
-    'django_jenkins.tasks.run_pyflakes',
-    'django_jenkins.tasks.run_sloccount',
-)
+APPLICATION_VERSION_NO = '1.0.1'
+SITE_URL = os.environ.get('SITE_URL', 'https://penguins.dbca.wa.gov.au')
 
 
 # Logging configuration
