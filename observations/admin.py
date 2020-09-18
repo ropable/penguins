@@ -147,7 +147,11 @@ class PenguinCountAdmin(ModelAdmin):
                 item.date,
                 '{}{}'.format(
                     settings.SITE_URL,
-                    reverse("admin:observations_site_change", args=(item.site.pk,)),
+                    reverse(
+                        'admin:observations_site_detail',
+                        args=(item.site.pk,),
+                        current_app=self.admin_site.name
+                    ),
                 ),
                 item.civil_twilight,
                 item.sub_fifteen,
