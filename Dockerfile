@@ -8,14 +8,17 @@ RUN apt-get update -y \
   && rm -rf /var/lib/apt/lists/* \
   && pip install --upgrade pip
 COPY manage.py Procfile requirements.txt ./
+RUN pip install --no-cache-dir -r requirements.txt
+
 COPY ldap_email_auth ./ldap_email_auth
 COPY observations ./observations
 COPY penguins ./penguins
 COPY storages ./storages
 COPY utils ./utils
-RUN pip install --no-cache-dir -r requirements.txt \
-  && python manage.py collectstatic --noinput
+RUN python manage.py collectstatic --noinput
 
+# Run the application as the www-data user.
+USER www-data
 HEALTHCHECK --interval=1m --timeout=5s --start-period=10s --retries=3 CMD ["wget", "-q", "-O", "-", "http://localhost:8080/"]
 EXPOSE 8080
 CMD ["honcho", "start"]

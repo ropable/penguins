@@ -35,7 +35,6 @@ django-flatpages-x==0.1.2
 django-guardian==1.2.5
 django-htmlmin==0.7.0
 django-immutablemodel==0.3.4
-django-jenkins==0.15.0
 #django-ldap-email-auth==0.1.1
 django-leaflet==0.13.2
 django-markitup==2.2.2

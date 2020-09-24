@@ -24,4 +24,4 @@ class Command(BaseCommand):
             not reply.<br>'''.format(count)
         msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
         msg.attach_alternative(html_content, 'text/html')
-        msg.send()
+        msg.send(fail_silently=True)

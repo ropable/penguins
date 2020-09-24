@@ -1,5 +1,6 @@
 from __future__ import unicode_literals
 
+from django.conf import settings
 from django.contrib.admin import ModelAdmin
 from django.contrib.admin.util import unquote
 from django.core.exceptions import PermissionDenied
@@ -126,6 +127,7 @@ class PenguinCountAdmin(ModelAdmin):
 
         writer = unicodecsv.writer(response, quoting=unicodecsv.QUOTE_ALL)
         writer.writerow(['date',
+                         'Site link',
                          'Civil Twilight Time',
                          '-15 - 0',
                          '1 - 15',
@@ -143,6 +145,14 @@ class PenguinCountAdmin(ModelAdmin):
         for item in queryset:
             writer.writerow([
                 item.date,
+                '{}{}'.format(
+                    settings.SITE_URL,
+                    reverse(
+                        'admin:observations_site_detail',
+                        args=(item.site.pk,),
+                        current_app=self.admin_site.name
+                    ),
+                ),
                 item.civil_twilight,
                 item.sub_fifteen,
                 item.zero_to_fifteen,
