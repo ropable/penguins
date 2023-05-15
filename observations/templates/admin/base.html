@@ -1,4 +1,6 @@
-{% load admin_static %}{% load firstof from future %}<!DOCTYPE html>
+{% load admin_static %}
+{% load firstof from future %}
+<!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
   <head>
     <meta charset="utf-8">
@@ -8,12 +10,11 @@
     <link href="//fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet" type="text/css">
     <link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "css/bootstrap.min.css" %}{% endblock %}" />
     <link rel="stylesheet" href="{% static "css/font-awesome.min.css" %}">
-
     <link rel="stylesheet" type="text/css" href="{% static "css/bootstrap-theme.min.css" %}" />
     <link rel="stylesheet" type="text/css" href="{% static "css/style.css" %}" />
     <link rel="shortcut icon" type="image/png" href="{{STATIC_URL}}favicon.ico"/>
-      <script src="{% static "js/jquery.min.js" %}"></script>
-  <script src="{% static "js/bootstrap.min.js" %}"></script> <!-- Loading JS at the end is an anti-pattern -->
+    <script src="{% static "js/jquery.min.js" %}"></script>
+    <script src="{% static "js/bootstrap.min.js" %}"></script>
     {% block extrastyle %}{% endblock %}
     <!--[if lte IE 7]><link rel="stylesheet" type="text/css" href="{% block stylesheet_ie %}{% static "admin/css/ie.css" %}{% endblock %}" /><![endif]-->
     {% if LANGUAGE_BIDI %}<link rel="stylesheet" type="text/css" href="{% block stylesheet_rtl %}{% static "admin/css/rtl.css" %}{% endblock %}" />{% endif %}
@@ -43,8 +44,8 @@
             </h1>
             <h1 id="site-logo" class="site-logo pull-right">
               <a href="/">
-                <img src="{% static 'img/logo-penguins.png' %}" alt="Little penguins database">
-                Little penguins database
+                <img src="{% static 'img/logo-penguins.png' %}" alt="Little Penguins Database">
+                Little Penguins Database
               </a>
             </h1>
           </div>
@@ -149,14 +150,11 @@
             Application version: {{ application_version_no }}
         </div>
         <div class="col-xs-6">
-            <p class="pull-right">&copy; 2015 Department of Parks and Wildlife</p>
+            <p class="pull-right">&copy; Department of Biodiversity, Conservation and Attractions</p>
         </div>
     </div>
   </div>
   {% endblock %}
-  <script src="{% static "js/jquery.min.js" %}"></script>
-  <script src="{% static "js/bootstrap.min.js" %}"></script>
-  <script src="{% static "js/holder.js" %}"></script>
   {% block extrajs %}{% endblock %}
 </body>
 </html>
