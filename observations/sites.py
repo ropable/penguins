@@ -7,11 +7,9 @@ from django.db import models
 from django.db.models import Avg, Count
 from django.utils.timezone import now
 from django.utils.translation import ugettext_lazy as _
-from flatpages_x.admin import FlatPageImage, Revision
-from flatpages_x.models import FlatPage
 
 from .admin import (SiteAdmin, CameraAdmin, PenguinCountAdmin,
-                    PenguinObservationAdmin, VideoAdmin, HelpCMS)
+                    PenguinObservationAdmin, VideoAdmin)
 from .models import (Site, Camera, PenguinCount, PenguinObservation,
                      Video, PenguinUser, GraphForm)
 
@@ -197,6 +195,3 @@ site.register(PenguinCount, PenguinCountAdmin)
 site.register(PenguinObservation, PenguinObservationAdmin)
 site.register(Video, VideoAdmin)
 site.register(Camera, CameraAdmin)
-site.register(FlatPage, HelpCMS)
-site.register(FlatPageImage)
-site.register(Revision)

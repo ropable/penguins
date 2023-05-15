@@ -1,30 +1,26 @@
 from __future__ import unicode_literals
 
+import datetime
+from daterange_filter.filter import DateRangeFilter
 from django.conf import settings
 from django.contrib.admin import ModelAdmin
-from django.contrib.admin.util import unquote
+from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
+from django.contrib.admin.util import unquote, quote
+from django.contrib.admin.views.main import ChangeList
 from django.core.exceptions import PermissionDenied
+from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404, HttpResponseRedirect
+from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.html import escape
-from django.utils.translation import ugettext as _, ugettext_lazy
-from django.core.urlresolvers import reverse
-from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
-
-from swingers.admin import DetailAdmin
-from leaflet.admin import LeafletGeoAdmin
-from flatpages_x.admin import FlatPageAdmin
 from django.utils.safestring import mark_safe
-import datetime
-import logging
+from django.utils.translation import ugettext as _, ugettext_lazy
+from functools import update_wrapper
+from leaflet.admin import LeafletGeoAdmin
 import unicodecsv
-from observations.models import Video
-from observations.forms import SelectDateForm
 
-from daterange_filter.filter import DateRangeFilter
-
-logger = logging.getLogger(__name__)
-list_per_page = 100
+from .models import Video
+from .forms import SelectDateForm
 
 
 class BaseAdmin(ModelAdmin):
@@ -40,12 +36,110 @@ class BaseAdmin(ModelAdmin):
         return super(BaseAdmin, self).changelist_view(request, context)
 
 
+class DetailChangeList(ChangeList):
+    def url_for_result(self, result):
+        if self.model_admin.changelist_link_detail:
+            pk = getattr(result, self.pk_attname)
+            return reverse('admin:%s_%s_detail' % (self.opts.app_label,
+                                                   self.opts.module_name),
+                           args=(quote(pk),),
+                           current_app=self.model_admin.admin_site.name)
+        else:
+            return super(DetailChangeList, self).url_for_result(result)
+
+
+class DetailAdmin(ModelAdmin):
+    detail_template = None
+    changelist_link_detail = False
+    change_form_template = None
+
+    def get_changelist(self, request, **kwargs):
+        return DetailChangeList
+
+    def has_view_permission(self, request, obj=None):
+        opts = self.opts
+        return request.user.has_perm(
+            opts.app_label + '.' + 'view_%s' % opts.object_name.lower()
+        )
+
+    def get_urls(self):
+        from django.conf.urls import patterns, url
+
+        def wrap(view):
+            def wrapper(*args, **kwargs):
+                return self.admin_site.admin_view(view)(*args, **kwargs)
+            return update_wrapper(wrapper, view)
+
+        info = self.model._meta.app_label, self.model._meta.module_name
+
+        urlpatterns = patterns(
+            '',
+            url(r'^$',
+                wrap(self.changelist_view),
+                name='%s_%s_changelist' % info),
+            url(r'^add/$',
+                wrap(self.add_view),
+                name='%s_%s_add' % info),
+            url(r'^(\d+)/history/$',
+                wrap(self.history_view),
+                name='%s_%s_history' % info),
+            url(r'^(\d+)/delete/$',
+                wrap(self.delete_view),
+                name='%s_%s_delete' % info),
+            url(r'^(\d+)/change/$',
+                wrap(self.change_view),
+                name='%s_%s_change' % info),
+            url(r'^(\d+)/$',
+                wrap(self.detail_view),
+                name='%s_%s_detail' % info),
+        )
+        return urlpatterns
+
+    def detail_view(self, request, object_id, extra_context=None):
+        opts = self.opts
+
+        obj = self.get_object(request, unquote(object_id))
+
+        if not self.has_view_permission(request, obj):
+            raise PermissionDenied
+
+        if obj is None:
+            raise Http404(_('%(name)s object with primary key %(key)r does '
+                            'not exist.') % {
+                                'name': force_text(opts.verbose_name),
+                                'key': escape(object_id)})
+
+        context = {
+            'title': _('Detail %s') % force_text(opts.verbose_name),
+            'object_id': object_id,
+            'original': obj,
+            'is_popup': "_popup" in request.REQUEST,
+            'media': self.media,
+            'app_label': opts.app_label,
+            'opts': opts,
+            'has_change_permission': self.has_change_permission(request, obj),
+        }
+        context.update(extra_context or {})
+        return TemplateResponse(request, self.detail_template or [
+            "admin/%s/%s/detail.html" % (opts.app_label,
+                                         opts.object_name.lower()),
+            "admin/%s/detail.html" % opts.app_label,
+            "admin/detail.html"
+        ], context, current_app=self.admin_site.name)
+
+    def queryset(self, request):
+        qs = super(DetailAdmin, self).queryset(request)
+        return qs.select_related(
+            *[field.rsplit('__', 1)[0]
+              for field in self.list_display if '__' in field]
+        )
+
+
 class SiteAdmin(DetailAdmin, LeafletGeoAdmin):
     actions = None
     list_display = ('name', 'location')
 
     def has_view_permission(self, request, obj=None):
-        # Horrible hack, but seemingly necessary :(
         return True
 
     def detail_view(self, request, object_id, extra_context=None):
@@ -296,6 +390,7 @@ class VideoAdmin(DetailAdmin):
         'start_time',
         'end_time')
     exclude = ('views',)
+    readonly_fields = ('file',)
 
     fieldsets = (
         (None, {
@@ -343,10 +438,3 @@ class VideoAdmin(DetailAdmin):
         }
         context.update(extra_context or {})
         return super(VideoAdmin, self).detail_view(request, object_id, context)
-
-
-class HelpCMS(FlatPageAdmin):
-    fieldsets = ((None, {'fields': ('url', 'title', 'content_md', 'sites')}),)
-    list_display = ('url', 'title')
-    list_filter = ('sites',)
-    search_fields = ('url', 'title')

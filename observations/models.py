@@ -9,29 +9,20 @@ from django.contrib.auth.models import Group
 from django.contrib.gis.db import models as geo_models
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.forms import ValidationError
-from django.core.files.storage import default_storage
+#from django.core.files.storage import default_storage
 from django.conf import settings
 from django.utils import timezone
 from django import forms
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import AbstractUser
-import logging
-import os
+#import logging
+#import os
 
 from observations.utils import civil_twilight
 
 
-logger = logging.getLogger(__name__)
-
-
 class ObservationBase(models.Model):
-
-    """
-    TODO
-    This class can be replaced if inheriting from
-    swingers.models.auth.Audit. clean_field() method below is from there.
-    """
 
     def clean_fields(self, exclude=None):
         """
@@ -176,7 +167,7 @@ class Video(models.Model):
     date = models.DateField(_("Date"),
                             help_text=_("The date of the recording."))
     camera = models.ForeignKey(Camera)
-    file = models.FileField(upload_to='videos/')
+    file = models.FileField(upload_to='videos')
     start_time = models.TimeField(
         _("Start time"),
         help_text=_("The start time of the recording."))
@@ -216,61 +207,61 @@ class Video(models.Model):
     def __str__(self):
         return "%s - %s @ %s" % (self.camera.name, self.name, str(self.date))
 
-    @classmethod
-    def import_folder(cls, folder=settings.S3_FOLDER):
-        logger = logging.getLogger('videos')
-        logger.info('Started Video.import_folder method')
-        VIDEO_FORMATS = ('.mp4', '.avi', '.mkv')
-        videos = [
-            v for v in default_storage.listdir(folder)[1] if v.endswith(VIDEO_FORMATS)]
-        count = 0
-        for video in videos:
-            #logger.info("Checking {}".format(video))
-            nameparts = video.split("_", 3)
-            # if len(nameparts) != 2:
-            #    logger.debug("Error: can't parse {0}".format(nameparts))
-            #    continue
-            filename = os.path.join(folder, video)
-            if cls.objects.filter(file=filename).exists():
-                continue
-            # If video doesn't exist and filename splits nicely, create it.
-            logger.info("Importing {}".format(video))
-            datestr = '_'.join(nameparts[0:2])
-            try:
-                video_datetime = datetime.datetime.strptime(
-                    datestr,
-                    "%Y-%m-%d_%H")
-            except:
-                datestr = '_'.join(nameparts[0:1])
-                video_datetime = datetime.datetime.strptime(
-                    datestr,
-                    "%Y-%m-%d")
-            date = video_datetime.date()
-            start_time = video_datetime.time()
-            camstr = nameparts[-1]
-            camstr = camstr.split(".")[0]  # Remove the extension.
-            # assume each video is 60 mins long (video times are
-            # inaccurate/halved?)
-            end_time = (video_datetime + datetime.timedelta(minutes=60)).time()
-            logger.info("Finding camera name closest to {} str:{}*".format(camstr,camstr.split("_")[0]))
-            try:
-                # use filter()[0] rather than get if theres dupes in the db.
-                camera = Camera.objects.filter(
-                    camera_key__icontains=camstr.split("_")[0])[0]
-                cls.objects.create(
-                    date=date,
-                    start_time=start_time,
-                    end_time=end_time,
-                    camera=camera,
-                    file=os.path.join(
-                        folder,
-                        video))
-                count += 1
-            except:
-                logger.warning('No matching camera found, skipping video name {}'.format(nameparts[-1]))
+    #@classmethod
+    #def import_folder(cls, folder=settings.S3_FOLDER):
+    #    logger = logging.getLogger('videos')
+    #    logger.info('Started Video.import_folder method')
+    #    VIDEO_FORMATS = ('.mp4', '.avi', '.mkv')
+    #    videos = [
+    #        v for v in default_storage.listdir(folder)[1] if v.endswith(VIDEO_FORMATS)]
+    #    count = 0
+    #    for video in videos:
+    #        #logger.info("Checking {}".format(video))
+    #        nameparts = video.split("_", 3)
+    #        # if len(nameparts) != 2:
+    #        #    logger.debug("Error: can't parse {0}".format(nameparts))
+    #        #    continue
+    #        filename = os.path.join(folder, video)
+    #        if cls.objects.filter(file=filename).exists():
+    #            continue
+    #        # If video doesn't exist and filename splits nicely, create it.
+    #        logger.info("Importing {}".format(video))
+    #        datestr = '_'.join(nameparts[0:2])
+    #        try:
+    #            video_datetime = datetime.datetime.strptime(
+    #                datestr,
+    #                "%Y-%m-%d_%H")
+    #        except:
+    #            datestr = '_'.join(nameparts[0:1])
+    #            video_datetime = datetime.datetime.strptime(
+    #                datestr,
+    #                "%Y-%m-%d")
+    #        date = video_datetime.date()
+    #        start_time = video_datetime.time()
+    #        camstr = nameparts[-1]
+    #        camstr = camstr.split(".")[0]  # Remove the extension.
+    #        # assume each video is 60 mins long (video times are
+    #        # inaccurate/halved?)
+    #        end_time = (video_datetime + datetime.timedelta(minutes=60)).time()
+    #        logger.info("Finding camera name closest to {} str:{}*".format(camstr,camstr.split("_")[0]))
+    #        try:
+    #            # use filter()[0] rather than get if theres dupes in the db.
+    #            camera = Camera.objects.filter(
+    #                camera_key__icontains=camstr.split("_")[0])[0]
+    #            cls.objects.create(
+    #                date=date,
+    #                start_time=start_time,
+    #                end_time=end_time,
+    #                camera=camera,
+    #                file=os.path.join(
+    #                    folder,
+    #                    video))
+    #            count += 1
+    #        except:
+    #            logger.warning('No matching camera found, skipping video name {}'.format(nameparts[-1]))
 
-        logger.info("Import task completed")
-        return count
+    #    logger.info("Import task completed")
+    #    return count
 
     class Meta:
         ordering = ['-date']
@@ -386,7 +377,7 @@ class ObserverCounter:
     def __init__(self):
         self.total = 0
         self.timestamps = {}
-        for x in xrange(0, 10):
+        for x in range(0, 10):
             self.timestamps[x] = 0
 
 
@@ -402,7 +393,7 @@ def update_penguin_count(sender, instance, created, **kwargs):
     Loop over all penguin observations for a particular day and update the
     count, and bucket them relative to the civil twilight time.
     """
-    print "Pre-save observation interceptor triggered"
+    print("Pre-save observation interceptor triggered")
     penguin_count, new_count = PenguinCount.objects.get_or_create(
         date=instance.date.date(), site=instance.site)
     if new_count:
@@ -433,7 +424,7 @@ def update_penguin_count(sender, instance, created, **kwargs):
                 o.observer.pk].total = sum(
                 observers[
                     o.observer.pk].timestamps.values())
-    range_iiterator = xrange(0, 10)
+    range_iiterator = range(0, 10)
     time_stamp = {}
     for r in range_iiterator:
         rangelist = []

@@ -49,7 +49,7 @@ $.backstretch("{% static 'img/login_background.jpg' %}");
   <div class="row login-body">
   <div class="col-xs-12">
   <form action="{{ app_path }}" method="post" id="login-form" class="form-signin" role="form">{% csrf_token %}
-    <h4 class="form-signin-heading">Sign in to the little penguins database</h4>
+    <h4 class="form-signin-heading">Sign in to the Little Penguins database</h4>
     {% if form.non_field_errors or form.this_is_the_login_form.errors %}
     {% for error in form.non_field_errors|add:form.this_is_the_login_form.errors %}
     <div class="alert alert-danger">
@@ -65,7 +65,7 @@ $.backstretch("{% static 'img/login_background.jpg' %}");
     </div>
     <input type="hidden" name="this_is_the_login_form" value="1" />
     <input type="hidden" name="next" value="{{ next }}" />
-    <blockquote>You must be a registered user to log in to this site. If you do not have an account, please contact George Shedrawi on <strong>+61 8 9219 8720</strong> or email him at <a href="mailto:george.shedrawi@dpaw.wa.gov.au">george.shedrawi@dpaw.wa.gov.au</a>.</blockquote>
+    <blockquote>You must be a registered user to log in to this site. If you do not have an account, please contact DBCA at <a href="mailto:oim.servicedesk@dbca.wa.gov.au">oim.servicedesk@dbca.wa.gov.au</a>.</blockquote>
     {% url 'admin_password_reset' as password_reset_url %}
     {% if password_reset_url %}
     <div class="password-reset-link">
