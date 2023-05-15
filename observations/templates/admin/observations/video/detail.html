@@ -185,12 +185,9 @@
 <script src="{% static 'js/moment.min.js' %}"></script>
 <script src="{% static 'js/bootstrap-datetimepicker.min.js' %}"></script>
 <script src="{% static 'js/parsley.min.js' %}"></script>
-<script src="//cdn.jsdelivr.net/flowplayer/5.4.3/flowplayer.min.js"></script>
+<script src="{% static 'js/flowplayer.min.js' %}"></script>
 <script>
-  //Global
-
-  var time = 0;
-
+var time = 0;
 
 {% if user in original.completed_by.all %}
   var isFinished = true;
@@ -207,9 +204,8 @@ $(function() {
         return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
     }
     flowplayer().bind("finish", function() {
-                    $('#markdone').show();
-                });
-
+        $('#markdone').show();
+    });
 
     $.ajaxSetup({
         crossDomain: false, // obviates need for sameOrigin test
@@ -303,6 +299,7 @@ function deleteObservation(pk) {
       }
   });
 }
+
 function markDone(pk) {
   $.ajax({
       url: '/api/videos/'+pk+'/',
@@ -314,6 +311,5 @@ function markDone(pk) {
 
     });
 }
-
 </script>
 {% endblock %}
