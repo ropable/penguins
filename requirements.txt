@@ -14,13 +14,13 @@ django-storages[azure]==1.9.1
 python-dotenv==0.18.0
 arrow==0.4.2
 pyephem==3.7.5.2
-Pillow==2.4.0
 unicodecsv==0.9.4
 ipython==4.2.0
 
 #BeautifulSoup==3.2.1
 #Fabric==1.10.1
 #Markdown==2.4
+#Pillow==2.4.0
 #Unidecode==0.04.17
 #amqp==1.4.6
 #anyjson==0.3.3
