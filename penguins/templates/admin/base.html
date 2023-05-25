@@ -90,13 +90,6 @@
           <strong>{% firstof user.get_short_name user.get_username %}</strong>.
           </p></li>
           {% block userlinks %}
-            {% url 'django-admindocs-docroot' as docsroot %}
-            {% if docsroot %}
-            <li><a href="{{ docsroot }}">{% trans 'Documentation' %}</a></li>
-            {% endif %}
-            {% if user.has_usable_password %}
-            <li><a href="{% url 'admin:password_change' %}">{% trans 'Change password' %}</a></li>
-            {% endif %}
             <li><a href="{% url 'admin:logout' %}">{% trans 'Log out' %}</a></li>
           {% endblock %}
         </ul>

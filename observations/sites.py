@@ -18,19 +18,13 @@ User = get_user_model()
 
 
 class PenguinUserAdmin(UserAdmin):
+
     fieldsets = (
-        (None, {'fields': ('username', 'password')}),
-        (_('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
-        (_('Permissions'),
-         {'fields': ('is_active',
-                     'is_superuser',
-                     'is_staff',
-                     'last_login')}),
-        (_('Statistics'), {
-         'fields': ('observation_count', 'completion_count')}),
+        (None, {'fields': ('email', 'last_login')}),
+        (_('Personal info'), {'fields': ('first_name', 'last_name')}),
+        (_('Permissions'), {'fields': ('is_active', 'is_superuser', 'is_staff', 'groups')}),
     )
     list_display = (
-        'username',
         'email',
         'first_name',
         'last_name',
@@ -39,17 +33,11 @@ class PenguinUserAdmin(UserAdmin):
         'is_active',
         'observation_count',
         'completion_count',
-        'completion_hours')
-
-    list_filter = ('is_superuser',)
-
-    add_fieldsets = (
-        (None, {
-            'classes': ('wide',),
-            'fields': ('username', 'password1', 'password2'),
-        }),
-        (_('Personal info'), {'fields': ('first_name', 'last_name', 'email')}),
+        'completion_hours',
     )
+    list_filter = UserAdmin.list_filter + ('groups__name',)
+    filter_horizontal = ('groups',)
+    readonly_fields = ('email', 'last_login')
 
     def changelist_view(self, request, extra_context=None):
         context = {
@@ -57,11 +45,8 @@ class PenguinUserAdmin(UserAdmin):
         context.update(extra_context or {})
         return super(PenguinUserAdmin, self).changelist_view(request, context)
 
-    readonly_fields = ('last_login', 'observation_count', 'completion_count')
-
     def response_add(self, request, obj, post_url_continue=None):
-        return super(PenguinUserAdmin, self).response_add(request, obj,
-                                                          post_url_continue)
+        return super(PenguinUserAdmin, self).response_add(request, obj, post_url_continue)
 
 
 class MedianSQL(models.sql.aggregates.Aggregate):

@@ -25,14 +25,13 @@
 {% block navbar %}
 <ul class="nav navbar-nav">
   <li><a href="{% url "admin:index" %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
-            {% if user.is_superuser %}
-
+  {% if user.is_superuser %}
   <li class="active"><a href="{% url "admin:observations_site_changelist" %}"><span class="glyphicon glyphicon-map-marker"></span> Sites</a></li>
   <li><a href="{% url "admin:observations_video_changelist" %}"><span class="glyphicon glyphicon-facetime-video"></span> Videos</a></li>
   <li><a href="{% url "admin:observations_penguinobservation_changelist" %}"><span class="glyphicon glyphicon-eye-open"></span> Observations</a></li>
   <li><a href="{% url "admin:observations_penguincount_changelist" %}"><span class="glyphicon glyphicon-check"></span> Penguin count</a></li>
   <li><a href="{% url "admin:observations_penguinuser_changelist" %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>
-      <li><a href="{% url "admin:observations_camera_changelist" %}"><span class="glyphicon glyphicon-camera"></span> Cameras</a></li>
+  <li><a href="{% url "admin:observations_camera_changelist" %}"><span class="glyphicon glyphicon-camera"></span> Cameras</a></li>
   {% endif %}
 </ul>
 {% endblock %}
@@ -66,7 +65,7 @@
   <tbody>
   {% for item in camera.video_set.all %}
     <tr>
-      <td><a href="{% url 'admin:observations_video_detail' item.id %}">{{ item.date }}</a></td>
+      <td>{% if can_add_observations %}<a href="{% url 'admin:observations_video_detail' item.id %}">{{ item.date }}</a>{% else %}{{ item.date }}{% endif %}</td>
       <td>{{ item.start_time }}</td>
       <td>{{ item.end_time }}</td>
       <td>{{ item.views }}</td>
@@ -83,7 +82,9 @@
   </div>
   <div class="col-xs-6 col-md-6 object-tools">
     <span class="pull-right">
+      {% if can_add_observations %}
       <a href="{% url "admin:observations_penguinobservation_add" %}?site={{ original.id }}" class="btn btn-primary" role="button"><span class="glyphicon glyphicon-plus"></span> Add penguin observation</a>
+      {% endif %}
       <a href="{% url "admin:observations_penguinobservation_changelist" %}" class="btn btn-default" role="button">View all</a>
     </span>
   </div>

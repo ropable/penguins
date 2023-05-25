@@ -164,7 +164,8 @@ class SiteAdmin(DetailAdmin, LeafletGeoAdmin):
             'title': obj.name,
             'select_date': SelectDateForm,
             'initial_videos': initial_videos,
-            'recent_observations': observations
+            'recent_observations': observations,
+            'can_add_observations': request.user.is_observer() or request.user.is_superuser,
         }
         context.update(extra_context or {})
         return super(SiteAdmin, self).detail_view(request, object_id, context)
@@ -417,7 +418,7 @@ class VideoAdmin(DetailAdmin):
         obj.views += 1
         obj.save()
 
-        if not self.has_view_permission(request, obj):
+        if not request.user.is_observer() or not request.user.is_superuser:
             raise PermissionDenied
 
         if obj is None:

@@ -49,7 +49,7 @@ MIDDLEWARE_CLASSES = (
     'penguins.middleware.SSOLoginMiddleware',
 )
 
-AUTH_USER_MODEL = "observations.PenguinUser"
+AUTH_USER_MODEL = 'observations.PenguinUser'
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 LOGIN_REDIRECT_URL_FAILURE = LOGIN_URL
@@ -75,6 +75,7 @@ TEMPLATE_LOADERS = (
     )),
 )
 TEMPLATE_DIRS = (
+    os.path.join(BASE_DIR, "penguins", "templates"),
     os.path.join(BASE_DIR, "observations", "templates"),
 )
 TEMPLATE_DEBUG = DEBUG
