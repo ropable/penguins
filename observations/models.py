@@ -2,12 +2,10 @@ from __future__ import unicode_literals, absolute_import
 
 import datetime
 from datetimewidget.widgets import DateWidget
-from django.db import models
+from django.contrib.gis.db import models
+from django.core.validators import MinValueValidator, MaxValueValidator
 from django.db.models.signals import post_save, pre_delete
 from django.dispatch import receiver
-from django.contrib.auth.models import Group
-from django.contrib.gis.db import models as geo_models
-from django.core.validators import MinValueValidator, MaxValueValidator
 from django.forms import ValidationError
 #from django.core.files.storage import default_storage
 from django.conf import settings
@@ -16,8 +14,6 @@ from django import forms
 from django.utils.encoding import python_2_unicode_compatible
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.auth.models import AbstractUser
-#import logging
-#import os
 
 from observations.utils import civil_twilight
 
@@ -56,6 +52,10 @@ class ObservationBase(models.Model):
 
 class PenguinUser(AbstractUser):
 
+    class Meta:
+        db_table = 'auth_user'  # Leave it alone!
+        managed = False
+
     @property
     def completion_count(self):
         return self.videos_seen.count()
@@ -72,20 +72,19 @@ class PenguinUser(AbstractUser):
             t += i.duration
         return t
 
-    class Meta:
-        db_table = 'auth_user'  # Leave it alone!
-        managed = False
+    def is_observer(self):
+        return 'Observers' in self.groups.values_list('name', flat=True)
 
 
 @python_2_unicode_compatible
-class Site(geo_models.Model):
+class Site(models.Model):
 
     """
     Represents a site that observations are recorded. It may or may not
     have multiple cameras associated with it.
     """
     name = models.CharField(max_length=100)
-    location = geo_models.PointField()
+    location = models.PointField()
 
     def __str__(self):
         if self.camera_set.count() > 0:
@@ -182,6 +181,9 @@ class Video(models.Model):
         settings.AUTH_USER_MODEL, related_name="videos_seen",
         verbose_name="Users who have seen this video")
 
+    class Meta:
+        ordering = ['-date']
+
     def clean_date(self):
         if self.date > datetime.date.today():
             raise ValidationError("The 'Date' cannot be in the future!")
@@ -206,65 +208,6 @@ class Video(models.Model):
 
     def __str__(self):
         return "%s - %s @ %s" % (self.camera.name, self.name, str(self.date))
-
-    #@classmethod
-    #def import_folder(cls, folder=settings.S3_FOLDER):
-    #    logger = logging.getLogger('videos')
-    #    logger.info('Started Video.import_folder method')
-    #    VIDEO_FORMATS = ('.mp4', '.avi', '.mkv')
-    #    videos = [
-    #        v for v in default_storage.listdir(folder)[1] if v.endswith(VIDEO_FORMATS)]
-    #    count = 0
-    #    for video in videos:
-    #        #logger.info("Checking {}".format(video))
-    #        nameparts = video.split("_", 3)
-    #        # if len(nameparts) != 2:
-    #        #    logger.debug("Error: can't parse {0}".format(nameparts))
-    #        #    continue
-    #        filename = os.path.join(folder, video)
-    #        if cls.objects.filter(file=filename).exists():
-    #            continue
-    #        # If video doesn't exist and filename splits nicely, create it.
-    #        logger.info("Importing {}".format(video))
-    #        datestr = '_'.join(nameparts[0:2])
-    #        try:
-    #            video_datetime = datetime.datetime.strptime(
-    #                datestr,
-    #                "%Y-%m-%d_%H")
-    #        except:
-    #            datestr = '_'.join(nameparts[0:1])
-    #            video_datetime = datetime.datetime.strptime(
-    #                datestr,
-    #                "%Y-%m-%d")
-    #        date = video_datetime.date()
-    #        start_time = video_datetime.time()
-    #        camstr = nameparts[-1]
-    #        camstr = camstr.split(".")[0]  # Remove the extension.
-    #        # assume each video is 60 mins long (video times are
-    #        # inaccurate/halved?)
-    #        end_time = (video_datetime + datetime.timedelta(minutes=60)).time()
-    #        logger.info("Finding camera name closest to {} str:{}*".format(camstr,camstr.split("_")[0]))
-    #        try:
-    #            # use filter()[0] rather than get if theres dupes in the db.
-    #            camera = Camera.objects.filter(
-    #                camera_key__icontains=camstr.split("_")[0])[0]
-    #            cls.objects.create(
-    #                date=date,
-    #                start_time=start_time,
-    #                end_time=end_time,
-    #                camera=camera,
-    #                file=os.path.join(
-    #                    folder,
-    #                    video))
-    #            count += 1
-    #        except:
-    #            logger.warning('No matching camera found, skipping video name {}'.format(nameparts[-1]))
-
-    #    logger.info("Import task completed")
-    #    return count
-
-    class Meta:
-        ordering = ['-date']
 
 
 @python_2_unicode_compatible
@@ -446,15 +389,6 @@ def update_penguin_count(sender, instance, created, **kwargs):
     penguin_count.outlier = time_stamp[9]
     penguin_count.total_penguins = sum(time_stamp.values())
     penguin_count.save()
-
-
-@receiver(post_save, sender=PenguinUser)
-def update_user(sender, instance, created, **kwargs):
-    if created:
-        group, created = Group.objects.get_or_create(name="Observers")
-        instance.is_staff = True
-        instance.groups.add(group)
-        instance.save()
 
 
 class GraphForm(forms.Form):
