@@ -418,7 +418,8 @@ class VideoAdmin(DetailAdmin):
         obj.views += 1
         obj.save()
 
-        if not request.user.is_observer() or not request.user.is_superuser:
+        # If the user is neither a superuser nor part of the Observer group, disallow usage.
+        if not request.user.is_superuser and not request.user.is_observer():
             raise PermissionDenied
 
         if obj is None:
