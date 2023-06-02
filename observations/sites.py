@@ -1,5 +1,6 @@
 from arrow import Arrow
 from collections import OrderedDict
+from django import forms
 from django.contrib.admin.sites import AdminSite
 from django.contrib.auth.admin import UserAdmin
 from django.contrib.auth import get_user_model
@@ -17,6 +18,19 @@ from .models import (Site, Camera, PenguinCount, PenguinObservation,
 User = get_user_model()
 
 
+class PenguinUserChangeForm(forms.ModelForm):
+
+    class Meta:
+        model = PenguinUser
+        fields = '__all__'
+
+    def __init__(self, *args, **kwargs):
+        super(PenguinUserChangeForm, self).__init__(*args, **kwargs)
+        f = self.fields.get('user_permissions', None)
+        if f is not None:
+            f.queryset = f.queryset.select_related('content_type')
+
+
 class PenguinUserAdmin(UserAdmin):
 
     fieldsets = (
@@ -24,6 +38,7 @@ class PenguinUserAdmin(UserAdmin):
         (_('Personal info'), {'fields': ('first_name', 'last_name')}),
         (_('Permissions'), {'fields': ('is_active', 'is_superuser', 'is_staff', 'groups')}),
     )
+    form = PenguinUserChangeForm
     list_display = (
         'email',
         'first_name',
