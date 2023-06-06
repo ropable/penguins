@@ -22,7 +22,6 @@
     {% block extrahead %}{% endblock %}
     {% block blockbots %}<meta name="robots" content="NONE,NOARCHIVE" />{% endblock %}
   </head>
-{% load i18n %}
 
 <body class="{% if is_popup %}popup {% endif %}{% block bodyclass %}{% endblock %}">
   {% if not is_popup %}
@@ -82,15 +81,14 @@
         {% endif %}
       </div>
 
-      {% if user.is_active and user.is_staff %}
+      {% if user.is_authenticated %}
       <div class="collapse navbar-collapse">
         <ul class="nav navbar-nav navbar-right">
           <li id="user-tools"><p class="navbar-text">
-          {% trans 'Welcome,' %}
-          <strong>{% firstof user.get_short_name user.get_username %}</strong>.
+          Welcome, <strong>{% firstof user.get_short_name user.get_username %}</strong>
           </p></li>
           {% block userlinks %}
-            <li><a href="{% url 'admin:logout' %}">{% trans 'Log out' %}</a></li>
+          <li><a href="{% url 'admin:logout' %}">Log out</a></li>
           {% endblock %}
         </ul>
       </div>
@@ -108,7 +106,7 @@
       <div class="col-xs-12">
       {% block breadcrumbs %}
         <ol class="breadcrumb">
-          <li><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
+          <li><a href="{% url 'admin:index' %}">Home</a></li>
           {% if title %}<li>{{ title }}</li>{% endif %}
         </ol>
       {% endblock %}

@@ -101,7 +101,7 @@
   {% endif %}
   <li><a href="{% url "help_page" %}"><span class="glyphicon glyphicon-question-sign"></span> Help</a>
 </ul>
-{% endblock %}
+{% endblock navbar %}
 
 {% block content_title %}{% endblock %}
 
@@ -116,14 +116,16 @@
     </div>
   </div>
   <div class="col-xs-12 col-md-6">
+    {% if user.is_observer %}
     <h3>Actions</h3>
     <div class="list-group">
       {% if perms.auth.add_user %}<a class="list-group-item" href="{% url 'admin:observations_penguinuser_add' %}"><span class="glyphicon glyphicon-plus"></span> Add a user</a>{% endif %}
       {% if perms.observations.add_video %}<a class="list-group-item" href="{% url 'admin:observations_video_add' %}"><span class="glyphicon glyphicon-plus"></span> Add a video</a>{% endif %}
       {% if perms.observations.add_penguinobservation %}<a class="list-group-item" href="{% url 'admin:observations_penguinobservation_add' %}"><span class="glyphicon glyphicon-plus"></span> Add a penguin observation</a>{% endif %}
-
     </div>
-     <div id="map" style="height:400px;">
+    {% endif %}
+    <h3>Site map</h3>
+    <div id="map" style="height:400px;">
     </div>
 ....
   </div>
