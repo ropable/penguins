@@ -7,7 +7,6 @@ from django.contrib.auth import get_user_model
 from django.db import models
 from django.db.models import Avg, Count
 from django.utils.timezone import now
-from django.utils.translation import ugettext_lazy as _
 
 from .admin import (SiteAdmin, CameraAdmin, PenguinCountAdmin,
                     PenguinObservationAdmin, VideoAdmin)
@@ -35,8 +34,8 @@ class PenguinUserAdmin(UserAdmin):
 
     fieldsets = (
         (None, {'fields': ('email', 'last_login')}),
-        (_('Personal info'), {'fields': ('first_name', 'last_name')}),
-        (_('Permissions'), {'fields': ('is_active', 'is_superuser', 'is_staff', 'groups')}),
+        ('Personal info', {'fields': ('first_name', 'last_name')}),
+        ('Permissions', {'fields': ('is_active', 'is_superuser', 'is_staff', 'groups')}),
     )
     form = PenguinUserChangeForm
     list_display = (
@@ -55,8 +54,7 @@ class PenguinUserAdmin(UserAdmin):
     readonly_fields = ('email', 'last_login')
 
     def changelist_view(self, request, extra_context=None):
-        context = {
-        }
+        context = {}
         context.update(extra_context or {})
         return super(PenguinUserAdmin, self).changelist_view(request, context)
 
@@ -181,7 +179,7 @@ class PenguinSite(AdminSite):
         context = {
             'sites': sites,
             'site_dataset': site_dataset,
-            'title': _("Penguin island sites"),
+            'title': 'Penguin island sites',
             'gform': gf,
         }
         context.update(extra_context or {})
