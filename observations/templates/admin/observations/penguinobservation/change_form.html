@@ -67,33 +67,26 @@
 {% block submit_buttons_bottom %}{% submit_row %}{% endblock %}
 
 {% if adminform.first_field and add %}
-   <script type="text/javascript">document.getElementById("{{ adminform.first_field.id_for_label }}").focus();</script>
+<script type="text/javascript">document.getElementById("{{ adminform.first_field.id_for_label }}").focus();</script>
 {% endif %}
 
 {# JavaScript for prepopulated fields #}
 {% prepopulated_fields_js %}
-
-
 
 </div>
 </form></div>
 
 {% endblock %}
 
-{%block extrajs %}
+{% block extrajs %}
 {{ block.super }}
 <script>
   $(document).ready(
-      function() {
-        site_id = $('#id_site').val();
-        if (site_id > 0) {
-          //$('#id_site').attr('disabled','true');
-          //$('#add_id_site').hide();
-
-          $('#id_site option:not(:selected)').attr('disabled',true);
-
-        }
-
+    function() {
+      site_id = $('#id_site').val();
+      if (site_id > 0) {
+        $('#id_site option:not(:selected)').attr('disabled',true);
+      }
     }
   );
 </script>

@@ -1,27 +1,57 @@
-from django.conf import settings
-from django.core.mail import EmailMultiAlternatives
+from datetime import datetime, timedelta
 from django.core.management.base import BaseCommand
-from observations.models import Video
+import logging
+from storages.backends.azure_storage import AzureStorage
+
+from observations.models import Video, Camera
 
 
 class Command(BaseCommand):
     help = 'Imports outstanding encoded videos'
 
     def handle(self, *args, **options):
-        v = Video.objects.first()  # Get any random video object.
-        count = v.import_folder()  # Do the import.
-        # Email each of the admin users the results of the import.
-        subject = '[Penguins] Observations video import'
-        from_email = 'penguins-alerts@dbca.wa.gov.au'
-        to_email = list(settings.ADMINS)
-        text_content = '''This is an automated message to inform you that {}
-            videos have been successfully imported by the Penguins Observations
-            application.\nThis is an automatically-generated email - please do
-            not reply.\n'''.format(count)
-        html_content = '''This is an automated message to inform you that {}
-            videos have been successfully imported by the Penguins Observations
-            application.<br>This is an automatically-generated email - please do
-            not reply.<br>'''.format(count)
-        msg = EmailMultiAlternatives(subject, text_content, from_email, to_email)
-        msg.attach_alternative(html_content, 'text/html')
-        msg.send(fail_silently=True)
+        logger = logging.getLogger('observations')
+        logger.info('Starting import of encoded videos')
+
+        store = AzureStorage()
+        all_blobs = store.list_all()
+        video_formats = ('.mp4',)
+        video_paths = [blob for blob in all_blobs if blob.endswith(video_formats)]
+        count = 0
+
+        for path in video_paths:
+            if Video.objects.filter(file=path).exists():
+                continue
+            video_filename = path.split('/')[-1]  # Final segment of the path.
+
+            # Parse the start_time string.
+            timestamp = video_filename[0:13]
+            try:
+                video_datetime = datetime.strptime(timestamp, "%Y-%m-%d_%H")
+            except:
+                video_datetime = None
+
+            # Parse camera name and find matching object
+            camera_key = video_filename[17:-4].split("_")[0]
+            if Camera.objects.filter(camera_key__icontains=camera_key).exists():
+                camera = Camera.objects.filter(camera_key__icontains=camera_key).first()
+            else:
+                camera = None
+
+            if not video_datetime:
+                logger.warning('Unable to parse timestamp from {}'.format(video_filename))
+            if not camera:
+                logger.warning('No matching camera found, skipping video: {}'.format(video_filename))
+
+            if video_datetime and camera:
+                print("Importing {} for camera {}, date {}".format(video_filename, camera, video_datetime))
+                Video.objects.create(
+                    date=video_datetime.date(),
+                    start_time=video_datetime.time(),
+                    end_time=(video_datetime + timedelta(hours=1)).time(),
+                    camera=camera,
+                    file=path,
+                )
+
+                count += 1
+        logger.info("Task completed, {} videos imported".format(count))

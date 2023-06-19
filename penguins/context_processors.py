@@ -1,10 +1,9 @@
 from django.conf import settings
 
 
-def standard(request):
+def from_settings(request):
     """Dictionary of context variables to pass with every request response.
     """
-    context = {
+    return {
         'application_version_no': settings.APPLICATION_VERSION_NO,
     }
-    return context

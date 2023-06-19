@@ -2,22 +2,17 @@ import dj_database_url
 import os
 
 BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-
-SECRET_KEY = os.environ['SECRET_KEY'] if os.environ.get('SECRET_KEY', False) else 'foo'
-S3_FOLDER = os.environ['S3_FOLDER'] if os.environ.get('S3_FOLDER', False) else 'foo'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'PlaceholderSecretKey')
 DEBUG = True if os.environ.get('DEBUG', False) == 'True' else False
-TEMPLATE_DEBUG = DEBUG
 CSRF_COOKIE_SECURE = True if os.environ.get('CSRF_COOKIE_SECURE', False) == 'True' else False
 SESSION_COOKIE_SECURE = True if os.environ.get('SESSION_COOKIE_SECURE', False) == 'True' else False
-
 if not DEBUG:
-    # Localhost, UAT and Production hosts
-    ALLOWED_HOSTS = [
-        'localhost',
-        '.dpaw.wa.gov.au',
-        '.dbca.wa.gov.au'
-    ]
+    ALLOWED_HOSTS = os.environ.get('ALLOWED_DOMAINS', 'localhost').split(',')
+else:
+    ALLOWED_HOSTS = ['*']
 INTERNAL_IPS = ('127.0.0.1', '::1')
+ROOT_URLCONF = 'penguins.urls'
+WSGI_APPLICATION = 'penguins.wsgi.application'
 
 # Email settings
 ADMINS = ('asi@dbca.wa.gov.au',)
@@ -33,30 +28,34 @@ INSTALLED_APPS = (
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.flatpages',
-    'markitup',
-    'flatpages_x',
-    'sorl.thumbnail',
     'django.contrib.sites',
     'django.contrib.humanize',
     'django.contrib.gis',
     'django_extensions',
-    'debug_toolbar',
     'daterange_filter',
-    'compressor',
     'datetimewidget',
     'south',
-    'storages',
     'django_wsgiserver',
-    'django_nose',
     'rest_framework',
     'leaflet',
     'observations'
 )
+MIDDLEWARE_CLASSES = (
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.csrf.CsrfViewMiddleware',
+    'django.contrib.auth.middleware.AuthenticationMiddleware',
+    'django.contrib.messages.middleware.MessageMiddleware',
+    'penguins.middleware.SSOLoginMiddleware',
+)
 
-ANONYMOUS_USER_ID = 1
-
-AUTH_USER_MODEL = "observations.PenguinUser"
+AUTH_USER_MODEL = 'observations.PenguinUser'
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+LOGIN_REDIRECT_URL_FAILURE = LOGIN_URL
+LOGOUT_URL = '/logout/'
+LOGOUT_REDIRECT_URL = LOGOUT_URL
+ANONYMOUS_USER_ID = -1
 
 TEMPLATE_CONTEXT_PROCESSORS = (
     'django.contrib.auth.context_processors.auth',
@@ -67,12 +66,19 @@ TEMPLATE_CONTEXT_PROCESSORS = (
     'django.core.context_processors.static',
     'django.core.context_processors.debug',
     'django.core.context_processors.i18n',
-    'penguins.context_processors.standard',
+    'penguins.context_processors.from_settings',
 )
-
-ROOT_URLCONF = 'penguins.urls'
-
-WSGI_APPLICATION = 'penguins.wsgi.application'
+TEMPLATE_LOADERS = (
+    ('django.template.loaders.cached.Loader', (
+        'django.template.loaders.filesystem.Loader',
+        'django.template.loaders.app_directories.Loader',
+    )),
+)
+TEMPLATE_DIRS = (
+    os.path.join(BASE_DIR, "penguins", "templates"),
+    os.path.join(BASE_DIR, "observations", "templates"),
+)
+TEMPLATE_DEBUG = DEBUG
 
 # Database
 DATABASES = {'default': dj_database_url.config()}
@@ -87,6 +93,7 @@ USE_L10N = True
 USE_TZ = True
 
 # Static files (CSS, JavaScript, Images)
+# NOTE: don't remove media variables, even if unused.
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
 MEDIA_URL = '/media/'
 STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
@@ -94,69 +101,29 @@ STATIC_URL = '/static/'
 STATICFILES_FINDERS = (
     'django.contrib.staticfiles.finders.FileSystemFinder',
     'django.contrib.staticfiles.finders.AppDirectoriesFinder',
-    'compressor.finders.CompressorFinder',
 )
 
-if os.environ.get('USE_AWS', False):
-    DEFAULT_FILE_STORAGE = 'storages.backends.s3boto.S3BotoStorage'
-    AWS_ACCESS_KEY_ID = os.environ['AWS_ACCESS_KEY_ID']
-    AWS_SECRET_ACCESS_KEY = os.environ['AWS_SECRET_ACCESS_KEY']
-    AWS_STORAGE_BUCKET_NAME = os.environ['AWS_STORAGE_BUCKET_NAME']
-    AWS_S3_HOST = os.environ['AWS_S3_HOST']
-    AWS_QUERYSTRING_AUTH = False
 
-FLATPAGES_X_PARSER = ["flatpages_x.markdown_parser.parse", {}]
+# Azure blob storage
+DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
+AZURE_ACCOUNT_NAME = os.environ.get('AZURE_ACCOUNT_NAME', None)
+AZURE_ACCOUNT_KEY = os.environ.get('AZURE_ACCOUNT_KEY', None)
+AZURE_CONTAINER = os.environ.get('AZURE_CONTAINER', None)
 
-TEMPLATE_LOADERS = (
-    ('django.template.loaders.cached.Loader', (
-        'django.template.loaders.filesystem.Loader',
-        'django.template.loaders.app_directories.Loader',
-    )),
-)
-
-TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR, "observations", "templates"),
-)
 
 # Authentication
-from ldap_email_auth import ldap_default_settings
-ldap_default_settings()
-
 AUTHENTICATION_BACKENDS = (
     'django.contrib.auth.backends.ModelBackend',
-    'ldap_email_auth.auth.EmailBackend')
-
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/'
-LOGIN_REDIRECT_URL_FAILURE = LOGIN_URL
-LOGOUT_URL = '/logout/'
-LOGOUT_REDIRECT_URL = LOGOUT_URL
-ANONYMOUS_USER_ID = -1
+)
 
 
 # Misc settings
-
-COMPRESS_ENABLED = False
-
-MARKITUP_SET = 'markitup/sets/markdown'
-MARKITUP_SKIN = 'markitup/skins/markitup'
-MARKITUP_FILTER = ('markdown.markdown', {'safe_mode': False})
-
 SOUTH_TESTS_MIGRATE = False
 SKIP_SOUTH_TESTS = True
-TEST_RUNNER = 'django_nose.NoseTestSuiteRunner'
-
 LEAFLET_CONFIG = {
     'SCALE': 'metric',
 }
-
-DEBUG_TOOLBAR_CONFIG = {
-    'HIDE_DJANGO_SQL': False,
-    'INTERCEPT_REDIRECTS': False,
-}
-
-# Application version number
-APPLICATION_VERSION_NO = '1.0.1'
+APPLICATION_VERSION_NO = '1.1.0'
 SITE_URL = os.environ.get('SITE_URL', 'https://penguins.dbca.wa.gov.au')
 
 
@@ -167,8 +134,7 @@ LOGGING = {
     'formatters': {
         'console': {'format': '%(asctime)s %(name)-12s %(message)s'},
         'standard': {
-            'format': '%(asctime)-.19s [%(process)d] [%(levelname)s] '
-                      '%(message)s'
+            'format': '%(asctime)-.19s [%(process)d] [%(levelname)s] %(message)s'
         },
     },
     'handlers': {
@@ -177,7 +143,7 @@ LOGGING = {
             'class': 'django.utils.log.NullHandler',
         },
         'console': {
-            'level': 'INFO',
+            'level': 'DEBUG',
             'class': 'logging.StreamHandler',
             'formatter': 'console'
         },
@@ -185,11 +151,7 @@ LOGGING = {
     'loggers': {
         'django.request': {
             'handlers': ['console'],
-            'level': 'INFO'
-        },
-        'log': {
-            'handlers': ['console'],
-            'level': 'INFO'
+            'level': 'DEBUG'
         },
         'observations': {
             'handlers': ['console'],
@@ -205,31 +167,6 @@ LOGGING = {
 }
 
 if DEBUG:
-    # Set up logging differently to give us some more information about what's
-    # going on
-    LOGGING['loggers'] = {
-        'django_auth_ldap': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True
-        },
-        'django.request': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True
-        },
-        'observations': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True
-        },
-        'videos': {
-            'handlers': ['console'],
-            'level': 'DEBUG',
-            'propagate': True
-        }
-    }
-
     TEMPLATE_LOADERS = (
         'django.template.loaders.filesystem.Loader',
         'django.template.loaders.app_directories.Loader',

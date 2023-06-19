@@ -1,9 +1,8 @@
+import datetime
 from rest_framework import viewsets
 from rest_framework import filters
 
-from observations.models import PenguinCount, PenguinObservation, Video
-from utils import RetrievePartialUpdateDestroyAPIView
-import datetime
+from .models import PenguinCount, PenguinObservation, Video
 
 
 class PenguinCountViewSet(viewsets.ReadOnlyModelViewSet):
