@@ -1,13 +1,14 @@
 from __future__ import unicode_literals
-
-import datetime
+from datetime import datetime, date
 from daterange_filter.filter import DateRangeFilter
 from django.conf import settings
+from django.conf.urls import url
 from django.contrib.admin import ModelAdmin
 from django.contrib.admin.templatetags.admin_urls import add_preserved_filters
-from django.contrib.admin.util import unquote, quote
+from django.contrib.admin.utils import unquote, quote
 from django.contrib.admin.views.main import ChangeList
 from django.core.exceptions import PermissionDenied
+from django.core.paginator import Paginator, EmptyPage, PageNotAnInteger
 from django.core.urlresolvers import reverse
 from django.http import HttpResponse, Http404, HttpResponseRedirect
 from django.template.response import TemplateResponse
@@ -23,19 +24,6 @@ from .models import Video
 from .forms import SelectDateForm
 
 
-class BaseAdmin(ModelAdmin):
-
-    def has_view_permission(self, request, obj=None):
-        return True
-
-    def changelist_view(self, request, extra_context=None):
-        context = {
-            'title': self.get_title(request)
-        }
-        context.update(extra_context or {})
-        return super(BaseAdmin, self).changelist_view(request, context)
-
-
 class DetailChangeList(ChangeList):
     def url_for_result(self, result):
         if self.model_admin.changelist_link_detail:
@@ -43,7 +31,8 @@ class DetailChangeList(ChangeList):
             return reverse('admin:%s_%s_detail' % (self.opts.app_label,
                                                    self.opts.module_name),
                            args=(quote(pk),),
-                           current_app=self.model_admin.admin_site.name)
+                           #current_app=self.model_admin.admin_site.name
+                           )
         else:
             return super(DetailChangeList, self).url_for_result(result)
 
@@ -63,17 +52,15 @@ class DetailAdmin(ModelAdmin):
         )
 
     def get_urls(self):
-        from django.conf.urls import patterns, url
 
         def wrap(view):
             def wrapper(*args, **kwargs):
                 return self.admin_site.admin_view(view)(*args, **kwargs)
             return update_wrapper(wrapper, view)
 
-        info = self.model._meta.app_label, self.model._meta.module_name
+        info = self.model._meta.app_label, self.model._meta.model_name
 
-        urlpatterns = patterns(
-            '',
+        urlpatterns = [
             url(r'^$',
                 wrap(self.changelist_view),
                 name='%s_%s_changelist' % info),
@@ -92,7 +79,7 @@ class DetailAdmin(ModelAdmin):
             url(r'^(\d+)/$',
                 wrap(self.detail_view),
                 name='%s_%s_detail' % info),
-        )
+        ]
         return urlpatterns
 
     def detail_view(self, request, object_id, extra_context=None):
@@ -113,19 +100,22 @@ class DetailAdmin(ModelAdmin):
             'title': _('Detail %s') % force_text(opts.verbose_name),
             'object_id': object_id,
             'original': obj,
-            'is_popup': "_popup" in request.REQUEST,
             'media': self.media,
             'app_label': opts.app_label,
             'opts': opts,
             'has_change_permission': self.has_change_permission(request, obj),
         }
         context.update(extra_context or {})
-        return TemplateResponse(request, self.detail_template or [
-            "admin/%s/%s/detail.html" % (opts.app_label,
-                                         opts.object_name.lower()),
-            "admin/%s/detail.html" % opts.app_label,
-            "admin/detail.html"
-        ], context, current_app=self.admin_site.name)
+        return TemplateResponse(
+            request,
+            self.detail_template or [
+                "admin/%s/%s/detail.html" % (opts.app_label, opts.object_name.lower()),
+                "admin/%s/detail.html" % opts.app_label,
+                "admin/detail.html"
+            ],
+            context,
+            #current_app=self.admin_site.name
+        )
 
     def queryset(self, request):
         qs = super(DetailAdmin, self).queryset(request)
@@ -159,7 +149,7 @@ class SiteAdmin(DetailAdmin, LeafletGeoAdmin):
         cams = obj.camera_set.all()
         initial_videos = Video.objects.filter(
             camera__in=cams,
-            date=datetime.date.today())
+            date=date.today())
         context = {
             'title': obj.name,
             'select_date': SelectDateForm,
@@ -173,34 +163,54 @@ class SiteAdmin(DetailAdmin, LeafletGeoAdmin):
 
 class CameraAdmin(DetailAdmin):
     actions = None
-    list_display = ('name', 'site', 'camera_key', 'ip_address', 'videocount')
+    list_display = ("name", "camera_key", "active", "video_count", "newest_video")
+    fields = ("name", "camera_key", "active", "location")
 
-    def videocount(self, item):
-        count = Video.objects.filter(camera_id=item.pk).count()
+    def video_count(self, obj):
+        count = Video.objects.filter(camera_id=obj.pk).count()
         return str(count)
+
+    def newest_video(self, obj):
+        video = obj.get_newest_video()
+        if video:
+            return video.get_start_datetime()
+        else:
+            return ""
 
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts
-
         obj = self.get_object(request, unquote(object_id))
 
         if not self.has_view_permission(request, obj):
             raise PermissionDenied
 
         if obj is None:
-            raise Http404(_('%(name)s object with primary key %(key)r does '
-                            'not exist.') % {
+            raise Http404('%(name)s object with primary key %(key)r does not exist.' % {
                 'name': force_text(opts.verbose_name),
-                'key': escape(object_id)})
+                'key': escape(object_id)
+            })
 
-        observations = obj.penguinobservation_set.filter(site=obj)[:10]
+        # Return a paginated list of videos.
+        video_qs = obj.video_set.all()
+        paginator = Paginator(video_qs, 50)
+        page = request.GET.get('page')
+        try:
+            videos = paginator.page(page)
+        except PageNotAnInteger:
+            # If page is not an integer, deliver first page.
+            videos = paginator.page(1)
+        except EmptyPage:
+            # If page is out of range (e.g. 9999), deliver last page of results.
+            videos = paginator.page(paginator.num_pages)
 
         context = {
-            'title': obj.name,
-            'recent_observations': observations
+            'title': '{} camera'.format(obj.name),
+            'videos': videos,
+            'video_count': video_qs.count(),
+            'can_add_observations': request.user.is_observer() or request.user.is_superuser,
         }
         context.update(extra_context or {})
-        return super(SiteAdmin, self).detail_view(request, object_id, context)
+        return super(CameraAdmin, self).detail_view(request, object_id, context)
 
 
 class PenguinCountAdmin(ModelAdmin):
@@ -212,13 +222,13 @@ class PenguinCountAdmin(ModelAdmin):
                     'ninety_to_one_oh_five', 'one_oh_five_to_one_twenty',
                     'total_penguins', 'outlier', 'comments')
 
-    def sitelink(self, item):
+    def sitelink(self, obj):
         return mark_safe(
-            '<a href="/observations/site/{0}/">{1}</a>'.format(item.site.pk, item.site.name))
+            '<a href="/observations/site/{0}/">{1}</a>'.format(obj.site.pk, obj.site.name))
 
     def export_to_csv(self, request, queryset):
         response = HttpResponse(content_type="text/csv")
-        response['Content-Disposition'] = "attachment; filename=export.csv"
+        response['Content-Disposition'] = 'attachment; filename=penguin_count_{}_{}.csv'.format(date.today().isoformat(), datetime.now().strftime('%H%M'))
 
         writer = unicodecsv.writer(response, quoting=unicodecsv.QUOTE_ALL)
         writer.writerow(['date',
@@ -237,125 +247,95 @@ class PenguinCountAdmin(ModelAdmin):
                          'outlier',
                          'Comments'])
 
-        for item in queryset:
+        for obj in queryset:
             writer.writerow([
-                item.date,
+                obj.date,
                 '{}{}'.format(
                     settings.SITE_URL,
                     reverse(
                         'admin:observations_site_detail',
-                        args=(item.site.pk,),
-                        current_app=self.admin_site.name
+                        args=(obj.site.pk,),
+                        #current_app=self.admin_site.name
                     ),
                 ),
-                item.civil_twilight,
-                item.sub_fifteen,
-                item.zero_to_fifteen,
-                item.fifteen_to_thirty,
-                item.thirty_to_fourty_five,
-                item.fourty_five_to_sixty,
-                item.sixty_to_seventy_five,
-                item.seventy_five_to_ninety,
-                item.ninety_to_one_oh_five,
-                item.one_oh_five_to_one_twenty,
-                item.total_penguins,
-                item.outlier,
-                item.comments])
+                obj.civil_twilight,
+                obj.sub_fifteen,
+                obj.zero_to_fifteen,
+                obj.fifteen_to_thirty,
+                obj.thirty_to_fourty_five,
+                obj.fourty_five_to_sixty,
+                obj.sixty_to_seventy_five,
+                obj.seventy_five_to_ninety,
+                obj.ninety_to_one_oh_five,
+                obj.one_oh_five_to_one_twenty,
+                obj.total_penguins,
+                obj.outlier,
+                obj.comments])
 
         return response
     export_to_csv.short_description = ugettext_lazy("Export to CSV")
 
 
-class PenguinObservationAdmin(BaseAdmin):
-    actions = ['delete', 'export_to_csv']
+class PenguinObservationAdmin(ModelAdmin):
+    actions = ["delete", "export_to_csv"]
+    date_hierarchy = 'date'
     list_display = (
-        'date',
-        'site',
-        'camera',
-        'observer',
-        'seen',
-        'comments',
-        'validated',
-        'link_to_video',
-        'position')
-    list_filter = (('date', DateRangeFilter), 'site', 'camera', 'validated')
-    fieldsets = (
-        (None, {
-            'fields': ('date', 'site', 'camera', 'seen', 'comments', 'validated')
-        }),
-        (ugettext_lazy("Environmental conditions (optional)"), {
-            'fields': (('wind_direction', 'wind_speed'),
-                       ('wave_direction', 'wave_height', 'wave_period'),
-                       'moon_phase')
-        })
+        "video_date",
+        "video_start_time",
+        "link_to_video",
+        "position",
+        "seen",
+        "observer",
+        "validated",
     )
-    exclude = ('observer',)
+    list_filter = (("video__date", DateRangeFilter), "validated")
+    fields = ("video_date", "video_start_time", "video", "position", "seen", "comments", "observer", "validated")
+    readonly_fields = ("video", "video_date", "video_start_time")
+
+    def video_date(self, obj):
+        return obj.video.date
+    video_date.short_description = "date"
+
+    def video_start_time(self, obj):
+        return obj.video.start_time
+    video_start_time.short_description = "start time"
+
+    def link_to_video(self, obj):
+        return mark_safe("<a href='{}'>{}</a>".format(reverse("admin:observations_video_detail", args=(obj.video.pk,)), obj.video))
+    link_to_video.short_description = "Video"
 
     def export_to_csv(self, request, queryset):
         response = HttpResponse(content_type="text/csv")
-        response['Content-Disposition'] = "attachment; filename=export.csv"
-
+        response['Content-Disposition'] = 'attachment; filename=penguin_observations_{}_{}.csv'.format(date.today().isoformat(), datetime.now().strftime('%H%M'))
         writer = unicodecsv.writer(response, quoting=unicodecsv.QUOTE_ALL)
         writer.writerow([
-            'date',
-            'site',
-            'camera',
-            'observer',
-            'Count',
-            'wind direction',
-            'wind speed',
-            'wave height',
-            'wave period',
-            'moon phase',
-            'raining',
-            'position',
-            'video',
-            'validated'])
+            "date",
+            "camera",
+            "video",
+            "observer",
+            "seen at (AWST)",
+            "count",
+            "validated",
+            "comments",
+        ])
 
-        for item in queryset:
+        for obj in queryset:
             writer.writerow([
-                item.date,
-                item.site,
-                item.camera,
-                item.observer.username,
-                item.seen,
-                item.wind_direction,
-                item.wind_speed,
-                item.wave_height,
-                item.wave_period,
-                item.moon_phase,
-                item.raining,
-                item.position,
-                item.video,
-                item.validated])
+                obj.video.date.strftime("%d/%b/%Y"),
+                obj.video.camera,
+                obj.video,
+                obj.observer.get_full_name(),
+                obj.get_observation_datetime().strftime("%d/%b/%Y %H:%M:%S"),
+                obj.seen,
+                obj.validated,
+                obj.comments,
+            ])
         return response
     export_to_csv.short_description = ugettext_lazy("Export to CSV")
-
-    def link_to_video(self, obj):
-        if (obj.video):
-            return mark_safe(
-                "<a href='{}'>{}</a>".format(
-                    reverse(
-                        "admin:observations_video_detail",
-                        args=(
-                            obj.video.pk,
-                        )),
-                    obj.video))
-        else:
-            return "No video"
-
-    def formfield_for_foreignkey(self, db_field, request=None, **kwargs):
-        if db_field.name == 'camera':
-            kwargs['empty_label'] = ugettext_lazy("None (In-situ)")
-        return super(PenguinObservationAdmin, self).formfield_for_foreignkey(
-            db_field, request, **kwargs)
 
     def save_model(self, request, obj, form, change):
         obj.observer = request.user
         obj.save()
-
-    def get_title(self, request):
-        return ugettext_lazy("Penguin observations")
 
     def response_post_save_add(self, request, obj):
         """
@@ -365,39 +345,21 @@ class PenguinObservationAdmin(BaseAdmin):
         opts = self.model._meta
         site_id = request.GET.get('site', None)
         if site_id is not None:
-            post_url = reverse(
-                'admin:observations_site_detail',
-                args=(
-                    site_id,
-                ),
-                current_app=self.admin_site.name)
+            post_url = reverse('admin:observations_site_detail', args=(site_id,))
             preserved_filters = self.get_preserved_filters(request)
             post_url = add_preserved_filters(
                 {'preserved_filters': preserved_filters, 'opts': opts}, post_url)
             return HttpResponseRedirect(post_url)
         else:
-            return super(
-                PenguinObservationAdmin,
-                self).response_post_save_add(
-                request,
-                obj)
+            return super(PenguinObservationAdmin, self).response_post_save_add(request, obj)
 
 
 class VideoAdmin(DetailAdmin):
-    list_display = (
-        'camera_expanded',
-        'file',
-        'date',
-        'start_time',
-        'end_time')
-    exclude = ('views',)
-    readonly_fields = ('file',)
-
-    fieldsets = (
-        (None, {
-            'fields': ('camera', 'file', 'date', 'start_time', 'end_time'),
-        }),
-    )
+    date_hierarchy = 'date'
+    list_display = ('camera', 'file', 'date', 'start_time', 'end_time')
+    fields = ('date', 'camera', 'file', 'start_time', 'end_time', 'views', 'mark_complete', 'completed_by')
+    readonly_fields = ('date', 'camera', 'file', 'start_time', 'end_time', 'views')
+    filter_horizontal = ('completed_by',)
 
     def has_view_permission(self, request, obj=None):
         return True
@@ -407,10 +369,6 @@ class VideoAdmin(DetailAdmin):
 
     def has_delete_permission(self, request, obj=None):
         return True
-
-    def camera_expanded(self, item):
-        return mark_safe(
-            "<a href='/observations/video/{}/change'>{}</a>".format(item.pk, item.camera.site))
 
     def detail_view(self, request, object_id, extra_context=None):
         opts = self.opts
@@ -423,20 +381,15 @@ class VideoAdmin(DetailAdmin):
             raise PermissionDenied
 
         if obj is None:
-            raise Http404(_('%(name)s object with primary key %(key)r does '
-                            'not exist.') % {
+            raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {
                 'name': force_text(opts.verbose_name),
                 'key': escape(object_id)})
 
-        observations = obj.camera.penguinobservation_set.filter(
-            observer=request.user,
-            date__range=(
-                datetime.datetime.combine(obj.date, obj.start_time),
-                datetime.datetime.combine(obj.date, obj.end_time)))
+        observations = obj.penguinobservation_set.filter(observer=request.user)
 
         context = {
-            'title': "View video",
-            'user_observations': observations
+            'title': 'View video',
+            'user_observations': observations,
         }
         context.update(extra_context or {})
         return super(VideoAdmin, self).detail_view(request, object_id, context)

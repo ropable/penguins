@@ -1,5 +1,4 @@
 {% load admin_static %}
-{% load firstof from future %}
 <!DOCTYPE html>
 <html lang="{{ LANGUAGE_CODE|default:"en-us" }}" {% if LANGUAGE_BIDI %}dir="rtl"{% endif %}>
   <head>
@@ -9,11 +8,11 @@
     <title>{% block title %}{% endblock %}</title>
     <link href="//fonts.googleapis.com/css?family=Varela+Round" rel="stylesheet" type="text/css">
     <link rel="stylesheet" type="text/css" href="{% block stylesheet %}{% static "css/bootstrap.min.css" %}{% endblock %}" />
-    <link rel="stylesheet" href="{% static "css/font-awesome.min.css" %}">
+    <link rel="stylesheet" type="text/css" href="{% static "css/font-awesome.min.css" %}">
     <link rel="stylesheet" type="text/css" href="{% static "css/bootstrap-theme.min.css" %}" />
     <link rel="stylesheet" type="text/css" href="{% static "css/style.css" %}" />
     <link rel="shortcut icon" type="image/png" href="{{STATIC_URL}}favicon.ico"/>
-    <script src="{% static "js/jquery.min.js" %}"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.4.1/jquery.min.js" integrity="sha512-bnIvzh6FU75ZKxp0GXLH9bewza/OIw6dLVh9ICg0gogclmYGguQJWl8U30WpbsGTqbIiAwxTsbe76DErLq5EDQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     <script src="{% static "js/bootstrap.min.js" %}"></script>
     {% block extrastyle %}{% endblock %}
     <!--[if lte IE 7]><link rel="stylesheet" type="text/css" href="{% block stylesheet_ie %}{% static "admin/css/ie.css" %}{% endblock %}" /><![endif]-->
@@ -65,19 +64,8 @@
         </button>
         {% if user.is_authenticated %}
         {% block navbar %}
-        <ul class="nav navbar-nav">
-          <li class="active"><a href="{% url "admin:index" %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
-          {% if user.is_superuser %}
-          {% if perms.observations.view_site %}<li><a href="{% url "admin:observations_site_changelist" %}"><span class="glyphicon glyphicon-map-marker"></span> Sites</a></li>{% endif %}
-          {% if perms.observations.change_video %}<li><a href="{% url "admin:observations_video_changelist" %}"><span class="glyphicon glyphicon-facetime-video"></span> Videos</a></li>{% endif %}
-          {% if perms.observations.change_penguinobservation %}<li><a href="{% url "admin:observations_penguinobservation_changelist" %}"><span class="glyphicon glyphicon-eye-open"></span> Observations</a></li>{% endif %}
-          {% if perms.observations.change_penguincount %}<li><a href="{% url "admin:observations_penguincount_changelist" %}"><span class="glyphicon glyphicon-check"></span> Penguin count</a></li>{% endif %}
-          {% if perms.auth.change_user %}<li><a href="{% url "admin:observations_penguinuser_changelist" %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>{% endif %}
-          <li><a href="{% url "admin:observations_camera_changelist" %}"><span class="glyphicon glyphicon-camera"></span> Cameras</a></li>
-          {% endif %}
-          <li><a href="{% url "help_page" %}"><span class="glyphicon glyphicon-question-sign"></span> Help</a>
-        </ul>
-        {% endblock %}
+        {% include 'admin/navbar.html' %}
+        {% endblock navbar %}
         {% endif %}
       </div>
 

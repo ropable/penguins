@@ -1,3 +1,4 @@
+from datetime import datetime
 from django import http
 from django.contrib.auth import login, logout, get_user_model
 
@@ -30,6 +31,8 @@ class SSOLoginMiddleware(object):
                 user = User()
 
             user.__dict__.update(attributemap)
+            if not user.last_login:
+                user.last_login = datetime.now()
             user.save()
             user.backend = 'django.contrib.auth.backends.ModelBackend'
             login(request, user)

@@ -1,83 +1,56 @@
-  {% extends "admin/base_site.html" %}
+{% extends "admin/base_site.html" %}
 {% load i18n admin_static %}
 
 {% block extrastyle %}{{ block.super }}<link rel="stylesheet" type="text/css" href="{% static "admin/css/dashboard.css" %}" />
-
 <link rel="stylesheet" type="text/css" href="{% static 'leaflet/leaflet.css' %}" />
-
-    {{ gform.media }}
-
+{{ gform.media }}
 {% endblock %}
 
 {% block extrajs %}
-
 <script type="text/javascript" src="{% static 'leaflet/leaflet.js' %}"></script>
-
-
-<script type="text/javascript" src="{% static 'js/canvasjs.min.js' %}"></script>
     <script>
     $(function() {
-      //Map
+        var pengIcon = L.icon({
+            iconUrl:  "{% static 'img/Aussie_Fairy_Penguin-icon.png' %}",
+            iconSize: [50, 50],
+            iconAnchor: [25, 50],
+            popupAnchor: [10, -50],
+        });
 
-    var pengIcon = L.icon({
-        iconUrl:  '{% static 'img/Aussie_Fairy_Penguin-icon.png' %}',
-        iconSize: [50, 50],
-        iconAnchor: [25, 50],
-        popupAnchor: [10, -50],
+        // create a map in the "map" div, set the view to a given place and zoom
+        var map = L.map("map", {
+            crs: L.CRS.EPSG4326,
+            center: [-32.305, 115.695],
+            zoom: 15,
+            minZoom: 1,
+            maxZoom: 18
+        });
 
-    });
+        // add an OpenStreetMap tile layer
+        /*
+        tile = {};
+        tile[0] = "https://{s}.tile.osm.org/{z}/{x}/{y}.png";
+        tile[1] = "https://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.png";
+        tile[2] = "https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}";
+        L.tileLayer(tile[0], {
+            attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
+        }).addTo(map);
+        */
 
-    // create a map in the "map" div, set the view to a given place and zoom
-    var map = L.map('map').setView([-32.305497,115.690649], 16);
+        const mapboxStreets = L.tileLayer(
+          "https://kmi.dbca.wa.gov.au/geoserver/gwc/service/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=gda94&TileMatrix=gda94:{z}&TileCol={x}&TileRow={y}&format=image/png&layer=dbca:mapbox-streets",
+          {
+            tileSize: 1024,
+            zoomOffset: -2,
+          },
+        ).addTo(map);
 
-    // add an OpenStreetMap tile layer
-    tile = {};
-    tile[0] = 'https://{s}.tile.osm.org/{z}/{x}/{y}.png';
-    tile[1] = 'https://{s}.tile.stamen.com/watercolor/{z}/{x}/{y}.png';
-    tile[2] = 'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}';
-    L.tileLayer(tile[0], {
-        attribution: '&copy; <a href="http://osm.org/copyright">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    // add a marker in the given location, attach some popup content to it and open the popup
-    {% for site in sites %}
-    L.marker([{{ site.location.y }}, {{ site.location.x }}],{ icon:pengIcon}).addTo(map)
-        .bindPopup("<a href='/observations/site/{{site.pk}}'>{{ site }}</a><br>{{site.video_count}} videos.<br>")
-        .openPopup();
-    {% endfor %}
-
-
-      //Chart
-
-      var chart = new CanvasJS.Chart("line", {
-        legend: {
-          horizontalAlign: "right",
-          verticalAlign: "center",
-          fontSize: 15
-        },
-        axisX: {
-          title: "Observation Date",
-        },
-        axisY: {
-          title: "No. of Penguins",
-        },
-        data: [
-        {% for site, data in site_dataset.items %}
-        {
-          type: "spline",
-          showInLegend: true,
-          legendText: "{{ site }}",
-          dataPoints: [
-            {% for point in data %}
-            {x: new Date({{ point.date.year }}, {{ point.date.month }} - 1, {{ point.date.day }}), y: {{ point.value }} },
-            {% endfor %}
-          ]
-        }{% if not forloop.last %},{% endif %}
+        // add a marker in the given location, attach some popup content to it and open the popup
+        {% for camera in cameras %}
+        L.marker([{{ camera.location.y }}, {{ camera.location.x }}], {icon: pengIcon}).addTo(map)
+            .bindPopup("<a href='/observations/camera/{{ camera.pk }}'>{{ camera }}</a><br>{{ camera.video_set.count }} videos.<br>")
+            .openPopup();
         {% endfor %}
-        ]
-      });
-
-      chart.render();
     });
     </script>
 {% endblock %}
@@ -86,21 +59,14 @@
 
 {% block bodyclass %}dashboard{% endblock %}
 
-{% block breadcrumbs %}{% endblock %}
+{% block breadcrumbs %}
+<ol class="breadcrumb">
+  <li>Home</li>
+</ol>
+{% endblock %}
 
 {% block navbar %}
-<ul class="nav navbar-nav">
-  <li class="active"><a href="{% url "admin:index" %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
-  {% if user.is_superuser %}
-  {% if perms.observations.view_site %}<li><a href="{% url "admin:observations_site_changelist" %}"><span class="glyphicon glyphicon-map-marker"></span> Sites</a></li>{% endif %}
-  {% if perms.observations.change_video %}<li><a href="{% url "admin:observations_video_changelist" %}"><span class="glyphicon glyphicon-facetime-video"></span> Videos</a></li>{% endif %}
-  {% if perms.observations.change_penguinobservation %}<li><a href="{% url "admin:observations_penguinobservation_changelist" %}"><span class="glyphicon glyphicon-eye-open"></span> Observations</a></li>{% endif %}
-  {% if perms.observations.change_penguincount %}<li><a href="{% url "admin:observations_penguincount_changelist" %}"><span class="glyphicon glyphicon-check"></span> Penguin count</a></li>{% endif %}
-  {% if perms.auth.change_user %}<li><a href="{% url "admin:observations_penguinuser_changelist" %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>{% endif %}
-  <li><a href="{% url "admin:observations_camera_changelist" %}"><span class="glyphicon glyphicon-camera"></span> Cameras</a></li>
-  {% endif %}
-  <li><a href="{% url "help_page" %}"><span class="glyphicon glyphicon-question-sign"></span> Help</a>
-</ul>
+{% include 'admin/navbar.html' %}
 {% endblock navbar %}
 
 {% block content_title %}{% endblock %}
@@ -108,44 +74,18 @@
 {% block content %}
 <div class="row">
   <div class="col-xs-12 col-md-6">
-    <h3>Penguin island sites</h3>
+    <h3>Penguin island cameras (active)</h3>
     <div class="list-group">
-    {% for site in sites %}
-      <a class="list-group-item" href="{% url 'admin:observations_site_detail' site.id %}">{{ site }}</a>
-    {% endfor %}
+      {% for camera in cameras %}
+      <a class="list-group-item" href="{% url 'admin:observations_camera_detail' camera.pk %}">{{ camera }} - {{ camera.video_set.count }} videos, latest {{ camera.get_newest_video.get_start_datetime }}</a>
+      {% endfor %}
     </div>
   </div>
+
   <div class="col-xs-12 col-md-6">
-    {% if user.is_observer %}
-    <h3>Actions</h3>
-    <div class="list-group">
-      {% if perms.auth.add_user %}<a class="list-group-item" href="{% url 'admin:observations_penguinuser_add' %}"><span class="glyphicon glyphicon-plus"></span> Add a user</a>{% endif %}
-      {% if perms.observations.add_video %}<a class="list-group-item" href="{% url 'admin:observations_video_add' %}"><span class="glyphicon glyphicon-plus"></span> Add a video</a>{% endif %}
-      {% if perms.observations.add_penguinobservation %}<a class="list-group-item" href="{% url 'admin:observations_penguinobservation_add' %}"><span class="glyphicon glyphicon-plus"></span> Add a penguin observation</a>{% endif %}
-    </div>
-    {% endif %}
     <h3>Site map</h3>
-    <div id="map" style="height:400px;">
-    </div>
-....
+    <div id="map" style="height:400px;"></div>
   </div>
-</div>
-<div class="row">
-    <h3>Average daily returning penguins</h3>
-    <div class="col-xs-2">
-      <form class="form form-inline" role="form"><div class="form-group">
-        {{ gform }} <br />
-        <input type="submit" class="btn">
-      </div></form>
-    </div>
-    <div class="col-xs-10">
-      <div id="line" style="height: 300px; width: 100%;">
-      </div>
-    </div>
-
 
 </div>
-      <div class="well">
-      This graph is based on the videos which have been viewed and tallied and may not be an accurate reflection of the total numbers.
-    </div>
 {% endblock %}
