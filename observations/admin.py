@@ -15,13 +15,11 @@ from django.template.response import TemplateResponse
 from django.utils.encoding import force_text
 from django.utils.html import escape
 from django.utils.safestring import mark_safe
-from django.utils.translation import ugettext as _, ugettext_lazy
 from functools import update_wrapper
 from leaflet.admin import LeafletGeoAdmin
 import unicodecsv
 
 from .models import Video
-from .forms import SelectDateForm
 
 
 class DetailChangeList(ChangeList):
@@ -31,7 +29,6 @@ class DetailChangeList(ChangeList):
             return reverse('admin:%s_%s_detail' % (self.opts.app_label,
                                                    self.opts.module_name),
                            args=(quote(pk),),
-                           #current_app=self.model_admin.admin_site.name
                            )
         else:
             return super(DetailChangeList, self).url_for_result(result)
@@ -46,10 +43,7 @@ class DetailAdmin(ModelAdmin):
         return DetailChangeList
 
     def has_view_permission(self, request, obj=None):
-        opts = self.opts
-        return request.user.has_perm(
-            opts.app_label + '.' + 'view_%s' % opts.object_name.lower()
-        )
+        return True
 
     def get_urls(self):
 
@@ -59,45 +53,27 @@ class DetailAdmin(ModelAdmin):
             return update_wrapper(wrapper, view)
 
         info = self.model._meta.app_label, self.model._meta.model_name
-
         urlpatterns = [
-            url(r'^$',
-                wrap(self.changelist_view),
-                name='%s_%s_changelist' % info),
-            url(r'^add/$',
-                wrap(self.add_view),
-                name='%s_%s_add' % info),
-            url(r'^(\d+)/history/$',
-                wrap(self.history_view),
-                name='%s_%s_history' % info),
-            url(r'^(\d+)/delete/$',
-                wrap(self.delete_view),
-                name='%s_%s_delete' % info),
-            url(r'^(\d+)/change/$',
-                wrap(self.change_view),
-                name='%s_%s_change' % info),
-            url(r'^(\d+)/$',
-                wrap(self.detail_view),
-                name='%s_%s_detail' % info),
+            url(r'^$', wrap(self.changelist_view), name='%s_%s_changelist' % info),
+            url(r'^add/$', wrap(self.add_view), name='%s_%s_add' % info),
+            url(r'^(\d+)/history/$', wrap(self.history_view), name='%s_%s_history' % info),
+            url(r'^(\d+)/delete/$', wrap(self.delete_view), name='%s_%s_delete' % info),
+            url(r'^(\d+)/change/$', wrap(self.change_view), name='%s_%s_change' % info),
+            url(r'^(\d+)/$', wrap(self.detail_view), name='%s_%s_detail' % info),
         ]
         return urlpatterns
 
     def detail_view(self, request, object_id, extra_context=None):
-        opts = self.opts
-
         obj = self.get_object(request, unquote(object_id))
-
+        opts = self.opts
         if not self.has_view_permission(request, obj):
             raise PermissionDenied
 
         if obj is None:
-            raise Http404(_('%(name)s object with primary key %(key)r does '
-                            'not exist.') % {
-                                'name': force_text(opts.verbose_name),
-                                'key': escape(object_id)})
+            raise Http404('{} object with primary key {} does not exist.'.format(force_text(opts.verbose_name), escape(object_id)))
 
         context = {
-            'title': _('Detail %s') % force_text(opts.verbose_name),
+            'title': 'Detail {}'.format(force_text(opts.verbose_name)),
             'object_id': object_id,
             'original': obj,
             'media': self.media,
@@ -114,7 +90,6 @@ class DetailAdmin(ModelAdmin):
                 "admin/detail.html"
             ],
             context,
-            #current_app=self.admin_site.name
         )
 
     def queryset(self, request):
@@ -137,25 +112,11 @@ class SiteAdmin(DetailAdmin, LeafletGeoAdmin):
         obj = self.get_object(request, unquote(object_id))
 
         if obj is None:
-            raise Http404(_('%(name)s object with primary key %(key)r does '
-                            'not exist.') % {
-                'name': force_text(opts.verbose_name),
-                'key': escape(object_id)})
-
-        observations = obj.penguinobservation_set.filter(site=obj)[:10]
+            raise Http404('{} object with primary key {} does not exist.'.format(force_text(opts.verbose_name), escape(object_id)))
 
         # Define a set of videos to pass into the view on load.
-        # All cameras, today's date.
-        cams = obj.camera_set.all()
-        initial_videos = Video.objects.filter(
-            camera__in=cams,
-            date=date.today())
         context = {
             'title': obj.name,
-            'select_date': SelectDateForm,
-            'initial_videos': initial_videos,
-            'recent_observations': observations,
-            'can_add_observations': request.user.is_observer() or request.user.is_superuser,
         }
         context.update(extra_context or {})
         return super(SiteAdmin, self).detail_view(request, object_id, context)
@@ -185,10 +146,7 @@ class CameraAdmin(DetailAdmin):
             raise PermissionDenied
 
         if obj is None:
-            raise Http404('%(name)s object with primary key %(key)r does not exist.' % {
-                'name': force_text(opts.verbose_name),
-                'key': escape(object_id)
-            })
+            raise Http404('{} object with primary key {} does not exist.'.format(force_text(opts.verbose_name), escape(object_id)))
 
         # Return a paginated list of videos.
         video_qs = obj.video_set.all()
@@ -255,7 +213,6 @@ class PenguinCountAdmin(ModelAdmin):
                     reverse(
                         'admin:observations_site_detail',
                         args=(obj.site.pk,),
-                        #current_app=self.admin_site.name
                     ),
                 ),
                 obj.civil_twilight,
@@ -273,7 +230,7 @@ class PenguinCountAdmin(ModelAdmin):
                 obj.comments])
 
         return response
-    export_to_csv.short_description = ugettext_lazy("Export to CSV")
+    export_to_csv.short_description = "Export to CSV"
 
 
 class PenguinObservationAdmin(ModelAdmin):
@@ -331,7 +288,7 @@ class PenguinObservationAdmin(ModelAdmin):
                 obj.comments,
             ])
         return response
-    export_to_csv.short_description = ugettext_lazy("Export to CSV")
+    export_to_csv.short_description = "Export to CSV"
 
     def save_model(self, request, obj, form, change):
         obj.observer = request.user
@@ -377,13 +334,11 @@ class VideoAdmin(DetailAdmin):
         obj.save()
 
         # If the user is neither a superuser nor part of the Observer group, disallow usage.
-        if not request.user.is_superuser and not request.user.is_observer():
-            raise PermissionDenied
+        #if not request.user.is_superuser and not request.user.is_observer():
+        #    raise PermissionDenied
 
         if obj is None:
-            raise Http404(_('%(name)s object with primary key %(key)r does not exist.') % {
-                'name': force_text(opts.verbose_name),
-                'key': escape(object_id)})
+            raise Http404('{} object with primary key {} does not exist.'.format(force_text(opts.verbose_name), escape(object_id)))
 
         observations = obj.penguinobservation_set.filter(observer=request.user).order_by("position")
 
