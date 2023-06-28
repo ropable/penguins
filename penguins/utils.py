@@ -2,6 +2,7 @@ from django.http import JsonResponse, HttpResponseBadRequest
 from django.utils.encoding import force_str
 from django.views.generic import ListView
 from django.views.generic.detail import BaseDetailView
+from django.views.generic.edit import BaseUpdateView
 from urllib import parse
 
 
@@ -97,11 +98,10 @@ class ListResourceView(ListView):
         return JsonResponse(objects)
 
 
-class DetailResourceView(BaseDetailView):
+class DetailUpdateResourceView(BaseUpdateView):
     """Generic API detail (single object) view.
     Extend with a `model` and `serializer` class.
     """
-    http_method_names = ['get', 'options', 'trace']
     model = None
     serializer = None
 

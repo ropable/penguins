@@ -151,8 +151,7 @@ class Video(models.Model):
     views = models.PositiveSmallIntegerField(default=0)
     mark_complete = models.BooleanField(default=False, help_text="Has this been viewed in its entirety by a reviewer?")
     completed_by = models.ManyToManyField(
-        settings.AUTH_USER_MODEL, related_name="videos_seen",
-        verbose_name="Users who have seen this video")
+        settings.AUTH_USER_MODEL, related_name="videos_seen", verbose_name="Users who have seen this video")
 
     class Meta:
         ordering = ["-date", "-start_time"]

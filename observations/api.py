@@ -1,63 +1,13 @@
 import arrow
-import datetime
-from rest_framework import viewsets
 from django.conf.urls import url
 from django.http import HttpResponse
 from django.http import JsonResponse, HttpResponseBadRequest
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.utils.decorators import method_decorator
 from django.views.decorators.csrf import csrf_exempt
-from django_filters import rest_framework as filters
 
-from penguins.utils import ListResourceView, DetailResourceView
-from .models import PenguinUser, PenguinCount, PenguinObservation, Video
-
-
-class PenguinCountViewSet(viewsets.ReadOnlyModelViewSet):
-    queryset = PenguinCount.objects.all()
-
-
-class PenguinObservationViewSet(viewsets.ModelViewSet):
-    queryset = PenguinObservation.objects.all()
-
-
-class VideoViewSet(viewsets.ModelViewSet):
-    queryset = Video.objects.all()
-    filter_backends = (filters.DjangoFilterBackend,)
-    filter_fields = ('camera', 'date')
-
-    def partial_update(self, request, pk=None):
-        if 'mark_complete' in request.DATA:
-            if request.DATA['mark_complete']:
-                self.get_object().completed_by.add(request.user)
-
-                pobs = PenguinObservation.objects.filter(
-                    video=self.get_object(),
-                    observer=request.user)  # .update(validated=True)
-                for obs in pobs:
-                    obs.validated = True
-                    obs.save()
-                if pobs.count() == 0:
-                    d = self.get_object().date
-                    hour = self.get_object().end_time.hour
-                    observation_date = datetime.datetime(
-                        d.year,
-                        d.month,
-                        d.day,
-                        hour,
-                        0)
-                    p = PenguinObservation(
-                        video=self.get_object(),
-                        observer=request.user,
-                        seen=0,
-                        comments="[default]No penguins reported",
-                        validated=True,
-                        date=observation_date)
-                    p.save()
-            else:
-                self.get_object().completed_by.remove(request.user)
-        response = super(VideoViewSet, self).partial_update(request, pk)
-        return response
+from penguins.utils import ListResourceView, DetailUpdateResourceView
+from .models import PenguinUser, PenguinObservation, Video
 
 
 def penguinsobservation_serializer(obj):
@@ -104,10 +54,9 @@ class PenguinObservationListResource(LoginRequiredMixin, ListResourceView):
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class PenguinObservationDetailResource(LoginRequiredMixin, DetailResourceView):
+class PenguinObservationDetailResource(LoginRequiredMixin, DetailUpdateResourceView):
     model = PenguinObservation
     serializer = PenguinObservationSerializer
-    http_method_names = ['get', 'put', 'patch', 'head', 'options', 'trace']
 
     def post(self, request, *args, **kwargs):
         self.object = self.get_object()
@@ -138,17 +87,28 @@ class VideoSerializer(object):
 class VideoListResource(LoginRequiredMixin, ListResourceView):
     model = Video
     serializer = VideoSerializer
+    http_method_names = ['get', 'head', 'options', 'trace']
 
 
 @method_decorator(csrf_exempt, name='dispatch')
-class VideoDetailResource(LoginRequiredMixin, DetailResourceView):
+class VideoDetailResource(LoginRequiredMixin, DetailUpdateResourceView):
     model = Video
     serializer = VideoSerializer
 
-    # TODO: patch/post method
+    def post(self, request, *args, **kwargs):
+        data = request.POST
+        video = self.get_object()
+        # "Mark as complete" function.
+        if "mark_complete" in data and data["mark_complete"]:
+            video.mark_complete = True
+            video.completed_by.add(request.user)
+            video.save()
+            return HttpResponse("OK")
+
+        return
 
 
-V2_API_URLS = [
+API_URLS = [
     url(r'^observation/$', PenguinObservationListResource.as_view(), name='penguinobservation_list_resource'),
     url(r'^observation/(?P<pk>\d+)/$', PenguinObservationDetailResource.as_view(), name='penguinobservation_detail_resource'),
     url(r'^video/$', VideoListResource.as_view(), name='video_list_resource'),

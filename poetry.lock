@@ -385,20 +385,6 @@ files = [
 six = ">=1.2"
 
 [[package]]
-name = "django-filter"
-version = "2.2.0"
-description = "Django-filter is a reusable Django application for allowing users to filter querysets dynamically."
-optional = false
-python-versions = ">=3.4"
-files = [
-    {file = "django-filter-2.2.0.tar.gz", hash = "sha256:c3deb57f0dd7ff94d7dce52a047516822013e2b441bed472b722a317658cfd14"},
-    {file = "django_filter-2.2.0-py3-none-any.whl", hash = "sha256:558c727bce3ffa89c4a7a0b13bc8976745d63e5fd576b3a9a851650ef11c401b"},
-]
-
-[package.dependencies]
-Django = ">=1.11"
-
-[[package]]
 name = "django-leaflet"
 version = "0.27.1"
 description = "Use Leaflet in your django projects"
@@ -437,20 +423,6 @@ dropbox = ["dropbox (>=7.2.1)"]
 google = ["google-cloud-storage (>=1.15.0)"]
 libcloud = ["apache-libcloud"]
 sftp = ["paramiko"]
-
-[[package]]
-name = "djangorestframework"
-version = "3.11.1"
-description = "Web APIs for Django, made easy."
-optional = false
-python-versions = ">=3.5"
-files = [
-    {file = "djangorestframework-3.11.1-py3-none-any.whl", hash = "sha256:8b1ac62c581dbc5799b03e535854b92fc4053ecfe74bad3f9c05782063d4196b"},
-    {file = "djangorestframework-3.11.1.tar.gz", hash = "sha256:6dd02d5a4bd2516fb93f80360673bf540c3b6641fec8766b1da2870a5aa00b32"},
-]
-
-[package.dependencies]
-django = ">=1.11"
 
 [[package]]
 name = "ephem"
@@ -901,4 +873,4 @@ files = [
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.7"
-content-hash = "1c5131ae194b1ecf901366f81c5bed9b3a2b8fdbfb9cdbf7cb61a000713b0825"
+content-hash = "7fba943b5656b1878675c93a5dce365a1e8de0fe94196ada4c22bd11ac1667f3"

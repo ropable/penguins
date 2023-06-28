@@ -74,16 +74,13 @@
 
 <div class="row">
   <div class="col-xs-6 col-md-6">
-    <h3>Your observations for this video</h3>
+    <h3>Your observations for this video:</h3>
   </div>
   <div class="col-xs-6 col-md-6 object-tools">
     <span class="pull-right">
-      {% if user in original.completed_by.all %}
-      {% else %}
-    <button id ="markdone" type="button" class="btn btn-success" role="button" style="display:none" onClick="markDone({{ original.pk }})"><span class="glyphicon glyphicon-thumbs-up"></span> Mark Finished</button>
-    {% endif %}
- <a class="btn btn-primary" href="{{ original.file.url }}"><span class="glyphicon glyphicon-facetime-video"></span> Download Video</a>
-  <button type="button" class="btn btn-primary" role="button" data-target="#addform" data-toggle="modal" onClick="formFillin();"><span class="glyphicon glyphicon-plus"></span> Add observation</button>
+      <button id ="markdone" type="button" class="btn btn-success" role="button" style="display:none" onClick="markDone({{ original.pk }})"><span class="glyphicon glyphicon-thumbs-up"></span> Mark Finished</button>
+      <a class="btn btn-primary" href="{{ original.file.url }}"><span class="glyphicon glyphicon-facetime-video"></span> Download Video</a>
+      <button type="button" class="btn btn-primary" role="button" data-target="#addform" data-toggle="modal" onClick="formFillin();"><span class="glyphicon glyphicon-plus"></span> Add observation</button>
     </span>
   </div>
 </div>
@@ -93,7 +90,6 @@
       <th>Penguins seen</th>
       <th>Comments</th>
       <th>Video position (s)</th></th>
-      <th>Action</th>
     </tr>
   <thead>
   <tbody>
@@ -102,7 +98,7 @@
       <td>{{ observation.seen }}</td>
       <td>{{ observation.comments }}</td>
       <td>{{ observation.position|floatformat:"0" }}</a></td>
-      <td><a onClick="deleteObservation({{ observation.pk }})" class="btn btn-danger">Delete</a>
+      <td></td>
     </tr>
   {% endfor %}
   </tbody>
@@ -236,13 +232,13 @@ $(function() {
         };
 
         $.ajax({
-          url: "/api/v2/observation/",
+          url: "/api/observation/",
           type: "POST",
           data: data
         }).done(function() {
           $("#addform").modal("hide");
           $(".modal-backdrop").remove();
-          $("#observations tbody").append("<tr><td>" + $("#id_time").val() + "</td><td>" + $("#id_seen").val() + "</td><td>" + $("#id_comments").val() + "</td><td>" + $("#id_position").val() + "</td><td><a href='?'>Reload page to delete this record</a></td></tr>");
+          $("#observations tbody").append("<tr><td>" + $("#id_seen").val() + "</td><td>" + $("#id_comments").val() + "</td><td>" + $("#id_position").val() + "</td></tr>");
           $("#add-form").parsley().reset();
           $("#add-form").find("input:text, textarea").val("");
           $("#id_time").data("DateTimePicker").setDate("{{ original.start_time|time:'H' }}");
@@ -277,20 +273,10 @@ function formFillin() {
     $("#counter").html("Video is paused");
 }
 
-function deleteObservation(pk) {
-  $.ajax({
-      url: "/api/observations/" + pk + "/",
-      type: "DELETE",
-      success: function(result) {
-        $("#row_" + pk).hide();
-      }
-  });
-}
-
 function markDone(pk) {
   $.ajax({
-      url: "/api/videos/" + pk + "/",
-      type: "PATCH",
+      url: "/api/video/" + pk + "/",
+      type: "POST",
       success: function(result) {
         $("#markdone").addClass("btn-danger").text("Done!")
       },

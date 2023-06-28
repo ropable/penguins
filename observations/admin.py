@@ -224,7 +224,7 @@ class PenguinCountAdmin(ModelAdmin):
 
     def sitelink(self, obj):
         return mark_safe(
-            '<a href="/observations/site/{0}/">{1}</a>'.format(obj.site.pk, obj.site.name))
+            '<a href="/observations/site/{}/">{}</a>'.format(obj.site.pk, obj.site.name))
 
     def export_to_csv(self, request, queryset):
         response = HttpResponse(content_type="text/csv")
@@ -385,7 +385,7 @@ class VideoAdmin(DetailAdmin):
                 'name': force_text(opts.verbose_name),
                 'key': escape(object_id)})
 
-        observations = obj.penguinobservation_set.filter(observer=request.user)
+        observations = obj.penguinobservation_set.filter(observer=request.user).order_by("position")
 
         context = {
             'title': 'View video',

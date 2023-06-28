@@ -35,8 +35,6 @@ INSTALLED_APPS = (
     'django_extensions',
     'daterange_filter',
     'datetimewidget',
-    'rest_framework',
-    'django_filters',
     'leaflet',
     'observations'
 )
