@@ -35,39 +35,30 @@
 
 {% block content %}
 <div class="alert alert-info">
-   <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <b>Please note:</b> Video observations will NOT be counted until you have finished watching the video until the end and pressed the "Mark Finished" button. If you recieve an error saying the video file can not be found, try reloading the page one or two times, or try a different browser. There are known issues with firefox's video playback.
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <b>Please note:</b> Video observations will NOT be counted until you have finished watching the video until the end and pressed the "Mark Finished" button.
 </div>
-{% block object-tools %}
-{% if change %}{% if not is_popup %}
-  <div class="btn-toolbar">
-    {% block object-tools-items %}
-        {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
-        <a href="{% add_preserved_filters history_url %}" class="btn btn-default"><span class="glyphicon glyphicon-time"></span> {% trans "History" %}</a>
-    {% if has_absolute_url %}<li><a href="{% url 'admin:view_on_site' content_type_id original.pk %}" class="viewsitelink">{% trans "View on site" %}</a></li>{% endif%}
-    {% endblock %}
-  </div>
-{% endif %}{% endif %}
-{% endblock %}
 
 <div id="video">
-<div class="well" style="margin-bottom:5px !important;">Hold the mouse over the window and press ? , to get help. Press HELP on the menu above to recieve more general instructions.</div>
-
-<div data-embed="false" class="flowplayer is-splash color-alt no-background no-volume no-mute" style="width:982px;height:552px;">
-   <video preload poster >
-   <source src="{{ original.file.url }}"></video>
-</div>
-<div class="well"><span id="counter">Video Not started</span>
-    <span class="pull-right">
-    {% if original.mark_complete %}
-      {% if user in original.completed_by.all %}
-        You have completed this video.
-      {% else %}
-        {{ original.completed_by.count }} reviewers have completed this video.
-    {% endif %}
-    {% endif %}
-  </span>
-</div>
+    <div class="well" style="margin-bottom:5px !important;">
+        Hold the mouse over the window and press <strong>?</strong> to get help. Press HELP on the menu above to recieve more general instructions.
+    </div>
+    <div data-embed="false" class="flowplayer is-splash color-alt no-background no-volume no-mute" style="width:982px;height:552px;">
+        <video preload poster>
+            <source src="{{ original.file.url }}">
+        </video>
+    </div>
+    <div class="well"><span id="counter">Video Not started</span>
+        <span class="pull-right">
+        {% if original.mark_complete %}
+          {% if user in original.completed_by.all %}
+            You have completed this video.
+          {% else %}
+            {{ original.completed_by.count }} reviewers have completed this video.
+          {% endif %}
+        {% endif %}
+      </span>
+    </div>
 </div>
 
 </br>
@@ -130,7 +121,7 @@
           <div class="form-group">
             <label for="id_seen" class="col-sm-2 control-label required">Penguins seen</label>
             <div class="col-sm-10">
-               <div class="input-group">
+              <div class="input-group">
                 <input type="text" class="form-control" id="id_seen" min="1" max="100" required  autocomplete="off">
                 <span class="input-group-addon glyphicon glyphicon-eye-open"></span>
               </div>
