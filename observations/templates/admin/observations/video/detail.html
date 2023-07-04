@@ -22,99 +22,74 @@
 {% block breadcrumbs %}
 <ol class="breadcrumb">
   <li><a href="{% url 'admin:index' %}">{% trans 'Home' %}</a></li>
-  <li>{% if has_change_permission %}<a href="{% url 'admin:observations_site_changelist' %}">Sites</a>{% else %}Sites{% endif %}</li>
-  <li><a href="{% url 'admin:observations_site_detail' original.camera.site.id %}">{{ original.camera.site.name }}</a></li>
-  <li>View video ({{ original.date|date:"d-m-Y" }} {{ original.start_time|time:"H:i" }}-{{ original.end_time|time:"H:i" }})</li>
+  <li>{% if has_change_permission %}<a href="{% url 'admin:observations_camera_changelist' %}">Cameras</a>{% else %}Camera{% endif %}</li>
+  <li><a href="{% url 'admin:observations_camera_detail' original.camera.id %}">{{ original.camera.name }}</a></li>
+  <li>Video {{ original.date|date:"d-m-Y" }} {{ original.start_time|time:"H:i" }}-{{ original.end_time|time:"H:i" }}</li>
 </ol>
 {% endblock %}
 {% endif %}
 
 {% block navbar %}
-<ul class="nav navbar-nav">
-  <li><a href="{% url "admin:index" %}"><span class="glyphicon glyphicon-home"></span> Home</a></li>
-  {% if user.is_superuser %}
-  <li class="active"><a href="{% url "admin:observations_site_changelist" %}"><span class="glyphicon glyphicon-map-marker"></span> Sites</a></li>
-  <li><a href="{% url "admin:observations_video_changelist" %}"><span class="glyphicon glyphicon-facetime-video"></span> Videos</a></li>
-  <li><a href="{% url "admin:observations_penguinobservation_changelist" %}"><span class="glyphicon glyphicon-eye-open"></span> Observations</a></li>
-  <li><a href="{% url "admin:observations_penguincount_changelist" %}"><span class="glyphicon glyphicon-check"></span> Penguin count</a></li>
-  <li><a href="{% url "admin:observations_penguinuser_changelist" %}"><span class="glyphicon glyphicon-user"></span> Users</a></li>
-  {% endif %}
-  <li><a href="{% url "help_page" %}"><span class="glyphicon glyphicon-question-sign"></span> Help</a>
-</ul>
-{% endblock %}
+{% include 'admin/navbar.html' %}
+{% endblock navbar %}
 
 {% block content %}
 <div class="alert alert-info">
-   <button type="button" class="close" data-dismiss="alert">&times;</button>
-  <b>Please note:</b> Video observations will NOT be counted until you have finished watching the video until the end and pressed the "Mark Finished" button. If you recieve an error saying the video file can not be found, try reloading the page one or two times, or try a different browser. There are known issues with firefox's video playback.
+  <button type="button" class="close" data-dismiss="alert">&times;</button>
+  <b>Please note:</b> Video observations will NOT be counted until you have finished watching the video until the end and pressed the "Mark Finished" button.
 </div>
-{% block object-tools %}
-{% if change %}{% if not is_popup %}
-  <div class="btn-toolbar">
-    {% block object-tools-items %}
-        {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
-        <a href="{% add_preserved_filters history_url %}" class="btn btn-default"><span class="glyphicon glyphicon-time"></span> {% trans "History" %}</a>
-    {% if has_absolute_url %}<li><a href="{% url 'admin:view_on_site' content_type_id original.pk %}" class="viewsitelink">{% trans "View on site" %}</a></li>{% endif%}
-    {% endblock %}
-  </div>
-{% endif %}{% endif %}
-{% endblock %}
 
 <div id="video">
-<div class="well" style="margin-bottom:5px !important;">Hold the mouse over the window and press ? , to get help. Press HELP on the menu above to recieve more general instructions.</div>
-
-<div data-embed="false" class="flowplayer is-splash color-alt no-background no-volume no-mute" style="width:982px;height:552px;">
-   <video preload poster >
-   <source src="{{ original.file.url }}"></video>
-</div>
-<div class="well"><span id="counter">Video Not started</span>
-    <span class="pull-right">
-    {% if original.mark_complete = True %}
-      {% if user in original.completed_by.all %}
-        You have completed this video.
-      {% else %}
-      {{ original.completed_by.count }} Reviewers have completed this video.
-    {% endif %}
-    {% endif %}
-  </span>
-</div>
+    <div class="well" style="margin-bottom:5px !important;">
+        Hold the mouse over the window and press <strong>?</strong> to get help. Press HELP on the menu above to recieve more general instructions.
+    </div>
+    <div data-embed="false" class="flowplayer is-splash color-alt no-background no-volume no-mute" style="width:982px;height:552px;">
+        <video preload poster>
+            <source src="{{ original.file.url }}">
+        </video>
+    </div>
+    <div class="well"><span id="counter">Video Not started</span>
+        <span class="pull-right">
+        {% if original.mark_complete %}
+          {% if user in original.completed_by.all %}
+            You have completed this video.
+          {% else %}
+            {{ original.completed_by.count }} reviewers have completed this video.
+          {% endif %}
+        {% endif %}
+      </span>
+    </div>
 </div>
 
 </br>
 
 <div class="row">
   <div class="col-xs-6 col-md-6">
-    <h3>Your observations for this video</h3>
+    <h3>Your observations for this video:</h3>
   </div>
   <div class="col-xs-6 col-md-6 object-tools">
     <span class="pull-right">
-      {% if user in original.completed_by.all %}
-      {% else %}
-    <button id ="markdone" type="button" class="btn btn-success" role="button" style="display:none" onClick="markDone({{ original.pk }})"><span class="glyphicon glyphicon-thumbs-up"></span> Mark Finished</button>
-    {% endif %}
- <a class="btn btn-primary" href="{{ original.file.url }}"><span class="glyphicon glyphicon-facetime-video"></span> Download Video</a>
-  <button type="button" class="btn btn-primary" role="button" data-target="#addform" data-toggle="modal" onClick="formFillin();"><span class="glyphicon glyphicon-plus"></span> Add observation</button>
+      <button id ="markdone" type="button" class="btn btn-success" role="button" style="display:none" onClick="markDone({{ original.pk }})"><span class="glyphicon glyphicon-thumbs-up"></span> Mark Finished</button>
+      <a class="btn btn-primary" href="{{ original.file.url }}"><span class="glyphicon glyphicon-facetime-video"></span> Download Video</a>
+      <button type="button" class="btn btn-primary" role="button" data-target="#addform" data-toggle="modal" onClick="formFillin();"><span class="glyphicon glyphicon-plus"></span> Add observation</button>
     </span>
   </div>
 </div>
 <table id="observations" class="table table-striped">
   <thead>
     <tr>
-      <th>Time</th>
       <th>Penguins seen</th>
       <th>Comments</th>
-      <th>Position</th>
-      <th>Action</th>
+      <th>Video position (s)</th></th>
     </tr>
   <thead>
   <tbody>
   {% for observation in user_observations %}
     <tr id="row_{{ observation.pk }}">
-      <td>{{ observation.date|localtime|time:"H:i" }}</td>
       <td>{{ observation.seen }}</td>
       <td>{{ observation.comments }}</td>
-      <td>{{ observation.position }}</a></td>
-      <td><a onClick="deleteObservation({{ observation.pk }})" class="btn btn-danger">Delete</a>
+      <td>{{ observation.position|floatformat:"0" }}</a></td>
+      <td></td>
     </tr>
   {% endfor %}
   </tbody>
@@ -146,7 +121,7 @@
           <div class="form-group">
             <label for="id_seen" class="col-sm-2 control-label required">Penguins seen</label>
             <div class="col-sm-10">
-               <div class="input-group">
+              <div class="input-group">
                 <input type="text" class="form-control" id="id_seen" min="1" max="100" required  autocomplete="off">
                 <span class="input-group-addon glyphicon glyphicon-eye-open"></span>
               </div>
@@ -196,15 +171,15 @@ var time = 0;
 {% endif %}
 
 $(function() {
-    /* Setup CSRF protection. */
-    var csrftoken = $.cookie('csrftoken');
+    /* Set up CSRF protection. */
+    var csrftoken = $.cookie("csrftoken");
 
     function csrfSafeMethod(method) {
         // these HTTP methods do not require CSRF protection
         return (/^(GET|HEAD|OPTIONS|TRACE)$/.test(method));
     }
     flowplayer().bind("finish", function() {
-        $('#markdone').show();
+        $("#markdone").show();
     });
 
     $.ajaxSetup({
@@ -216,52 +191,51 @@ $(function() {
         }
     });
 
-    $('#id_time').datetimepicker({
+    $("#id_time").datetimepicker({
       pickDate: false,
       pick12HourFormat: false,
       useSeconds: false,
       minuteStepping: 1,
       timeFormat:"HH mm",
-      defaultDate: '{{ original.start_time|time:"H" }}'
+      defaultDate: "{{ original.start_time|time:"H" }}"
     });
 
-    $('#save').on('click', function () {
-      $('#add-form').parsley().validate();
+    $("#save").on("click", function () {
+      $("#add-form").parsley().validate();
     });
 
-    $('#add-form').parsley().subscribe('parsley:form:validate', function(form) {
+    $("#add-form").parsley().subscribe("parsley:form:validate", function(form) {
       if (form.isValid()) {
-        var btn = $('#save');
-        btn.button('loading')
+        var btn = $("#save");
+        btn.button("loading")
 
-        var time = moment('{{ original.date|date:"Y-m-d" }} ' + $('#id_time').val(), "YYYY-MM-DD h:m a");
+        var time = moment("{{ original.date|date:'Y-m-d' }} " + $("#id_time").val(), "YYYY-MM-DD h:m a");
 
         var data = {
-          'date': time.format('YYYY-MM-DDTh:m:s+08:00'), // hack to override the browser timezone
-          'observer': {{ user.id }},
-          'camera': {{ original.camera.id }},
-          'site': {{ original.camera.site.id }},
-          'seen': $('#id_seen').val(),
-          'comments': $('#id_comments').val(),
-          'video': {{ original.id }},
-          'position': $('#id_position').val(),
-          'validated': isFinished
+          "date": time.format("YYYY-MM-DDThh:mm:ss+08:00"), // hack to override the browser timezone
+          "camera": {{ original.camera.id }},
+          "video": {{ original.id }},
+          "observer": {{ user.id }},
+          "seen": $("#id_seen").val(),
+          "position": $("#id_position").val(),
+          "comments": $("#id_comments").val(),
+          "validated": isFinished
         };
 
         $.ajax({
-          url: "/api/observations/",
+          url: "/api/observation/",
           type: "POST",
           data: data
         }).done(function() {
-          $('#addform').modal('hide');
-          $('.modal-backdrop').remove();
-          $('#observations tbody').append("<tr><td>" + $('#id_time').val() + "</td><td>" + $('#id_seen').val() + "</td>" + "<td>" + $('#id_comments').val() + "</td><td>" + $('#id_position').val() + "</td><td><a href='?'>Reload page to delete this record</a></td></tr>");
-          $('#add-form').parsley().reset();
-          $('#add-form').find('input:text, textarea').val('');
-          $('#id_time').data("DateTimePicker").setDate('{{ original.start_time|time:"H" }}');
+          $("#addform").modal("hide");
+          $(".modal-backdrop").remove();
+          $("#observations tbody").append("<tr><td>" + $("#id_seen").val() + "</td><td>" + $("#id_comments").val() + "</td><td>" + $("#id_position").val() + "</td></tr>");
+          $("#add-form").parsley().reset();
+          $("#add-form").find("input:text, textarea").val("");
+          $("#id_time").data("DateTimePicker").setDate("{{ original.start_time|time:'H' }}");
         }).fail(function(msg) {
         }).always(function() {
-          btn.button('reset');
+          btn.button("reset");
         });
       }
     });
@@ -270,9 +244,9 @@ $(function() {
         var f = flowplayer();
         if (f.video.time > 0) {
             time = Math.floor(f.video.time);
-            $('#counter').html(time + " seconds");
+            $("#counter").html(time + " seconds");
         } else {
-            $('#counter').html('Video not started');
+            $("#counter").html("Video not started");
         }
     }, 100);
   });
@@ -283,31 +257,21 @@ function formFillin() {
 
     if (f.video.time > 0) {
       time = Math.floor(f.video.time);
-      $('#id_position').val(time);
+      $("#id_position").val(time);
     } else {
-      $('#id_position').val(0);
+      $("#id_position").val(0);
     }
-    $('#counter').html('Video is paused');
-}
-
-function deleteObservation(pk) {
-  $.ajax({
-      url: '/api/observations/'+pk+'/',
-      type: 'DELETE',
-      success: function(result) {
-        $('#row_'+pk).hide();
-      }
-  });
+    $("#counter").html("Video is paused");
 }
 
 function markDone(pk) {
   $.ajax({
-      url: '/api/videos/'+pk+'/',
-      type: 'PATCH',
+      url: "/api/video/" + pk + "/",
+      type: "POST",
       success: function(result) {
-        $('#markdone').addClass('btn-danger').text('Done!')
+        $("#markdone").addClass("btn-danger").text("Done!")
       },
-      data: {'mark_complete': true}
+      data: {"mark_complete": true}
 
     });
 }

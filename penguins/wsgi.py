@@ -3,7 +3,7 @@ WSGI config for penguins project.
 It exposes the WSGI callable as a module-level variable named ``application``
 """
 import os
-from pathlib2 import Path
+from pathlib import Path
 
 d = Path(__file__).resolve().parents[1]
 dot_env = os.path.join(str(d), '.env')
