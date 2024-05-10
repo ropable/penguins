@@ -1,0 +1,17 @@
+apiVersion: networking.k8s.io/v1
+kind: Ingress
+metadata:
+  name: penguins-ingress
+spec:
+  ingressClassName: nginx
+  rules:
+  - host: penguins-uat.dbca.wa.gov.au
+    http:
+      paths:
+      - path: /
+        pathType: Prefix
+        backend:
+          service:
+            name: penguins-clusterip-uat
+            port:
+              number: 8080
