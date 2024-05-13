@@ -1,0 +1,39 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: penguins-import-cronjob
+  labels:
+    app: penguins-import-cronjob
+spec:
+  schedule: ""
+  concurrencyPolicy: Forbid
+  jobTemplate:
+    spec:
+      parallelism: 1
+      activeDeadlineSeconds: 600
+      template:
+        spec:
+          restartPolicy: Never
+          containers:
+          - name: penguins-import-cronjob
+            image: ghcr.io/dbca-wa/penguins
+            command: ["python"]
+            args: ["--version"]
+            env:
+            - name: TZ
+              value: "Australia/Perth"
+            securityContext:
+              #runAsNonRoot: true
+              privileged: false
+              allowPrivilegeEscalation: false
+              capabilities:
+                drop:
+                  - ALL
+              readOnlyRootFilesystem: true
+            volumeMounts:
+              - mountPath: /tmp
+                name: tmpfs-ram
+          volumes:
+            - name: tmpfs-ram
+              emptyDir:
+                medium: "Memory"

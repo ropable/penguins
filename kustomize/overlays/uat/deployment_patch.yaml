@@ -1,0 +1,37 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: penguins-deployment
+spec:
+  template:
+    spec:
+      containers:
+      - name: penguins
+        env:
+        - name: SITE_URL
+          value: "penguins-uat.dbca.wa.gov.au"
+        - name: DATABASE_URL
+          valueFrom:
+            secretKeyRef:
+              name: penguins-env-uat
+              key: DATABASE_URL
+        - name: SECRET_KEY
+          valueFrom:
+            secretKeyRef:
+              name: penguins-env-uat
+              key: SECRET_KEY
+        - name: AZURE_ACCOUNT_NAME
+          valueFrom:
+            secretKeyRef:
+              name: penguins-env-uat
+              key: AZURE_ACCOUNT_NAME
+        - name: AZURE_ACCOUNT_KEY
+          valueFrom:
+            secretKeyRef:
+              name: penguins-env-uat
+              key: AZURE_ACCOUNT_KEY
+        - name: AZURE_CONTAINER
+          valueFrom:
+            secretKeyRef:
+              name: penguins-env-uat
+              key: AZURE_CONTAINER
