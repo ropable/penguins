@@ -31,38 +31,24 @@ spec:
           limits:
             memory: "4096Mi"
             cpu: "1000m"
-        #startupProbe:
-        #  httpGet:
-        #    path: /livez
-        #    port: 8080
-        #    scheme: HTTP
-        #  initialDelaySeconds: 3
-        #  periodSeconds: 15
-        #  timeoutSeconds: 10
-        #  successThreshold: 1
-        #  failureThreshold: 3
-        #livenessProbe:
-        #  httpGet:
-        #    path: /livez
-        #    port: 8080
-        #    scheme: HTTP
-        #  initialDelaySeconds: 0
-        #  periodSeconds: 15
-        #  successThreshold: 1
-        #  failureThreshold: 3
-        #  timeoutSeconds: 10
-        #readinessProbe:
-        #  httpGet:
-        #    path: /readyz
-        #    port: 8080
-        #    scheme: HTTP
-        #  initialDelaySeconds: 0
-        #  periodSeconds: 15
-        #  successThreshold: 1
-        #  failureThreshold: 3
-        #  timeoutSeconds: 10
+        startupProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 0
+          periodSeconds: 3
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
+        livenessProbe:
+          tcpSocket:
+            port: 8080
+          initialDelaySeconds: 0
+          periodSeconds: 10
+          timeoutSeconds: 1
+          successThreshold: 1
+          failureThreshold: 3
         securityContext:
-          #runAsNonRoot: true
+          runAsNonRoot: false
           privileged: false
           allowPrivilegeEscalation: false
           capabilities:
