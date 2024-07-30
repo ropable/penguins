@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "penguins"
-version = "1.2.0"
+version = "1.2.1"
 description = "Department of Parks and Wildlife Little Penguins Observations application"
 authors = ["Ashley Felton <ashley.felton@dbca.wa.gov.au>"]
 license = "Apache-2.0"
