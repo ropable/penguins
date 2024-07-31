@@ -1,150 +1,142 @@
+from dbca_utils.utils import env
 import dj_database_url
 import os
+from pathlib import Path
 import sys
+import tomllib
+from zoneinfo import ZoneInfo
 
-BASE_DIR = os.path.dirname(os.path.dirname(__file__))
-SECRET_KEY = os.environ.get('SECRET_KEY', 'PlaceholderSecretKey')
-DEBUG = True if os.environ.get('DEBUG', False) == 'True' else False
-CSRF_COOKIE_SECURE = True if os.environ.get('CSRF_COOKIE_SECURE', False) == 'True' else False
-SESSION_COOKIE_SECURE = True if os.environ.get('SESSION_COOKIE_SECURE', False) == 'True' else False
+
+# Project paths
+# Build paths inside the project like this: os.path.join(BASE_DIR, ...)
+BASE_DIR = str(Path(__file__).resolve().parents[1])
+PROJECT_DIR = str(Path(__file__).resolve().parents[0])
+# Add PROJECT_DIR to the system path.
+sys.path.insert(0, PROJECT_DIR)
+
+# Application definition
+DEBUG = env('DEBUG', False)
+SECRET_KEY = env('SECRET_KEY', 'PlaceholderSecretKey')
+CSRF_COOKIE_SECURE = env('CSRF_COOKIE_SECURE', False)
+CSRF_TRUSTED_ORIGINS = env('CSRF_TRUSTED_ORIGINS', 'http://127.0.0.1').split(',')
+SESSION_COOKIE_SECURE = env('SESSION_COOKIE_SECURE', False)
+SECURE_SSL_REDIRECT = env('SECURE_SSL_REDIRECT', False)
+SECURE_REFERRER_POLICY = env('SECURE_REFERRER_POLICY', None)
+SECURE_HSTS_SECONDS = env('SECURE_HSTS_SECONDS', 0)
 if not DEBUG:
-    ALLOWED_HOSTS = os.environ.get('ALLOWED_DOMAINS', 'localhost').split(',')
+    ALLOWED_HOSTS = env('ALLOWED_HOSTS', 'localhost').split(',')
 else:
     ALLOWED_HOSTS = ['*']
-INTERNAL_IPS = ('127.0.0.1', '::1')
+INTERNAL_IPS = ['127.0.0.1', '::1']
 ROOT_URLCONF = 'penguins.urls'
 WSGI_APPLICATION = 'penguins.wsgi.application'
-
-# Email settings
-ADMINS = ('asi@dbca.wa.gov.au',)
-EMAIL_HOST = os.environ.get('EMAIL_HOST', 'smtp')
-EMAIL_PORT = os.environ.get('EMAIL_PORT', 25)
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 # Application definition
 INSTALLED_APPS = (
+    'whitenoise.runserver_nostatic',
     'django.contrib.admin',
-    'django.contrib.admindocs',
-    'django.contrib.contenttypes',
     'django.contrib.auth',
+    'django.contrib.contenttypes',
+    'django.contrib.gis',
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django.contrib.sites',
-    'django.contrib.humanize',
-    'django.contrib.gis',
     'django_extensions',
-    'daterange_filter',
-    'datetimewidget',
-    'leaflet',
-    'observations'
+    #'daterange_filter',
+    #'datetimewidget',
+    #'leaflet',
+    'observations',
 )
-MIDDLEWARE_CLASSES = (
-    'django.middleware.common.CommonMiddleware',
+MIDDLEWARE = [
+    'penguins.middleware.HealthCheckMiddleware',
+    'django.middleware.security.SecurityMiddleware',
+    'whitenoise.middleware.WhiteNoiseMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware',
+    'django.middleware.common.CommonMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
-    'penguins.middleware.SSOLoginMiddleware',
-)
-
-AUTH_USER_MODEL = 'observations.PenguinUser'
-LOGIN_URL = '/login/'
-LOGIN_REDIRECT_URL = '/'
-LOGIN_REDIRECT_URL_FAILURE = LOGIN_URL
-LOGOUT_URL = '/logout/'
-LOGOUT_REDIRECT_URL = LOGOUT_URL
-ANONYMOUS_USER_ID = -1
-
-"""
-TEMPLATE_CONTEXT_PROCESSORS = (
-    'django.contrib.auth.context_processors.auth',
-    'django.contrib.messages.context_processors.messages',
-    'django.template.context_processors.media',
-    'django.template.context_processors.request',
-    'django.template.context_processors.csrf',
-    'django.template.context_processors.static',
-    'django.template.context_processors.debug',
-    'django.template.context_processors.i18n',
-    'penguins.context_processors.from_settings',
-)
-TEMPLATE_LOADERS = (
-    ('django.template.loaders.cached.Loader', (
-        'django.template.loaders.filesystem.Loader',
-        'django.template.loaders.app_directories.Loader',
-    )),
-)
-TEMPLATE_DIRS = (
-    os.path.join(BASE_DIR, "penguins", "templates"),
-    os.path.join(BASE_DIR, "observations", "templates"),
-)
-TEMPLATE_DEBUG = DEBUG
-"""
+    'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'dbca_utils.middleware.SSOLoginMiddleware',
+]
 TEMPLATES = [
     {
         'BACKEND': 'django.template.backends.django.DjangoTemplates',
         'DIRS': [
-            os.path.join(BASE_DIR, "penguins", "templates"),
+            os.path.join(PROJECT_DIR, 'templates'),
         ],
         'APP_DIRS': True,
         'OPTIONS': {
             'context_processors': [
                 'django.contrib.auth.context_processors.auth',
-                'django.contrib.messages.context_processors.messages',
-                'django.template.context_processors.media',
-                'django.template.context_processors.request',
-                'django.template.context_processors.csrf',
-                'django.template.context_processors.static',
                 'django.template.context_processors.debug',
                 'django.template.context_processors.i18n',
-                'penguins.context_processors.from_settings',
+                'django.template.context_processors.media',
+                'django.template.context_processors.static',
+                'django.template.context_processors.tz',
+                'django.template.context_processors.request',
+                'django.template.context_processors.csrf',
+                'django.contrib.messages.context_processors.messages',
+                'penguins.context_processors.template_context',
             ],
         },
     },
 ]
+# This is required to add context variables to all templates:
+STATIC_CONTEXT_VARS = {}
+LOGIN_URL = '/login/'
+LOGIN_REDIRECT_URL = '/'
+project = tomllib.load(open(os.path.join(BASE_DIR, 'pyproject.toml'), 'rb'))
+APPLICATION_VERSION_NO = project['tool']['poetry']['version']
+LOGOUT_URL = '/logout/'
+LOGOUT_REDIRECT_URL = LOGOUT_URL
+SITE_URL = env('SITE_URL', 'localhost')
 
-# Database
-DATABASES = {'default': dj_database_url.config()}
-CONN_MAX_AGE = None
+# Email settings
+EMAIL_HOST = env('EMAIL_HOST', 'email.host')
+EMAIL_PORT = env('EMAIL_PORT', 25)
+
+
+# Database configuration
+DATABASES = {
+    # Defined in the DATABASE_URL env variable.
+    'default': dj_database_url.config(),
+}
 
 # Internationalization
-SITE_ID = 1
-LANGUAGE_CODE = 'en-us'
 TIME_ZONE = 'Australia/Perth'
-USE_I18N = True
-USE_L10N = True
+TZ = ZoneInfo(TIME_ZONE)
 USE_TZ = True
-
-# Static files (CSS, JavaScript, Images)
-# NOTE: don't remove media variables, even if unused.
-MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-MEDIA_URL = '/media/'
-STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
-STATIC_URL = '/static/'
-STATICFILES_FINDERS = (
-    'django.contrib.staticfiles.finders.FileSystemFinder',
-    'django.contrib.staticfiles.finders.AppDirectoriesFinder',
+USE_I18N = False
+USE_L10N = True
+# Sensible AU date input formats
+DATE_INPUT_FORMATS = (
+    '%d/%m/%Y',
+    '%d/%m/%y',
+    '%d-%m-%Y',
+    '%d-%m-%y',
+    '%d %b %Y',
+    '%d %b, %Y',
+    '%d %B %Y',
+    '%d %B, %Y',
+    '%Y-%m-%d'  # Needed for form validation.
 )
 
+# Static files (CSS, JavaScript, Images)
+STATIC_ROOT = os.path.join(BASE_DIR, 'staticfiles')
+STATIC_URL = '/static/'
+STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
+WHITENOISE_ROOT = STATIC_ROOT
+
+# Media uploads
+MEDIA_URL = '/media/'
 
 # Azure blob storage
 DEFAULT_FILE_STORAGE = 'storages.backends.azure_storage.AzureStorage'
 AZURE_ACCOUNT_NAME = os.environ.get('AZURE_ACCOUNT_NAME', None)
 AZURE_ACCOUNT_KEY = os.environ.get('AZURE_ACCOUNT_KEY', None)
 AZURE_CONTAINER = os.environ.get('AZURE_CONTAINER', None)
-
-
-# Authentication
-AUTHENTICATION_BACKENDS = (
-    'django.contrib.auth.backends.ModelBackend',
-)
-
-
-# Misc settings
-LEAFLET_CONFIG = {
-    'SCALE': 'metric',
-}
-APPLICATION_VERSION_NO = '1.2.1'
-SITE_URL = os.environ.get('SITE_URL', 'https://penguins.dbca.wa.gov.au')
 
 
 # Logging settings - log to stdout
@@ -161,7 +153,7 @@ LOGGING = {
             'stream': sys.stdout,
             'level': 'WARNING',
         },
-        'observations': {
+        'penguins': {
             'class': 'logging.StreamHandler',
             'formatter': 'verbose',
             'stream': sys.stdout,
@@ -173,9 +165,15 @@ LOGGING = {
             'handlers': ['console'],
             'level': 'ERROR',
         },
-        'observations': {
-            'handlers': ['observations'],
+        'penguins': {
+            'handlers': ['penguins'],
             'level': 'INFO',
         },
+        # Set the logging level for all azure-* libraries (the azure-storage-blob library uses this one).
+        # Reference: https://learn.microsoft.com/en-us/azure/developer/python/sdk/azure-sdk-logging
+        'azure': {
+            'handlers': ['console'],
+            'level': 'ERROR',
+        }
     }
 }

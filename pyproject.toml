@@ -1,31 +1,33 @@
 [tool.poetry]
 name = "penguins"
-version = "1.2.1"
-description = "Department of Parks and Wildlife Little Penguins Observations application"
+version = "2.0.0"
+description = "DBCA Little Penguins Observations application"
 authors = ["Ashley Felton <ashley.felton@dbca.wa.gov.au>"]
 license = "Apache-2.0"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "~3.7"
-django = "1.11.29"
-psycopg2-binary = "2.7.6"
-dj-database-url = "0.5.0"
-dj-static = "0.0.6"
-django-extensions = "2.2.9"
-django-leaflet = "0.27.1"
-django-datetime-widget = "0.9.3"
-django-daterange-filter = "1.2.0"
-python-dotenv = "0.18.0"
-arrow = "0.8.0"
-pyephem = "3.7.7.0"
-unicodecsv = "0.14.1"
-psycopg2 = "2.8.6"
-django-storages = {version = "1.9.1", extras = ["azure"]}
-gunicorn = "20.1.0"
+python = "~3.12"
+django = "4.2.14"
+psycopg = {version = "3.2.1", extras = ["binary", "pool"]}
+dbca-utils = "2.0.2"
+python-dotenv = "1.0.1"
+dj-database-url = "2.2.0"
+django-extensions = "3.2.3"
+gunicorn = "22.0.0"
+whitenoise = {version = "6.7.0", extras = ["brotli"]}
+django-storages = {version = "1.14.4", extras = ["azure"]}
+
+#django-leaflet = "0.27.1"
+#django-datetime-widget = "0.9.3"
+#django-daterange-filter = "1.2.0"
+#pyephem = "3.7.7.0"
+#unicodecsv = "0.14.1"
 
 [tool.poetry.group.dev.dependencies]
-ipython = "5.0.0"
+ipython = "^8.26.0"
+ipdb = "^0.13.11"
+pre-commit = "^3.7.1"
 
 [build-system]
 requires = ["poetry-core"]
