@@ -143,7 +143,7 @@ AUTHENTICATION_BACKENDS = (
 LEAFLET_CONFIG = {
     'SCALE': 'metric',
 }
-APPLICATION_VERSION_NO = '1.2.0'
+APPLICATION_VERSION_NO = '1.2.1'
 SITE_URL = os.environ.get('SITE_URL', 'https://penguins.dbca.wa.gov.au')
 
 
