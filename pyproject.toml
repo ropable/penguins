@@ -17,12 +17,7 @@ django-extensions = "3.2.3"
 gunicorn = "22.0.0"
 whitenoise = {version = "6.7.0", extras = ["brotli"]}
 django-storages = {version = "1.14.4", extras = ["azure"]}
-
-#django-leaflet = "0.27.1"
-#django-datetime-widget = "0.9.3"
-#django-daterange-filter = "1.2.0"
-#pyephem = "3.7.7.0"
-#unicodecsv = "0.14.1"
+webtemplate-dbca = "1.7.1"
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.26.0"

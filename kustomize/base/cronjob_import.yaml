@@ -5,8 +5,8 @@ metadata:
   labels:
     app: penguins-import-cronjob
 spec:
-  # AWST: 06:05 every day.
-  schedule: "5 22 * * *"
+  # AWST: 07:05 every day.
+  schedule: "5 23 * * *"
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:

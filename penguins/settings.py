@@ -1,11 +1,11 @@
-from dbca_utils.utils import env
-import dj_database_url
 import os
-from pathlib import Path
 import sys
 import tomllib
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
+import dj_database_url
+from dbca_utils.utils import env
 
 # Project paths
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
@@ -46,6 +46,7 @@ INSTALLED_APPS = (
     #'daterange_filter',
     #'datetimewidget',
     #'leaflet',
+    'webtemplate_dbca',
     'observations',
 )
 MIDDLEWARE = [
@@ -88,6 +89,8 @@ STATIC_CONTEXT_VARS = {}
 LOGIN_URL = '/login/'
 LOGIN_REDIRECT_URL = '/'
 project = tomllib.load(open(os.path.join(BASE_DIR, 'pyproject.toml'), 'rb'))
+SITE_TITLE = 'Penguin Island Observations'
+SITE_ACRONYM = 'Penguins'
 APPLICATION_VERSION_NO = project['tool']['poetry']['version']
 LOGOUT_URL = '/logout/'
 LOGOUT_REDIRECT_URL = LOGOUT_URL

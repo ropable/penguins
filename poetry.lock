@@ -1167,6 +1167,19 @@ files = [
 ]
 
 [[package]]
+name = "webtemplate-dbca"
+version = "1.7.1"
+description = "Base HTML templates for DBCA Django projects"
+optional = false
+python-versions = "*"
+files = [
+    {file = "webtemplate-dbca-1.7.1.tar.gz", hash = "sha256:0fe4ccd143dfee138c85969989a9757d14dbdf3387f1317f37f4667d90131da0"},
+]
+
+[package.dependencies]
+Django = ">=3.2"
+
+[[package]]
 name = "whitenoise"
 version = "6.7.0"
 description = "Radically simplified static file serving for WSGI applications"
@@ -1186,4 +1199,4 @@ brotli = ["brotli"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.12"
-content-hash = "0af5c47f38d358a1d4e56faeced0553f6c0e2725d29d5282d334ccc9854cf42c"
+content-hash = "87c8958b012c2d94ed6ecf2659273a997fffe6171d0ff47d719280bfff2009d5"
