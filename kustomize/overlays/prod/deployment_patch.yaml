@@ -35,3 +35,13 @@ spec:
             secretKeyRef:
               name: penguins-env-prod
               key: AZURE_CONTAINER
+        - name: GEOSERVER_URL
+          valueFrom:
+            secretKeyRef:
+              name: penguins-env-prod
+              key: GEOSERVER_URL
+        - name: LAYER_NAME
+          valueFrom:
+            secretKeyRef:
+              name: penguins-env-prod
+              key: LAYER_NAME
