@@ -8,11 +8,17 @@ from observations.models import Camera, Video, PenguinObservation
 
 
 class CameraAdmin(ModelAdmin):
-    list_display = ("name", "camera_key", "active")
+    list_display = ("name", "camera_key", "active", "video_count", "newest_video")
     list_filter = ("active",)
     formfield_overrides = {
         models.PointField: {"widget": mapwidgets.LeafletPointFieldWidget}
     }
+
+    def video_count(self, obj):
+        return obj.video_set.count()
+
+    def newest_video(self, obj):
+        return obj.get_newest_video() or ""
 
 
 class VideoAdmin(ModelAdmin):
@@ -73,8 +79,8 @@ class VideoAdmin(ModelAdmin):
 
 class PenguinObservationAdmin(ModelAdmin):
     date_hierarchy = "video__date"
-    list_display = ("video", "position", "seen", "validated")
-    list_filter = ("validated",)
+    list_display = ("video", "position", "seen", "observer", "validated")
+    list_filter = ("video__camera", "validated")
     readonly_fields = ("video", "observer", "position", "seen", "comments")
     fieldsets = (
         (
