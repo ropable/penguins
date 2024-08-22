@@ -6,11 +6,38 @@
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/fontawesome.min.css" integrity="sha512-B46MVOJpI6RBsdcU307elYeStF2JKT87SsHZfRSkjVi4/iZ3912zXi45X5/CBr/GbCyLx6M1GQtTKYRd52Jxgw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.6.0/css/all.min.css" integrity="sha512-Kc323vGBEqzTmouAECnVceyQqyqdsSiqLQISBL29aUW4U/M7pSPA/gEUZQqv1cwx4OnYxTxve5UMg5GT6L4JJg==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <style>
+  .navbar-custom {
+    background-color: #5393d2;
+  }
+  /* Change the brand and text color */
+  .navbar-custom .navbar-brand, .navbar-custom .navbar-text {
+    color: #ffffff;
+  }
+  /* Change the link color */
+  .navbar-custom .navbar-nav .nav-link {
+    color: #034c8b;
+  }
+  /* Change the color of active or hovered links */
+  .navbar-custom .nav-item.active .nav-link, .navbar-custom .nav-item:hover .nav-link {
+    color: #ffffff;
+  }
   .footer {
     background-color: #f5f5f5;
   }
 </style>
 {% endblock %}
+
+{% block navbar_brand %}
+<a class="navbar-brand d-block d-sm-none" href="/">
+    {{ site_acronym }}
+</a>
+<a class="navbar-brand d-none d-sm-block" href="/">
+    {% block navbar_logo %}<img class="d-inline-block" src="{% static 'img/dbca_logo_sml.png' %}" height="50">{% endblock navbar_logo %}
+    <img class="d-inline-block" src="{% static 'img/penguin_logo.png' %}" height="50">
+</a>
+{% endblock navbar_brand %}
+
+{% block navbar_class %}navbar fixed-top navbar-expand-md navbar-custom{% endblock %}
 
 {% block navbar_links %}
 {% if user.is_authenticated %}
