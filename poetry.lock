@@ -460,13 +460,13 @@ typing_extensions = ">=3.10.0.0"
 
 [[package]]
 name = "django"
-version = "4.2.14"
+version = "4.2.15"
 description = "A high-level Python web framework that encourages rapid development and clean, pragmatic design."
 optional = false
 python-versions = ">=3.8"
 files = [
-    {file = "Django-4.2.14-py3-none-any.whl", hash = "sha256:3ec32bc2c616ab02834b9cac93143a7dc1cdcd5b822d78ac95fc20a38c534240"},
-    {file = "Django-4.2.14.tar.gz", hash = "sha256:fc6919875a6226c7ffcae1a7d51e0f2ceaf6f160393180818f6c95f51b1e7b96"},
+    {file = "Django-4.2.15-py3-none-any.whl", hash = "sha256:61ee4a130efb8c451ef3467c67ca99fdce400fedd768634efc86a68c18d80d30"},
+    {file = "Django-4.2.15.tar.gz", hash = "sha256:c77f926b81129493961e19c0e02188f8d07c112a1162df69bfab178ae447f94a"},
 ]
 
 [package.dependencies]
@@ -491,6 +491,17 @@ files = [
 
 [package.dependencies]
 Django = ">=3.2"
+
+[[package]]
+name = "django-map-widgets"
+version = "0.5.1"
+description = "Configurable and user-friendly map widgets for GeoDjango fields"
+optional = false
+python-versions = "*"
+files = [
+    {file = "django_map_widgets-0.5.1-py3-none-any.whl", hash = "sha256:7307935163b46c6a2a225c85c91c7262a8b47a5c3aefbbc6d8fc7a5fda53b7cd"},
+    {file = "django_map_widgets-0.5.1.tar.gz", hash = "sha256:68e81f9c58c1cd6d180421220a4d100a185c8062ae0ca7be790658fcfd4eda1d"},
+]
 
 [[package]]
 name = "django-storages"
@@ -1199,4 +1210,4 @@ brotli = ["brotli"]
 [metadata]
 lock-version = "2.0"
 python-versions = "~3.12"
-content-hash = "87c8958b012c2d94ed6ecf2659273a997fffe6171d0ff47d719280bfff2009d5"
+content-hash = "06f4284232c50ee57dd44f954cf927484af756c3ad9461a9086f76b5c8f5c8f2"

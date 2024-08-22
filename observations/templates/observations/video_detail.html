@@ -1,0 +1,99 @@
+{% extends "base_penguins.html" %}
+{% load static %}
+
+{% block extra_style %}
+{{ block.super }}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.17.3/video-js.min.css" integrity="sha512-xQ+IvAl0/u0XWFWC0uoJLfQLKE+J3KZ/kPWpD/8ZoTw/pafvsQW0hudKW4lgZwk02eymBBpdwC0QfqrHUOhOhw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css" integrity="sha512-k+xZuzf4IaGQK9sSDjaNyrfwgxBfoF++7u6Q0ZVUs2rDczx9doNZkYXyyQbnJQcMR4o+IjvAcIj69hHxiOZEig==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+{% endblock %}
+
+{% block page_content_inner %}
+<div class="row">
+  <div class="col">
+    <div>
+      <h1>
+        {{ object.camera }}: {{ object.date}} {{ object.start_time }} - {{ object.end_time}}{% if object.mark_complete %} (completed){% endif %}
+      </h1>
+    </div>
+
+    <div class="alert alert-warning alert-dismissible fade show" role="alert">
+      <strong>Please note:</strong> the "Mark finished" button will not be enabled until you have finished watching the video until the end.
+      <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+
+    <div>
+      <button type="button" class="btn btn-primary" id="addObservationButton" data-bs-toggle="modal" data-bs-target="#addObservationModal">Add an observation</button>
+      <button type="button" class="btn btn-success" id="markFinishedButton" data-action="{% url 'observations:video_complete' pk=object.pk %}" data-csrf-token="{{ csrf_token }}" disabled>Mark finished</button>
+      <a class="btn btn-secondary" href="{{ object.file.url }}?rscd={{ object.get_content_disposition }}" role="button" id="downloadButton">Download video</a>
+    </div>
+
+  </div>
+</div>
+
+<div class="row my-1">
+  <div class="col">
+    <video id="videoPlayer" class="video-js">
+      <source src="{{ object.file.url }}" type="video/mp4" />
+      <p class="vjs-no-js">
+        To view this video please enable JavaScript, and consider upgrading to a web browser that
+        <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+      </p>
+    </video>
+  </div>
+</div>
+
+<div class="row">
+  <div class="col">
+    <div>Your observations for this video:</div>
+    <div id="videoObservationsTable" hx-get="{% url 'observations:video_observations' pk=object.pk %}" hx-trigger="load,observationCreated from:body" hx-swap="innerHTML"></div>
+  </div>
+</div>
+
+<!-- Modal -->
+<div class="modal fade" id="addObservationModal" tabindex="-1" aria-labelledby="addObservationModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h1 class="modal-title fs-5" id="addObservationModalLabel">Add an observation</h1>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+      <div class="modal-body">
+        <form id="saveObservationForm" onsubmit="event.preventDefault(); submitObservationForm(this);" action="{% url 'observations:penguinobservation_create' pk=object.pk %}" method="POST">
+          {% csrf_token %}
+          <div class="row mb-3">
+            <label for="videoPosition" class="col-sm-2 col-form-label">Video position (seconds)</label>
+            <div class="col-sm-10">
+              <input type="text" readonly class="form-control-plaintext" id="videoPosition" name="videoPosition" value="0" />
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="penguinCount" class="col-sm-2 col-form-label"><strong>No. of penguins<span class="asteriskField">*</span></strong></label>
+            <div class="col-sm-10">
+              <input type="number" min="1" class="form-control" id="penguinCount" name="penguinCount" required />
+            </div>
+          </div>
+          <div class="row mb-3">
+            <label for="comments" class="col-sm-2 col-form-label">Comments</label>
+            <div class="col-sm-10">
+              <textarea class="form-control" id="comments" name="comments" rows="3"></textarea>
+            </div>
+          </div>
+          <div>
+            <button type="submit" class="btn btn-primary" id="saveObservationButton">Save observation</button>
+            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          </div>
+        </form>
+      </div><!-- /.modal-body -->
+    </div><!-- /.modal-content -->
+  </div><!-- /.modal-dialog -->
+</div><!-- /.modal -->
+
+{% endblock page_content_inner %}
+
+{% block base_js %}
+{{ block.super }}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/2.0.0/htmx.min.js" integrity="sha512-Cpedvic0/Mgc3uRJ5apQ/ZYroPCZpatYEXGJayRaRNjKLaFualFxfxn97LJymznV+nC7y0/Hp/apHNwGpMimuw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.17.3/video.min.js" integrity="sha512-gqDlEVSJBx2sY4FCoF8fElKc1JpQqbKnZSBmBEW/qQ6rRSyfIEAkevSH22LnGZ5vsNrhv79fM4S+AMmmCEMQKA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js" integrity="sha512-0Yc4Jv5wX4+mjDuLxmHFGqgDtMFAEBLpPq/0nPVmAOwHPMkYXiS1YVYWTcrVQztftk/32089DDTyrCJO8hBCZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="{% static 'js/video_detail.js' %}"></script>
+{% endblock %}
