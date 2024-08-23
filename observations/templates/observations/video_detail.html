@@ -58,7 +58,7 @@
         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
       </div>
       <div class="modal-body">
-        <form id="saveObservationForm" onsubmit="event.preventDefault(); submitObservationForm(this);" action="{% url 'observations:penguinobservation_create' pk=object.pk %}" method="POST">
+        <form id="saveObservationForm" onsubmit="event.preventDefault(); submitObservationForm(this);" action="{% url 'observations:penguinobservation_create' pk=object.pk %}" method="post">
           {% csrf_token %}
           <div class="row mb-3">
             <label for="videoPosition" class="col-sm-2 col-form-label">Video position (seconds)</label>

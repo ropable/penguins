@@ -67,9 +67,19 @@ class VideoList(LoginRequiredMixin, ListView):
 
     def get_queryset(self):
         queryset = super().get_queryset()
-        if "camera_id" in self.request.GET and self.request.GET["camera_id"]:
+        if self.request.GET.get("camera_id"):
             queryset = queryset.filter(camera__pk=self.request.GET["camera_id"])
-        # TODO: filter by date, views, mark_complete
+        if self.request.GET.get("date"):
+            # Django is nice enough to parse the date string for us.
+            queryset = queryset.filter(date=self.request.GET["date"])
+        if self.request.GET.get("completed"):
+            completed = self.request.GET["completed"] == "true"
+            queryset = queryset.filter(mark_complete=completed)
+        if self.request.GET.get("views"):
+            if self.request.GET["views"] == "false":
+                queryset = queryset.filter(views=0)
+            elif self.request.GET["views"] == "true":
+                queryset = queryset.filter(views__gt=0)
         return queryset
 
     def get_context_data(self, **kwargs):
@@ -82,8 +92,18 @@ class VideoList(LoginRequiredMixin, ListView):
         context["object_count"] = len(self.get_queryset())
         context["previous_pages"] = get_previous_pages(context["page_obj"])
         context["next_pages"] = get_next_pages(context["page_obj"])
+        context["active_cameras"] = Camera.objects.filter(active=True)
         links = [(reverse("observations:site_home"), "Home"), (None, "Videos")]
         context["breadcrumb_trail"] = breadcrumbs_html(links)
+        # Context for filter form.
+        if self.request.GET.get("camera_id"):
+            context["filter_camera_id"] = int(self.request.GET["camera_id"])
+        if self.request.GET.get("date"):
+            context["filter_date"] = self.request.GET["date"]
+        if self.request.GET.get("completed"):
+            context["filter_completed"] = self.request.GET["completed"]
+        if self.request.GET.get("views"):
+            context["filter_views"] = self.request.GET["views"]
         return context
 
 
