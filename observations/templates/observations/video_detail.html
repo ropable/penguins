@@ -5,6 +5,13 @@
 {{ block.super }}
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.17.3/video-js.min.css" integrity="sha512-xQ+IvAl0/u0XWFWC0uoJLfQLKE+J3KZ/kPWpD/8ZoTw/pafvsQW0hudKW4lgZwk02eymBBpdwC0QfqrHUOhOhw==" crossorigin="anonymous" referrerpolicy="no-referrer" />
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css" integrity="sha512-k+xZuzf4IaGQK9sSDjaNyrfwgxBfoF++7u6Q0ZVUs2rDczx9doNZkYXyyQbnJQcMR4o+IjvAcIj69hHxiOZEig==" crossorigin="anonymous" referrerpolicy="no-referrer" />
+<style type="text/css">
+  /*
+  I can't believe that we need to hack the CSS selector to display an element.
+  Ref: https://github.com/videojs/video.js/issues/5751
+  */
+  .video-js .vjs-current-time { display: block; }
+</style>
 {% endblock %}
 
 {% block page_content_inner %}
@@ -32,7 +39,7 @@
 
 <div class="row my-1">
   <div class="col">
-    <video id="videoPlayer" class="video-js">
+    <video id="videoPlayer" class="video-js vjs-show-big-play-button-on-pause">
       <source src="{{ object.file.url }}" type="video/mp4" />
       <p class="vjs-no-js">
         To view this video please enable JavaScript, and consider upgrading to a web browser that
@@ -94,6 +101,7 @@
 {{ block.super }}
 <script src="https://cdnjs.cloudflare.com/ajax/libs/htmx/2.0.0/htmx.min.js" integrity="sha512-Cpedvic0/Mgc3uRJ5apQ/ZYroPCZpatYEXGJayRaRNjKLaFualFxfxn97LJymznV+nC7y0/Hp/apHNwGpMimuw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.17.3/video.min.js" integrity="sha512-gqDlEVSJBx2sY4FCoF8fElKc1JpQqbKnZSBmBEW/qQ6rRSyfIEAkevSH22LnGZ5vsNrhv79fM4S+AMmmCEMQKA==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/videojs-hotkeys/0.2.28/videojs.hotkeys.min.js" integrity="sha512-XFywGzDn2tPc+tF4RbOZdolw11XBdD3OgmAvnC+yoiD1qBSGVshZPZEq6d1XYzCrZpNrVXpPcuYPdx3k0QZkcw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.js" integrity="sha512-0Yc4Jv5wX4+mjDuLxmHFGqgDtMFAEBLpPq/0nPVmAOwHPMkYXiS1YVYWTcrVQztftk/32089DDTyrCJO8hBCZw==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
-<script src="{% static 'js/video_detail.js' %}"></script>
+<script src="{% static 'js/video_player.js' %}"></script>
 {% endblock %}

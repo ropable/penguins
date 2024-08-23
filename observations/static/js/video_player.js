@@ -1,25 +1,39 @@
 "use strict";
 const player = videojs("videoPlayer", {
   controls: true,
-  controlBar: {
-    'volumePanel': false,
-  },
   autoplay: false,
   preload: "auto",
   disablePictureInPicture: true,
   muted: true,
-  playbackRates: [0.5, 1.0, 1.5, 2.0],
+  controlBar: {
+    volumePanel: false,
+    remainingTimeDisplay: {
+      displayNegative: false
+    },
+    skipButtons: {
+      forward: 10,
+      backward: 10
+    }
+  },
+  playbackRates: [1.0, 1.5, 2.0, 2.5, 3.0],
   userActions: {
     hotkeys: true
   },
+  plugins: {
+    hotkeys: {
+      enableMute: false,
+      enableVolumeScroll: false,
+      seekStep: 30,
+    }
+  }
 });
 const addObservationButton = $("#addObservationButton");
 const markFinishedButton = $("#markFinishedButton");
-const modalAddObservation = new bootstrap.Modal(document.getElementById('addObservationModal'));
+const modalAddObservation = new bootstrap.Modal(document.getElementById("addObservationModal"));
 
 // FIXME: the event below doesn't seem to work to set the video position.
 const urlParams = new URLSearchParams(window.location.search);
-const position = urlParams.get('position');
+const position = urlParams.get("position");
 player.on("loadedmetadata", function () {
   if (position !== null) {
     // Start the player at the requested position.
@@ -29,9 +43,8 @@ player.on("loadedmetadata", function () {
 });
 
 player.on("pause", () => {
-  console.log("PAUSED at " + player.currentTime());
   // Copy the video position value to the model form field.
-  $('#videoPosition').val(Math.floor(player.currentTime()));
+  $("#videoPosition").val(Math.floor(player.currentTime()));
 });
 
 // On completion of the video, enable the 'Mark finished' button.
@@ -89,4 +102,3 @@ function submitObservationForm(form) {
     }
   });
 }
-
