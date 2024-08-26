@@ -53,6 +53,7 @@ class HelpPage(LoginRequiredMixin, TemplateView):
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
+        context["page_title"] = "Penguins | Help page"
         links = [(reverse("observations:site_home"), "Home"), (None, "Help")]
         context["breadcrumb_trail"] = breadcrumbs_html(links)
         return context
@@ -119,7 +120,7 @@ class VideoDetail(LoginRequiredMixin, DetailView):
             context["superuser"] = True
         context["can_add_observations"] = user_can_add_observations(self.request.user)
         obj = self.get_object()
-        context["page_title"] = f"Penguins | Videos | {obj.pk}"
+        context["page_title"] = f"Penguins | {obj}"
         links = [
             (reverse("observations:site_home"), "Home"),
             (reverse("observations:video_list"), "Videos"),
