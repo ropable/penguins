@@ -31,16 +31,10 @@ const addObservationButton = $("#addObservationButton");
 const markFinishedButton = $("#markFinishedButton");
 const modalAddObservation = new bootstrap.Modal(document.getElementById("addObservationModal"));
 
-// FIXME: the event below doesn't seem to work to set the video position.
-const urlParams = new URLSearchParams(window.location.search);
-const position = urlParams.get("position");
-player.on("loadedmetadata", function () {
-  if (position !== null) {
-    // Start the player at the requested position.
-    console.log("Starting at position " + position);
-    player.currentTime(position);
-  }
-});
+function videoPlayerPosition(position) {
+  // Move the video player position.
+  player.currentTime(position);
+};
 
 player.on("pause", () => {
   // Copy the video position value to the model form field.
@@ -66,6 +60,8 @@ markFinishedButton.on("click", function () {
       // Change the text of the 'Mark finished' button, and disable it.
       markFinishedButton.html("Finished!");
       markFinishedButton.prop("disabled", true);
+      // Append 'completed' to the page heading.
+      $("#pageHeading").append(" (completed)");
     }
   });
 });

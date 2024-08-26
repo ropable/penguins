@@ -9,7 +9,12 @@
   <tbody>
     {% for object in object_list %}
     <tr>
-      <td>{{ object.position|floatformat }}</td>
+      <td>
+        <button type="button" class="btn btn-outline-secondary btn-sm"
+          onclick="videoPlayerPosition({{ object.position|floatformat }})">
+          {{ object.position|floatformat }} <i class="fa-regular fa-square-caret-right"></i>
+        </button>
+      </td>
       <td>{{ object.seen }}</td>
       <td>{{ object.comments }}</td>
     </tr>

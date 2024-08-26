@@ -18,7 +18,7 @@
 <div class="row">
   <div class="col">
     <div>
-      <h1>
+      <h1 id="pageHeading">
         {{ object.camera }}: {{ object.date}} {{ object.start_time }} - {{ object.end_time}}{% if object.mark_complete %} (completed){% endif %}
       </h1>
     </div>
@@ -51,7 +51,10 @@
 
 <div class="row">
   <div class="col">
-    <div>Your observations for this video:</div>
+    <div>
+      Your observations for this video:<br>
+      <em>Note that video timestamp skipping may not work until the video is fully downloaded in your browser tab.</em>
+    </div>
     <div id="videoObservationsTable" hx-get="{% url 'observations:video_observations' pk=object.pk %}" hx-trigger="load,observationCreated from:body" hx-swap="innerHTML"></div>
   </div>
 </div>
