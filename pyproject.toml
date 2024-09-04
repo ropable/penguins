@@ -19,6 +19,7 @@ whitenoise = {version = "6.7.0", extras = ["brotli"]}
 django-storages = {version = "1.14.4", extras = ["azure"]}
 webtemplate-dbca = "1.7.1"
 django-map-widgets = "0.5.1"
+xlsxwriter = "3.2.0"
 
 [tool.poetry.group.dev.dependencies]
 ipython = "^8.26.0"

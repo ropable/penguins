@@ -121,6 +121,7 @@ class PenguinObservation(models.Model):
         verbose_name="count",
         validators=[MinValueValidator(0), MaxValueValidator(100)],
         help_text="The count of penguins seen in this observation.",
+        # TODO: rename this field to count
     )
     comments = models.TextField(blank=True, null=True)
     raining = models.BooleanField(

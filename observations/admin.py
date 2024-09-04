@@ -1,8 +1,11 @@
+from datetime import date, datetime
 from django.contrib.gis import admin
 from django.contrib.admin import SimpleListFilter
 from django.contrib.gis.admin import ModelAdmin
 from django.contrib.gis.db import models
+from django.http import HttpResponse
 import mapwidgets
+import xlsxwriter
 
 from observations.models import Camera, Video, PenguinObservation
 
@@ -77,7 +80,70 @@ class VideoAdmin(ModelAdmin):
     )
 
 
+@admin.action(description="Export selected record to XLSX")
+def export_to_xlsx(modeladmin, request, queryset):
+    """Writes a passed-in queryset of objects to a file-like object as an Excel spreadsheet."""
+    response = HttpResponse(
+        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+    response["Content-Disposition"] = (
+        f"attachment; filename=penguin_observations_{date.today().isoformat()}_{datetime.now().strftime('%H%M')}.xlsx"
+    )
+
+    with xlsxwriter.Workbook(
+        response,
+        {
+            "in_memory": True,
+            "default_date_format": "dd-mmm-yyyy HH:MM",
+            "remove_timezone": True,
+        },
+    ) as workbook:
+        observations_sheet = workbook.add_worksheet("Penguin observations")
+        observations_sheet.write_row(
+            "A1",
+            (
+                "DATE",
+                "CAMERA",
+                "VIDEO",
+                "OBSERVER",
+                "SEEN (AWST)",
+                "COUNT",
+                "VALIDATED",
+                "COMMENTS",
+                "LINK",
+            ),
+        )
+        row = 1
+
+        for obj in queryset:
+            observations_sheet.write_row(
+                row,
+                0,
+                [
+                    obj.video.date.strftime("%d/%b/%Y"),
+                    obj.video.camera.__str__(),
+                    obj.video.__str__(),
+                    obj.observer.get_full_name(),
+                    obj.get_observation_datetime().strftime("%d/%b/%Y %H:%M:%S"),
+                    obj.seen,
+                    obj.validated,
+                    obj.comments,
+                    request.build_absolute_uri(obj.video.get_absolute_url()),
+                ],
+            )
+            row += 1
+
+        observations_sheet.set_column("A:B", 12)
+        observations_sheet.set_column("C:C", 38)
+        observations_sheet.set_column("D:E", 24)
+        observations_sheet.set_column("F:G", 12)
+        observations_sheet.set_column("H:I", 40)
+
+    return response
+
+
 class PenguinObservationAdmin(ModelAdmin):
+    actions = [export_to_xlsx]
     date_hierarchy = "video__date"
     list_display = ("video", "position", "seen", "observer", "validated")
     list_filter = ("video__camera", "validated")
