@@ -25,8 +25,20 @@ project dependencies using `pip`:
 This project uses environment variables (in a `.env` file) to define application settings.
 Required settings are as follows:
 
-    DATABASE_URL="postgis://USER:PASSWORD@HOST:PORT/DATABASE_NAME"
-    SECRET_KEY="ThisIsASecretKey"
+    DATABASE_URL=postgis://USER:PASSWORD@HOST:PORT/DATABASE_NAME
+    SECRET_KEY=ThisIsASecretKey
+    GEOSERVER_URL=https://geoserver.url/geoserver
+    LAYER_NAME=namespace:layer
+
+# Video uploads
+
+Captured videos are uploaded to Azure container storage as blobs. To serve videos,
+account credentials and the container name should be provided as environment variables
+in the same `.env` file as follows:
+
+    AZURE_ACCOUNT_NAME=name
+    AZURE_ACCOUNT_KEY=key
+    AZURE_CONTAINER=container_name
 
 # Running
 
@@ -43,3 +55,15 @@ Run console commands manually:
 To build a new Docker image from the `Dockerfile`:
 
     docker image build -t ghcr.io/dbca-wa/penguins .
+
+# Pre-commit hooks
+
+This project includes pre-commit hooks as a means of preventing sensitive information
+from being committed into the repository using [TruffleHog](https://docs.trufflesecurity.com/docs/scanning-git/precommit-hooks/).
+
+If TruffleHog is available in your development environment, install pre-commit hooks
+locally like so (this is optional):
+
+    pre-commit install --allow-missing-config
+
+Reference: <https://pre-commit.com/>
