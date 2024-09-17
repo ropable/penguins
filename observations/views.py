@@ -1,18 +1,15 @@
+import json
+
 from django.conf import settings
 from django.contrib.auth.mixins import LoginRequiredMixin
-from django.http import JsonResponse, HttpResponseForbidden
+from django.http import HttpResponseForbidden, JsonResponse
 from django.urls import reverse
-from django.views.generic import View, TemplateView, ListView, DetailView
+from django.views.generic import DetailView, ListView, TemplateView, View
 from django.views.generic.detail import SingleObjectMixin
-import json
-from penguins.utils import (
-    get_previous_pages,
-    get_next_pages,
-    user_can_add_observations,
-    breadcrumbs_html,
-)
 
-from .models import Camera, Video, PenguinObservation
+from penguins.utils import breadcrumbs_html, get_next_pages, get_previous_pages, user_can_add_observations
+
+from .models import Camera, PenguinObservation, Video
 
 
 class SiteHome(LoginRequiredMixin, TemplateView):

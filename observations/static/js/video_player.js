@@ -8,33 +8,35 @@ const player = videojs("videoPlayer", {
   controlBar: {
     volumePanel: false,
     remainingTimeDisplay: {
-      displayNegative: false
+      displayNegative: false,
     },
     skipButtons: {
       forward: 10,
-      backward: 10
-    }
+      backward: 10,
+    },
   },
   playbackRates: [1.0, 1.5, 2.0, 2.5, 3.0],
   userActions: {
-    hotkeys: true
+    hotkeys: true,
   },
   plugins: {
     hotkeys: {
       enableMute: false,
       enableVolumeScroll: false,
       seekStep: 30,
-    }
-  }
+    },
+  },
 });
 const addObservationButton = $("#addObservationButton");
 const markFinishedButton = $("#markFinishedButton");
-const modalAddObservation = new bootstrap.Modal(document.getElementById("addObservationModal"));
+const modalAddObservation = new bootstrap.Modal(
+  document.getElementById("addObservationModal"),
+);
 
 function videoPlayerPosition(position) {
   // Move the video player position.
   player.currentTime(position);
-};
+}
 
 player.on("pause", () => {
   // Copy the video position value to the model form field.
@@ -51,7 +53,7 @@ markFinishedButton.on("click", function () {
   // https://docs.djangoproject.com/en/dev/howto/csrf/#setting-the-token-on-the-ajax-request
   $.ajax({
     headers: {
-      "X-CSRFToken": markFinishedButton.data("csrf-token")
+      "X-CSRFToken": markFinishedButton.data("csrf-token"),
     },
     type: "PATCH",
     url: markFinishedButton.data("action"),
@@ -62,7 +64,7 @@ markFinishedButton.on("click", function () {
       markFinishedButton.prop("disabled", true);
       // Append 'completed' to the page heading.
       $("#pageHeading").append(" (completed)");
-    }
+    },
   });
 });
 
@@ -84,8 +86,9 @@ function submitObservationForm(form) {
     success: function (response) {
       // Success notification.
       Toastify({
-        text: "New penguin observation created at position " + response.position,
-        duration: 1500
+        text:
+          "New penguin observation created at position " + response.position,
+        duration: 1500,
       }).showToast();
       // Reset the form fields.
       form.reset();
@@ -95,6 +98,6 @@ function submitObservationForm(form) {
       player.play();
       // Trigger the videoObservationsTable htmx element event.
       document.body.dispatchEvent(new Event("observationCreated"));
-    }
+    },
   });
 }

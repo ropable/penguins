@@ -1,74 +1,125 @@
 {% extends "base_penguins.html" %}
 {% load static %}
-
 {% block page_content_inner %}
-<h1>Information and method to count Little Penguins</h1>
-<div class="alert alert-primary">
-  The Department of Biodiversity, Conservation and Attractions would like to acknowledge the NSW Foundation for the National Parks and Wildlife and the Australian Geographic Society for their support.
-</div>
-
-<h2><strong>Background Information</strong></h2>
-<p>Why do we monitor Little Penguins?</p>
-<p>Penguin Island supports the largest colony of Little Penguins (scientific name is <em>Eudyptula minor</em>) in Western Australia, and may contain up to 500 breeding pairs. During the breeding season, the male and female share incubation and chick rearing duties, with incubation shifts typically lasting an average of 3 to 4 days. Incubation of eggs takes approximately 35 days before the chicks hatch. </p>
-<p><img alt="Hatched penguin chick" src="{% static 'img/help_hatched_chick.png' %}" /></p>
-<p>For the first three weeks after hatching, the chicks are guarded by at least one of the parents in one to two day shifts. During these shifts, the other parent goes to sea to forage and returns at dusk, tending to come ashore in small groups.</p>
-<p>It is important to understand the health of individual penguins and the numbers returning to Penguin Island during the breeding season. This information is highly valuable and helps to get an on-going assessment of nesting population health and manage any potential decrease in Little Penguin numbers.</p>
-<p>Scientists monitoring penguin breeding success and individual health also use infrared cameras to non-invasively record the number of Little Penguins returning to the island at key locations. This is very useful, and allows scientists to make informed management decisions; it also generates a lot of videos to watch!</p>
-<p>Thanks to this project, citizen scientists will be able to turn the videos of Penguin Island’s penguins into real data and help detect any decrease in the numbers of Little Penguins returning to their natural nesting location on Penguin Island. </p>
-<p>Before we embark on counting penguins there are a few really important things you will need to know so we can make certain that we collect accurate data. Like any scientific study the results are only as good as the data we acquire....</p>
-
-<h2><strong>Choosing a video</strong></h2>
-<p>Upon entering the site you will be presented with a page containing the following:</p>
-<ol>
-  <li>A list of active cameras, with video footage to review</li>
-  <li>A map outlining the location of active cameras</li>
-</ol>
-<p><img alt="Site home pages" src="{% static 'img/help_site_home.png' %}" /></p>
-<p>Click on any active camera in the list, or click on a penguin marker on the map to open that camera.</p>
-
-<p>You will find yourself at a page with a list of videos:</p>
-<p><img alt="Video selection page" src="{% static 'img/help_video_list.png' %}" /></p>
-<p>This page lists the following:</p>
-<ol>
-  <li>The camera, date and time duration</li>
-  <li>How many views the video has received</li>
-  <li>Whether the video has been completed on not</li>
-</ol>
-
-<p>You can filter videos using the filters at the top. Select a video that has not already been completed by clicking the link in the first column. You will be taken to the video detail screen:</p>
-<p><img alt="Video detail screen" src="{% static 'img/help_video_detail.png' %}" /></p>
-
-<h2>Counting Little Penguins</h2>
-<p>Note: The counting method is different for the two different cameras due to the field of view. Penguins will move quickly from the water to the boardwalk, so be as vigilant as possible.</p>
-
-<h4>The North Pole camera</h4>
-<ul>
-  <li>When a group of penguins appears, please wait until the middle penguin is in the centre of the beach and then pause the video.</li>
-  <li>Count the total number of Little Penguins in that group. Scroll back and forwards to assist in counting.</li>
-  <li>Please only count those coming up the beach from the water not coming out of the bushes or from under the boardwalk.</li>
-</ul>
-<p><img alt="North Pole camera" src="{% static 'img/help_north_pole.png' %}" /></p>
-
-<h4>The South Pole camera</h4>
-<p>Please only count penguins that have come up the stairs and add the observation when they reach the top step. If a group returns and they are making their way up the steps please wait until the middle penguin is at the top step. Do not count those coming out of the bushes and such because they will already have been counted or are waiting for a friend to arrive.</p>
-<p>Essentially, an analogy would be if we wanted to know the number of people at an airport who returned home that day we would count only those coming off of planes, not how many are loitering or coming from the car park.</p>
-<p><img alt="South Pole camera" src="{% static 'img/help_south_pole.png' %}" /></p>
-
-<h2>How to add an observation</h2>
-<p>Click the "Add an observation" button, the video will pause and a form will appear that allows you to record the number of penguins sighted. The video position (seconds) will be automatically filled.</p>
-<p><img alt="Add an observation" src="{% static 'img/help_penguin_observation.png' %}" /></p>
-<p>Type in the number of new penguins you see on screen. Be careful not to include seagulls or other bird life. Penguins are distinctive by their larger bodies, black back and white breast, and the way they waddle so you should not have too much trouble telling them apart.</p>
-<ol>
-    <li>If necessary, leave a comment to help explain your observation if it needs to be reviewed, particularly if you are unsure and would like a reviewer to double check your work, otherwise leave it blank.</li>
-    <li>Click <strong>Save observation</strong>.</li>
-</ol>
-
-<p>Afterwards press on the play button on the video to resume watching.</p>
-<p>You can return to a previous observation timestamp by clicking on the position number on the list of your observations.</p>
-
-<h2>Completing the video</h2>
-<p>When you have finished watching the video, click the green <strong>Mark Finished</strong> button at the top. It will not be enabled until the video is completed. This indicates to the system you have watched the complete video and you have counted all the penguins. The system will then accept the counts. <strong>Please remember to push this button upon completion of the video.</strong></p>
-<p>If you are done watching the video have completed it, it will inform you of that too. If you have any further questions please contact DBCA at <a href="mailto:oim.servicedesk@dbca.wa.gov.au">oim.servicedesk@dbca.wa.gov.au</a></p>
-<p><img alt="Penguin Erin Clithero" src="{% static 'img/help_penguin.png' %}" /></p>
-<p>Photo: Erin Clithero</p>
+    <h1>Information and method to count Little Penguins</h1>
+    <div class="alert alert-primary">
+        The Department of Biodiversity, Conservation and Attractions would like to acknowledge the NSW Foundation for the National Parks and Wildlife and the Australian Geographic Society for their support.
+    </div>
+    <h2>
+        <strong>Background Information</strong>
+    </h2>
+    <p>Why do we monitor Little Penguins?</p>
+    <p>
+        Penguin Island supports the largest colony of Little Penguins (scientific name is <em>Eudyptula minor</em>) in Western Australia, and may contain up to 500 breeding pairs. During the breeding season, the male and female share incubation and chick rearing duties, with incubation shifts typically lasting an average of 3 to 4 days. Incubation of eggs takes approximately 35 days before the chicks hatch.
+    </p>
+    <p>
+        <img alt="Hatched penguin chick"
+             src="{% static 'img/help_hatched_chick.png' %}" />
+    </p>
+    <p>
+        For the first three weeks after hatching, the chicks are guarded by at least one of the parents in one to two day shifts. During these shifts, the other parent goes to sea to forage and returns at dusk, tending to come ashore in small groups.
+    </p>
+    <p>
+        It is important to understand the health of individual penguins and the numbers returning to Penguin Island during the breeding season. This information is highly valuable and helps to get an on-going assessment of nesting population health and manage any potential decrease in Little Penguin numbers.
+    </p>
+    <p>
+        Scientists monitoring penguin breeding success and individual health also use infrared cameras to non-invasively record the number of Little Penguins returning to the island at key locations. This is very useful, and allows scientists to make informed management decisions; it also generates a lot of videos to watch!
+    </p>
+    <p>
+        Thanks to this project, citizen scientists will be able to turn the videos of Penguin Island’s penguins into real data and help detect any decrease in the numbers of Little Penguins returning to their natural nesting location on Penguin Island.
+    </p>
+    <p>
+        Before we embark on counting penguins there are a few really important things you will need to know so we can make certain that we collect accurate data. Like any scientific study the results are only as good as the data we acquire....
+    </p>
+    <h2>
+        <strong>Choosing a video</strong>
+    </h2>
+    <p>Upon entering the site you will be presented with a page containing the following:</p>
+    <ol>
+        <li>A list of active cameras, with video footage to review</li>
+        <li>A map outlining the location of active cameras</li>
+    </ol>
+    <p>
+        <img alt="Site home pages" src="{% static 'img/help_site_home.png' %}" />
+    </p>
+    <p>Click on any active camera in the list, or click on a penguin marker on the map to open that camera.</p>
+    <p>You will find yourself at a page with a list of videos:</p>
+    <p>
+        <img alt="Video selection page"
+             src="{% static 'img/help_video_list.png' %}" />
+    </p>
+    <p>This page lists the following:</p>
+    <ol>
+        <li>The camera, date and time duration</li>
+        <li>How many views the video has received</li>
+        <li>Whether the video has been completed on not</li>
+    </ol>
+    <p>
+        You can filter videos using the filters at the top. Select a video that has not already been completed by clicking the link in the first column. You will be taken to the video detail screen:
+    </p>
+    <p>
+        <img alt="Video detail screen"
+             src="{% static 'img/help_video_detail.png' %}" />
+    </p>
+    <h2>Counting Little Penguins</h2>
+    <p>
+        Note: The counting method is different for the two different cameras due to the field of view. Penguins will move quickly from the water to the boardwalk, so be as vigilant as possible.
+    </p>
+    <h4>The North Pole camera</h4>
+    <ul>
+        <li>
+            When a group of penguins appears, please wait until the middle penguin is in the centre of the beach and then pause the video.
+        </li>
+        <li>Count the total number of Little Penguins in that group. Scroll back and forwards to assist in counting.</li>
+        <li>
+            Please only count those coming up the beach from the water not coming out of the bushes or from under the boardwalk.
+        </li>
+    </ul>
+    <p>
+        <img alt="North Pole camera" src="{% static 'img/help_north_pole.png' %}" />
+    </p>
+    <h4>The South Pole camera</h4>
+    <p>
+        Please only count penguins that have come up the stairs and add the observation when they reach the top step. If a group returns and they are making their way up the steps please wait until the middle penguin is at the top step. Do not count those coming out of the bushes and such because they will already have been counted or are waiting for a friend to arrive.
+    </p>
+    <p>
+        Essentially, an analogy would be if we wanted to know the number of people at an airport who returned home that day we would count only those coming off of planes, not how many are loitering or coming from the car park.
+    </p>
+    <p>
+        <img alt="South Pole camera" src="{% static 'img/help_south_pole.png' %}" />
+    </p>
+    <h2>How to add an observation</h2>
+    <p>
+        Click the "Add an observation" button, the video will pause and a form will appear that allows you to record the number of penguins sighted. The video position (seconds) will be automatically filled.
+    </p>
+    <p>
+        <img alt="Add an observation"
+             src="{% static 'img/help_penguin_observation.png' %}" />
+    </p>
+    <p>
+        Type in the number of new penguins you see on screen. Be careful not to include seagulls or other bird life. Penguins are distinctive by their larger bodies, black back and white breast, and the way they waddle so you should not have too much trouble telling them apart.
+    </p>
+    <ol>
+        <li>
+            If necessary, leave a comment to help explain your observation if it needs to be reviewed, particularly if you are unsure and would like a reviewer to double check your work, otherwise leave it blank.
+        </li>
+        <li>
+            Click <strong>Save observation</strong>.
+        </li>
+    </ol>
+    <p>Afterwards press on the play button on the video to resume watching.</p>
+    <p>
+        You can return to a previous observation timestamp by clicking on the position number on the list of your observations.
+    </p>
+    <h2>Completing the video</h2>
+    <p>
+        When you have finished watching the video, click the green <strong>Mark Finished</strong> button at the top. It will not be enabled until the video is completed. This indicates to the system you have watched the complete video and you have counted all the penguins. The system will then accept the counts. <strong>Please remember to push this button upon completion of the video.</strong>
+    </p>
+    <p>
+        If you are done watching the video have completed it, it will inform you of that too. If you have any further questions please contact DBCA at <a href="mailto:oim.servicedesk@dbca.wa.gov.au">oim.servicedesk@dbca.wa.gov.au</a>
+    </p>
+    <p>
+        <img alt="Penguin Erin Clithero" src="{% static 'img/help_penguin.png' %}" />
+    </p>
+    <p>Photo: Erin Clithero</p>
 {% endblock %}

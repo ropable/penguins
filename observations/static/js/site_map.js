@@ -5,16 +5,15 @@
 // layerName
 // penguinIconUrl
 // camerasJson
-const geoserver_wmts_url = geoserverUrl + "/gwc/service/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=gda94&tilematrix=gda94:{z}&tilecol={x}&tilerow={y}&format=image/jpeg";
+const geoserver_wmts_url =
+  geoserverUrl +
+  "/gwc/service/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=gda94&tilematrix=gda94:{z}&tilecol={x}&tilerow={y}&format=image/jpeg";
 
 // Base tile layer
-const baseLayer = L.tileLayer(
-  geoserver_wmts_url + "&layer=" + layerName,
-  {
-    tileSize: 1024,
-    zoomOffset: -2,
-  },
-);
+const baseLayer = L.tileLayer(geoserver_wmts_url + "&layer=" + layerName, {
+  tileSize: 1024,
+  zoomOffset: -2,
+});
 
 // Penguin icon
 const penguinIcon = L.icon({
@@ -26,7 +25,7 @@ const penguinIcon = L.icon({
 
 // Define map and add the base layer
 const map = L.map("map", {
-  crs: L.CRS.EPSG4326,  // WGS 84
+  crs: L.CRS.EPSG4326, // WGS 84
   center: [-32.305, 115.695],
   zoom: 16,
   minZoom: 12,

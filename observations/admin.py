@@ -1,21 +1,20 @@
 from datetime import date, datetime
-from django.contrib.gis import admin
+
+import mapwidgets
+import xlsxwriter
 from django.contrib.admin import SimpleListFilter
+from django.contrib.gis import admin
 from django.contrib.gis.admin import ModelAdmin
 from django.contrib.gis.db import models
 from django.http import HttpResponse
-import mapwidgets
-import xlsxwriter
 
-from observations.models import Camera, Video, PenguinObservation
+from observations.models import Camera, PenguinObservation, Video
 
 
 class CameraAdmin(ModelAdmin):
     list_display = ("name", "camera_key", "active", "video_count", "newest_video")
     list_filter = ("active",)
-    formfield_overrides = {
-        models.PointField: {"widget": mapwidgets.LeafletPointFieldWidget}
-    }
+    formfield_overrides = {models.PointField: {"widget": mapwidgets.LeafletPointFieldWidget}}
 
     def video_count(self, obj):
         return obj.video_set.count()
@@ -83,9 +82,7 @@ class VideoAdmin(ModelAdmin):
 @admin.action(description="Export selected record to XLSX")
 def export_to_xlsx(modeladmin, request, queryset):
     """Writes a passed-in queryset of objects to a file-like object as an Excel spreadsheet."""
-    response = HttpResponse(
-        content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
-    )
+    response = HttpResponse(content_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet")
     response["Content-Disposition"] = (
         f"attachment; filename=penguin_observations_{date.today().isoformat()}_{datetime.now().strftime('%H%M')}.xlsx"
     )

@@ -42,13 +42,9 @@ class Video(models.Model):
     camera = models.ForeignKey(Camera, on_delete=models.PROTECT)
     file = models.FileField(upload_to="videos")  # TODO: rename field.
     start_time = models.TimeField(help_text="The start time of the recording.")
-    end_time = models.TimeField(
-        help_text="The end time of the recording (usually 1h after start)."
-    )
+    end_time = models.TimeField(help_text="The end time of the recording (usually 1h after start).")
     views = models.PositiveSmallIntegerField(default=0)
-    mark_complete = models.BooleanField(
-        default=False, help_text="Has this been viewed in its entirety by a reviewer?"
-    )
+    mark_complete = models.BooleanField(default=False, help_text="Has this been viewed in its entirety by a reviewer?")
     completed_by = models.ManyToManyField(
         settings.AUTH_USER_MODEL,
         blank=True,
@@ -108,9 +104,7 @@ class PenguinObservation(models.Model):
     date = models.DateTimeField(
         help_text="The date on which the observation is noted"
     )  # TODO: remove this field (use Video.date). Also, it's a datetime :/
-    observer = models.ForeignKey(
-        settings.AUTH_USER_MODEL, related_name="observations", on_delete=models.PROTECT
-    )
+    observer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="observations", on_delete=models.PROTECT)
     position = models.FloatField(
         default=0,
         null=True,
@@ -124,9 +118,7 @@ class PenguinObservation(models.Model):
         # TODO: rename this field to count
     )
     comments = models.TextField(blank=True, null=True)
-    raining = models.BooleanField(
-        default=False, help_text="Was it raining at the time of the observation?"
-    )
+    raining = models.BooleanField(default=False, help_text="Was it raining at the time of the observation?")
     validated = models.BooleanField(default=True, verbose_name="Confirmed")
 
     def __str__(self):
@@ -139,7 +131,5 @@ class PenguinObservation(models.Model):
 
     def get_observation_datetime(self):
         """From the associated video and the value of `position`, derive the datetime of the penguin observation."""
-        start = datetime.combine(self.video.date, self.video.start_time).astimezone(
-            timezone.get_current_timezone()
-        )
+        start = datetime.combine(self.video.date, self.video.start_time).astimezone(timezone.get_current_timezone())
         return start + timedelta(seconds=self.position)
