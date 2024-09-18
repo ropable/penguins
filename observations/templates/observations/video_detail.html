@@ -47,10 +47,12 @@
                         id="markFinishedButton"
                         data-action="{% url 'observations:video_complete' pk=object.pk %}"
                         disabled>Mark finished</button>
-                <a class="btn btn-secondary"
-                   href="{{ object.file.url }}?rscd={{ object.get_content_disposition }}"
-                   role="button"
-                   id="downloadButton">Download video</a>
+                {% if user.is_staff %}
+                    <a class="btn btn-secondary"
+                       href="{{ object.file.url }}?rscd={{ object.get_content_disposition }}"
+                       role="button"
+                       id="downloadButton">Download video</a>
+                {% endif %}
             </div>
         </div>
     </div>
