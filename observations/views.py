@@ -152,7 +152,6 @@ class PenguinObservationCreate(LoginRequiredMixin, SingleObjectMixin, View):
         return super().dispatch(request, *args, **kwargs)
 
     def post(self, request, *args, **kwargs):
-        # video = Video.objects.get(pk=kwargs["pk"])
         video = self.get_object()
         observation = PenguinObservation.objects.create(
             video=video,

@@ -27,6 +27,10 @@ const player = videojs("videoPlayer", {
     },
   },
 });
+const saveObservationForm = $("#saveObservationForm");
+const csrftoken = saveObservationForm
+  .find('input[name="csrfmiddlewaretoken"]')
+  .val();
 const addObservationButton = $("#addObservationButton");
 const markFinishedButton = $("#markFinishedButton");
 const modalAddObservation = new bootstrap.Modal(
@@ -52,12 +56,12 @@ markFinishedButton.on("click", function () {
   // We have to set the CSRF token for this AJAX request.
   // https://docs.djangoproject.com/en/dev/howto/csrf/#setting-the-token-on-the-ajax-request
   $.ajax({
-    headers: {
-      "X-CSRFToken": markFinishedButton.data("csrf-token"),
-    },
     type: "PATCH",
     url: markFinishedButton.data("action"),
     dataType: "json",
+    headers: {
+      "X-CSRFToken": csrftoken,
+    },
     success: function () {
       // Change the text of the 'Mark finished' button, and disable it.
       markFinishedButton.html("Finished!");
@@ -83,6 +87,9 @@ function submitObservationForm(form) {
     url: saveForm.attr("action"),
     data: saveForm.serialize(),
     dataType: "json",
+    headers: {
+      "X-CSRFToken": csrftoken,
+    },
     success: function (response) {
       // Success notification.
       Toastify({

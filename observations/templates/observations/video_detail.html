@@ -46,7 +46,6 @@
                         class="btn btn-success"
                         id="markFinishedButton"
                         data-action="{% url 'observations:video_complete' pk=object.pk %}"
-                        data-csrf-token="{{ csrf_token }}"
                         disabled>Mark finished</button>
                 <a class="btn btn-secondary"
                    href="{{ object.file.url }}?rscd={{ object.get_content_disposition }}"
