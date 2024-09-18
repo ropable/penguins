@@ -21,4 +21,4 @@ patches:
   - path: cronjob_import_patch.yaml
 images:
   - name: ghcr.io/dbca-wa/penguins
-    newTag: 1.2.1
+    newTag: 2.0.0
