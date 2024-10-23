@@ -16,54 +16,54 @@ spec:
         app: penguins-deployment
     spec:
       containers:
-      - name: penguins
-        image: ghcr.io/dbca-wa/penguins
-        imagePullPolicy: Always
-        env:
-        - name: ALLOWED_HOSTS
-          value: ".dbca.wa.gov.au"
-        - name: CSRF_TRUSTED_ORIGINS
-          value: "https://*.dbca.wa.gov.au"
-        - name: CSRF_COOKIE_SECURE
-          value: "True"
-        - name: SESSION_COOKIE_SECURE
-          value: "True"
-        - name: TZ
-          value: "Australia/Perth"
-        resources:
-          requests:
-            memory: "100Mi"
-            cpu: "5m"
-          limits:
-            memory: "2048Mi"
-            cpu: "1000m"
-        startupProbe:
-          tcpSocket:
-            port: 8080
-          initialDelaySeconds: 0
-          periodSeconds: 3
-          timeoutSeconds: 1
-          successThreshold: 1
-          failureThreshold: 3
-        livenessProbe:
-          tcpSocket:
-            port: 8080
-          initialDelaySeconds: 0
-          periodSeconds: 10
-          timeoutSeconds: 1
-          successThreshold: 1
-          failureThreshold: 3
-        securityContext:
-          runAsNonRoot: false
-          privileged: false
-          allowPrivilegeEscalation: false
-          capabilities:
-            drop:
-              - ALL
-          readOnlyRootFilesystem: true
-        volumeMounts:
-          - mountPath: /tmp
-            name: tmpfs-ram
+        - name: penguins
+          image: ghcr.io/dbca-wa/penguins
+          imagePullPolicy: Always
+          env:
+            - name: ALLOWED_HOSTS
+              value: ".dbca.wa.gov.au"
+            - name: CSRF_TRUSTED_ORIGINS
+              value: "https://*.dbca.wa.gov.au"
+            - name: CSRF_COOKIE_SECURE
+              value: "True"
+            - name: SESSION_COOKIE_SECURE
+              value: "True"
+            - name: TZ
+              value: "Australia/Perth"
+          resources:
+            requests:
+              memory: "100Mi"
+              cpu: "5m"
+            limits:
+              memory: "2048Mi"
+              cpu: "1000m"
+          startupProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 3
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
+          livenessProbe:
+            tcpSocket:
+              port: 8080
+            initialDelaySeconds: 0
+            periodSeconds: 10
+            timeoutSeconds: 1
+            successThreshold: 1
+            failureThreshold: 3
+          securityContext:
+            runAsNonRoot: false
+            privileged: false
+            allowPrivilegeEscalation: false
+            capabilities:
+              drop:
+                - ALL
+            readOnlyRootFilesystem: true
+          volumeMounts:
+            - mountPath: /tmp
+              name: tmpfs-ram
       volumes:
         - name: tmpfs-ram
           emptyDir:
