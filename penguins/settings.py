@@ -93,6 +93,7 @@ APPLICATION_VERSION_NO = project["tool"]["poetry"]["version"]
 LOGOUT_URL = "/logout/"
 LOGOUT_REDIRECT_URL = LOGOUT_URL
 SITE_URL = env("SITE_URL", "localhost")
+EXAMPLE_VIDEO_URL = env("EXAMPLE_VIDEO_URL", None)
 
 # Email settings
 EMAIL_HOST = env("EMAIL_HOST", "email.host")

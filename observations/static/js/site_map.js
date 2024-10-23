@@ -26,8 +26,8 @@ const penguinIcon = L.icon({
 // Define map and add the base layer
 const map = L.map("map", {
   crs: L.CRS.EPSG4326, // WGS 84
-  center: [-32.305, 115.695],
-  zoom: 16,
+  center: [-32.305, 115.691],
+  zoom: 15,
   minZoom: 12,
   maxZoom: 20,
   attributionControl: false,

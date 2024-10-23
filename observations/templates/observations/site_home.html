@@ -3,6 +3,16 @@
 {% block extra_style %}
     {{ block.super }}
     <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.17.3/video-js.min.css"
+          integrity="sha512-xQ+IvAl0/u0XWFWC0uoJLfQLKE+J3KZ/kPWpD/8ZoTw/pafvsQW0hudKW4lgZwk02eymBBpdwC0QfqrHUOhOhw=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer" />
+    <link rel="stylesheet"
+          href="https://cdnjs.cloudflare.com/ajax/libs/toastify-js/1.12.0/toastify.min.css"
+          integrity="sha512-k+xZuzf4IaGQK9sSDjaNyrfwgxBfoF++7u6Q0ZVUs2rDczx9doNZkYXyyQbnJQcMR4o+IjvAcIj69hHxiOZEig=="
+          crossorigin="anonymous"
+          referrerpolicy="no-referrer" />
+    <link rel="stylesheet"
           href="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.css"
           integrity="sha512-h9FcoyWjHcOcmEVkxOfTLnmZFWIH0iZhZT1H2TbOq55xssQGEJHEaIm+PgoUaZbRvQTNTluNOEfb1ZRy6D3BOw=="
           crossorigin="anonymous"
@@ -10,7 +20,11 @@
     <style>#map { width:100%; height: 480px;}</style>
 {% endblock %}
 {% block page_content_inner %}
-    <div class="row">
+    <div class="row my-1">
+        <div class="col">
+            <h1>Site map</h1>
+            <div class="card card-body" id="map"></div>
+        </div>
         <div class="col">
             <h1>{{ page_heading }}</h1>
             <table class="table table-bordered table-hover">
@@ -26,32 +40,62 @@
             </table>
         </div>
     </div>
-    <div class="row my-1">
-        <div class="col">
-            <h1>Site map</h1>
-            <div class="card card-body" id="map"></div>
+    {% if example_video_url %}
+        <div class="row">
+            <div class="col">
+                <br>
+                <p>A example of little penguins arriving on the north beach:</p>
+                <video id="videoPlayer" class="video-js vjs-show-big-play-button-on-pause">
+                    <source src="{{ example_video_url }}" type="video/mp4" />
+                    <p class="vjs-no-js">
+                        To view this video please enable JavaScript, and consider upgrading to a web browser that
+                        <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
+                    </p>
+                </video>
+            </div>
         </div>
-    </div>
+    {% endif %}
 {% endblock %}
 {% block extra_js %}
     {{ block.super }}
     <script>
-  const geoserverUrl = "{{ geoserver_url }}";
-  const layerName = "{{ layer_name }}";
-  const penguinIconUrl = "{% static 'img/penguin_icon.png' %}";
-  const camerasJson = JSON.parse("{{ cameras_json|escapejs }}");
+      const geoserverUrl = "{{ geoserver_url }}";
+      const layerName = "{{ layer_name }}";
+      const penguinIconUrl = "{% static 'img/penguin_icon.png' %}";
+      const camerasJson = JSON.parse("{{ cameras_json|escapejs }}");
     </script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/video.js/8.17.3/video.min.js"
+            integrity="sha512-gqDlEVSJBx2sY4FCoF8fElKc1JpQqbKnZSBmBEW/qQ6rRSyfIEAkevSH22LnGZ5vsNrhv79fM4S+AMmmCEMQKA=="
+            crossorigin="anonymous"
+            referrerpolicy="no-referrer"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.9.4/leaflet.min.js"
             integrity="sha512-puJW3E/qXDqYp9IfhAI54BJEaWIfloJ7JWs7OeD5i6ruC9JZL1gERT1wjtwXFlh7CjE7ZJ+/vcRZRkIYIb6p4g=="
             crossorigin="anonymous"
             referrerpolicy="no-referrer"></script>
     <script src="{% static 'js/site_map.js' %}"></script>
+    {# Iterate through the list of camera and add a marker to the map for each. #}
     <script>
-  // Iterate through the list of camera and add a marker to the map for each.
-  {% for camera in active_cameras %}
-  var marker = L.marker([{{ camera.location.y}}, {{camera.location.x}}], { icon: penguinIcon }).addTo(map);
-  var popupHtml = "<a href='{% url "observations:video_list" %}?camera_id={{ camera.pk }}'>{{ camera.name }}</a><br>{{ camera.video_set.count }} videos";
-  marker.bindPopup(popupHtml);
-  {% endfor %}
+      {% for camera in active_cameras %}
+      var marker = L.marker([{{ camera.location.y}}, {{camera.location.x}}], { icon: penguinIcon }).addTo(map);
+      var popupHtml = "<a href='{% url "observations:video_list" %}?camera_id={{ camera.pk }}'>{{ camera.name }}</a><br>{{ camera.video_set.count }} videos";
+      marker.bindPopup(popupHtml);
+      {% endfor %}
+
+      // Video player configuration.
+      const player = videojs("videoPlayer", {
+        controls: true,
+        autoplay: true,
+        preload: "auto",
+        disablePictureInPicture: true,
+        muted: true,
+        controlBar: {
+          volumePanel: false,
+          remainingTimeDisplay: {
+            displayNegative: false,
+          },
+        },
+        playbackRates: [1.0, 1.5, 2.0, 2.5, 3.0],
+        loop: true,
+      });
     </script>
 {% endblock extra_js %}
