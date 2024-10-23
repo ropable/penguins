@@ -47,7 +47,7 @@
                         id="markFinishedButton"
                         data-action="{% url 'observations:video_complete' pk=object.pk %}"
                         disabled>Mark finished</button>
-                {% if user.is_staff %}
+                {% if user.is_superuser %}
                     <a class="btn btn-secondary"
                        href="{{ object.file.url }}?rscd={{ object.get_content_disposition }}"
                        role="button"
