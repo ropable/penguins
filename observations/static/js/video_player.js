@@ -26,6 +26,8 @@ const player = videojs("videoPlayer", {
       seekStep: 30,
     },
   },
+  fluid: true,
+  responsive: true,
 });
 const saveObservationForm = $("#saveObservationForm");
 const csrftoken = saveObservationForm
