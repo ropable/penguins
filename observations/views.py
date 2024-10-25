@@ -25,10 +25,6 @@ class SiteHome(LoginRequiredMixin, TemplateView):
         context["page_heading"] = "Penguin Island cameras"
         context["geoserver_url"] = settings.GEOSERVER_URL
         context["layer_name"] = settings.LAYER_NAME
-        if settings.EXAMPLE_VIDEO_URL:
-            context["example_video_url"] = settings.EXAMPLE_VIDEO_URL
-        else:
-            context["example_video_url"] = None
         queryset = Camera.objects.filter(active=True)
         context["active_cameras"] = queryset
         # Pass a list of cameras to the template context
@@ -57,6 +53,10 @@ class HelpPage(LoginRequiredMixin, TemplateView):
         context["page_title"] = "Penguins | Help page"
         links = [(reverse("observations:site_home"), "Home"), (None, "Help")]
         context["breadcrumb_trail"] = breadcrumbs_html(links)
+        if settings.EXAMPLE_VIDEO_URL:
+            context["example_video_url"] = settings.EXAMPLE_VIDEO_URL
+        else:
+            context["example_video_url"] = None
         return context
 
 
