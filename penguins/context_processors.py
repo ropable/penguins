@@ -1,9 +1,12 @@
 from django.conf import settings
 
 
-def from_settings(request):
-    """Dictionary of context variables to pass with every request response.
-    """
-    return {
-        'application_version_no': settings.APPLICATION_VERSION_NO,
+def template_context(request):
+    """Pass extra context variables to every template."""
+    context = {
+        "site_title": settings.SITE_TITLE,
+        "site_acronym": settings.SITE_ACRONYM,
+        "application_version_no": settings.APPLICATION_VERSION_NO,
     }
+    context.update(settings.STATIC_CONTEXT_VARS)
+    return context

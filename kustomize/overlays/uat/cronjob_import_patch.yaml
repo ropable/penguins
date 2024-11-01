@@ -3,8 +3,6 @@ kind: CronJob
 metadata:
   name: penguins-import-cronjob
 spec:
-  # x minutes past the hour, every hour.
-  schedule: "35 * * * *"
   jobTemplate:
     spec:
       template:

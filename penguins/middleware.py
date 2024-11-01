@@ -1,38 +1,41 @@
-from datetime import datetime
-from django import http
-from django.contrib.auth import login, logout, get_user_model
+import logging
+
+from django.db import connections
+from django.http import HttpResponse, HttpResponseServerError
+
+LOGGER = logging.getLogger("django")
 
 
-class SSOLoginMiddleware(object):
+class HealthCheckMiddleware(object):
+    def __init__(self, get_response):
+        self.get_response = get_response
 
-    def process_request(self, request):
-        User = get_user_model()
+    def __call__(self, request):
+        if request.method == "GET":
+            if request.path == "/readyz":
+                return self.readiness(request)
+            elif request.path == "/livez":
+                return self.liveness(request)
+        return self.get_response(request)
 
-        if request.path.startswith('/logout') and "HTTP_X_LOGOUT_URL" in request.META and request.META["HTTP_X_LOGOUT_URL"]:
-            logout(request)
-            return http.HttpResponseRedirect(request.META["HTTP_X_LOGOUT_URL"])
+    def liveness(self, request):
+        """Returns that the server is alive."""
+        return HttpResponse("OK")
 
-        if not request.user.is_authenticated() and "HTTP_REMOTE_USER" in request.META:
-            attributemap = {
-                "username": "HTTP_REMOTE_USER",
-                "last_name": "HTTP_X_LAST_NAME",
-                "first_name": "HTTP_X_FIRST_NAME",
-                "email": "HTTP_X_EMAIL",
-            }
+    def readiness(self, request):
+        """Connect to each database and do a generic standard SQL query
+        that doesn't write any data and doesn't depend on any tables
+        being present.
+        """
+        try:
+            cursor = connections["default"].cursor()
+            cursor.execute("SELECT 1;")
+            row = cursor.fetchone()
+            cursor.close()
+            if row is None:
+                return HttpResponseServerError("Database: invalid response")
+        except Exception as e:
+            LOGGER.exception(e)
+            return HttpResponseServerError("Database: unable to connect")
 
-            for key, value in attributemap.items():
-                attributemap[key] = request.META[value]
-
-            if attributemap["email"] and User.objects.filter(email__iexact=attributemap["email"]).exists():
-                user = User.objects.filter(email__iexact=attributemap["email"])[0]
-            elif (User.__name__ != "EmailUser") and User.objects.filter(username__iexact=attributemap["username"]).exists():
-                user = User.objects.filter(username__iexact=attributemap["username"])[0]
-            else:
-                user = User()
-
-            user.__dict__.update(attributemap)
-            if not user.last_login:
-                user.last_login = datetime.now()
-            user.save()
-            user.backend = 'django.contrib.auth.backends.ModelBackend'
-            login(request, user)
+        return HttpResponse("OK")

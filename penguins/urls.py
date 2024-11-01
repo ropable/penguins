@@ -1,11 +1,24 @@
-from __future__ import absolute_import
-from django.conf.urls import include, url
-from observations.api import API_URLS
-from observations.sites import site
-from observations.views import HelpPage
+from django.conf import settings
+from django.contrib import admin
+from django.contrib.auth.views import LoginView, LogoutView
+from django.urls import include, path
+from django.views.generic import RedirectView
+
+admin.site.site_header = "Little Penguins Observations administration"
+admin.site.index_title = "Little Penguins Observations"
+admin.site.site_title = "Little Penguins Observations"
 
 urlpatterns = [
-    url(r'^api/', include((API_URLS, 'observations'), namespace='api')),
-    url(r'^help/', HelpPage.as_view(), name='help_page'),
-    url(r'', include(site.urls)),
+    path("admin/", admin.site.urls),
+    path("login/", LoginView.as_view(template_name="login.html"), name="login"),
+    path("logout/", LogoutView.as_view(template_name="logged_out.html"), name="logout"),
+    path(
+        "favicon.ico",
+        RedirectView.as_view(url=f"{settings.STATIC_URL}favicon.ico"),
+        name="favicon",
+    ),
+    path(
+        "",
+        include("observations.urls"),
+    ),
 ]

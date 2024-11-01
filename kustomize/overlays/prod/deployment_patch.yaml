@@ -6,32 +6,47 @@ spec:
   template:
     spec:
       containers:
-      - name: penguins
-        env:
-        - name: SITE_URL
-          value: "penguins.dbca.wa.gov.au"
-        - name: DATABASE_URL
-          valueFrom:
-            secretKeyRef:
-              name: penguins-env-prod
-              key: DATABASE_URL
-        - name: SECRET_KEY
-          valueFrom:
-            secretKeyRef:
-              name: penguins-env-prod
-              key: SECRET_KEY
-        - name: AZURE_ACCOUNT_NAME
-          valueFrom:
-            secretKeyRef:
-              name: penguins-env-prod
-              key: AZURE_ACCOUNT_NAME
-        - name: AZURE_ACCOUNT_KEY
-          valueFrom:
-            secretKeyRef:
-              name: penguins-env-prod
-              key: AZURE_ACCOUNT_KEY
-        - name: AZURE_CONTAINER
-          valueFrom:
-            secretKeyRef:
-              name: penguins-env-prod
-              key: AZURE_CONTAINER
+        - name: penguins
+          env:
+            - name: SITE_URL
+              value: "penguins.dbca.wa.gov.au"
+            - name: DATABASE_URL
+              valueFrom:
+                secretKeyRef:
+                  name: penguins-env-prod
+                  key: DATABASE_URL
+            - name: SECRET_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: penguins-env-prod
+                  key: SECRET_KEY
+            - name: AZURE_ACCOUNT_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: penguins-env-prod
+                  key: AZURE_ACCOUNT_NAME
+            - name: AZURE_ACCOUNT_KEY
+              valueFrom:
+                secretKeyRef:
+                  name: penguins-env-prod
+                  key: AZURE_ACCOUNT_KEY
+            - name: AZURE_CONTAINER
+              valueFrom:
+                secretKeyRef:
+                  name: penguins-env-prod
+                  key: AZURE_CONTAINER
+            - name: GEOSERVER_URL
+              valueFrom:
+                secretKeyRef:
+                  name: penguins-env-prod
+                  key: GEOSERVER_URL
+            - name: LAYER_NAME
+              valueFrom:
+                secretKeyRef:
+                  name: penguins-env-prod
+                  key: LAYER_NAME
+            - name: EXAMPLE_VIDEO_URL
+              valueFrom:
+                secretKeyRef:
+                  name: penguins-env-uat
+                  key: EXAMPLE_VIDEO_URL

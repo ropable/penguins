@@ -1,0 +1,40 @@
+{% extends "base_penguins.html" %}
+{% block navbar_button %}{% endblock %}
+{% block navbar_links %}{% endblock %}
+{% block page_content %}
+    <div class="container-fluid">
+        <div class="row">
+            <div class="col">
+                <h4>Please log in with your email address and password:</h4>
+                <form class="form-horizontal" action="" method="POST">
+                    {% csrf_token %}
+                    {% if form.errors %}
+                        <div class="form-group">
+                            <div class="col">
+                                <div class="alert alert-danger">Sorry, that's not a valid email and/or password.</div>
+                            </div>
+                        </div>
+                    {% endif %}
+                    <div class="mb-3">
+                        <label for="username" class="form-label">Email address</label>
+                        <input type="text"
+                               class="form-control"
+                               name="username"
+                               value=""
+                               id="username">
+                    </div>
+                    <div class="mb-3">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password"
+                               class="form-control"
+                               name="password"
+                               value=""
+                               id="password">
+                    </div>
+                    <button type="submit" class="btn btn-primary">Submit</button>
+                    <input type="hidden" name="next" value="{{ next }}" />
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock %}

@@ -1,0 +1,108 @@
+{% extends "base_penguins.html" %}
+{% block page_content_inner %}
+    <div class="row">
+        <div class="col">
+            <h1>{{ page_heading }}</h1>
+            <form class="row row-cols-lg-auto g-2 align-items-center"
+                  action=""
+                  method="get">
+                <div class="col-12">
+                    <div class="input-group">
+                        <div class="input-group-text">Camera</div>
+                        <select class="form-select"
+                                aria-label="Select camera"
+                                id="selectCamera"
+                                name="camera_id"
+                                onchange="this.form.submit()">
+                            <option value="">--------</option>
+                            {% for camera in active_cameras %}
+                                <option value="{{ camera.pk }}"
+                                        {% if camera.pk == filter_camera_id %}selected{% endif %}>
+                                    {{ camera.name }}
+                                </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="input-group">
+                        <div class="input-group-text">Date</div>
+                        <input type="date"
+                               class="form-control"
+                               aria-label="Select date"
+                               {% if filter_date %}value="{{ filter_date }}"{% endif %}
+                               id="selectDate"
+                               name="date"
+                               onchange="this.form.submit()" />
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="input-group">
+                        <div class="input-group-text">Completed?</div>
+                        <select class="form-select"
+                                aria-label="Select completed"
+                                id="selectCompleted"
+                                name="completed"
+                                onchange="this.form.submit()">
+                            <option value="">--------</option>
+                            <option value="true"{% if filter_completed == "true" %} selected{% endif %}>Yes</option>
+                            <option value="false"{% if filter_completed == "false" %} selected{% endif %}>No</option>
+                        </select>
+                    </div>
+                </div>
+                <div class="col-12">
+                    <div class="input-group">
+                        <div class="input-group-text">Has views?</div>
+                        <select class="form-select"
+                                aria-label="Have views"
+                                id="selectCompleted"
+                                name="views"
+                                onchange="this.form.submit()">
+                            <option value="">--------</option>
+                            <option value="true"{% if filter_views == "true" %} selected{% endif %}>Yes</option>
+                            <option value="false"{% if filter_views == "false" %} selected{% endif %}>No</option>
+                        </select>
+                    </div>
+                </div>
+            </form>
+            {% if object_list %}
+                <div class="mt-2">{% include "pagination.html" %}</div>
+                <table class="table table-striped table-bordered table-condensed">
+                    <thead>
+                        <tr>
+                            <th>Video</th>
+                            <th>Views</th>
+                            <th>Completed</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for obj in object_list %}
+                            <tr>
+                                <td>
+                                    {% if can_add_observations %}
+                                        <a href="{% url 'observations:video_detail' obj.pk %}">{{ obj.camera }}, {{ obj.date }} {{ obj.start_time }} - {{ obj.end_time }}</a>
+                                    {% else %}
+                                        {{ obj.camera }}, {{ obj.date }} {{ obj.start_time }} - {{ obj.end_time }}
+                                    {% endif %}
+                                </td>
+                                <td>{{ obj.views }}</td>
+                                <td>
+                                    {% if obj.mark_complete %}
+                                        <i class="fa-solid fa-check"></i>
+                                    {% else %}
+                                        <i class="fa-solid fa-xmark"></i>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+                {% include "pagination.html" %}
+            {% else %}
+                <div class="my-4">No videos found.</div>
+            {% endif %}
+        </div>
+        <!-- /.col -->
+    </div>
+    <!-- /.row -->
+{% endblock page_content_inner %}

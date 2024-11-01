@@ -12,23 +12,47 @@ framework, the Python programming language and PostgreSQL database. The
 application source code is freely available according to the terms of
 the attached licence.
 
-# Installation
+## Installation
 
-This project requires a Python 2.7.* environment to run. For development, set up
-a virtual environment running a local copy of Python and then install the
-project dependencies using `pip`:
+The recommended way to set up this project for development is using
+[Poetry](https://python-poetry.org/docs/) to install and manage a virtual Python
+environment. With Poetry installed, change into the project directory and run:
 
-    pip install -r requirements.txt
+    poetry install
 
-# Environment variables
+Activate the virtualenv like so:
 
-This project uses environment variables (in a `.env` file) to define application settings.
-Required settings are as follows:
+    poetry shell
 
-    DATABASE_URL="postgis://USER:PASSWORD@HOST:PORT/DATABASE_NAME"
-    SECRET_KEY="ThisIsASecretKey"
+To run Python commands in the activated virtualenv, thereafter run them like so:
 
-# Running
+    python manage.py
+
+Manage new or updating project dependencies with Poetry also, like so:
+
+    poetry add newpackage==1.0
+
+## Environment variables
+
+This project uses **python-dotenv** to set environment variables (in a `.env` file).
+The following variables are required for the project to run:
+
+    DATABASE_URL=postgis://USER:PASSWORD@HOST:PORT/DATABASE_NAME
+    SECRET_KEY=ThisIsASecretKey
+    GEOSERVER_URL=https://geoserver.url/geoserver
+    LAYER_NAME=namespace:layer
+
+## Video uploads
+
+Captured videos are uploaded to Azure container storage as blobs. To serve videos,
+account credentials and the container name should be provided as environment variables
+in the same `.env` file as follows:
+
+    AZURE_ACCOUNT_NAME=name
+    AZURE_ACCOUNT_KEY=key
+    AZURE_CONTAINER=container_name
+
+## Running
 
 Use `runserver` to run a local copy of the application:
 
@@ -38,8 +62,21 @@ Run console commands manually:
 
     python manage.py shell_plus
 
-# Docker image
+## Docker image
 
 To build a new Docker image from the `Dockerfile`:
 
     docker image build -t ghcr.io/dbca-wa/penguins .
+
+## Pre-commit hooks
+
+This project includes the following pre-commit hooks:
+
+- TruffleHog: <https://docs.trufflesecurity.com/docs/scanning-git/precommit-hooks/>
+
+Pre-commit hooks may have additional system dependencies to run. Optionally
+install pre-commit hooks locally like so:
+
+    pre-commit install
+
+Reference: <https://pre-commit.com/>
