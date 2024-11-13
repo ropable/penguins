@@ -48,5 +48,5 @@ spec:
             - name: EXAMPLE_VIDEO_URL
               valueFrom:
                 secretKeyRef:
-                  name: penguins-env-uat
+                  name: penguins-env-prod
                   key: EXAMPLE_VIDEO_URL
