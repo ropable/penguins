@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "penguins"
-version = "2.0.0"
+version = "2.0.1"
 description = "DBCA Little Penguins Observations application"
 authors = ["Ashley Felton <ashley.felton@dbca.wa.gov.au>"]
 license = "Apache-2.0"
@@ -9,13 +9,13 @@ readme = "README.md"
 [tool.poetry.dependencies]
 python = "~3.12"
 django = "4.2.16"
-psycopg = {version = "3.2.3", extras = ["binary", "pool"]}
+psycopg = { version = "3.2.3", extras = ["binary", "pool"] }
 dbca-utils = "2.0.2"
 python-dotenv = "1.0.1"
 dj-database-url = "2.3.0"
 django-extensions = "3.2.3"
 gunicorn = "23.0.0"
-whitenoise = {version = "6.8.2", extras = ["brotli"]}
+whitenoise = { version = "6.8.2", extras = ["brotli"] }
 django-storages = { version = "1.14.4", extras = ["azure"] }
 webtemplate-dbca = "1.7.1"
 django-map-widgets = "0.5.1"
