@@ -40,7 +40,7 @@ class Video(models.Model):
 
     date = models.DateField(help_text="The date of the recording.")
     camera = models.ForeignKey(Camera, on_delete=models.PROTECT)
-    file = models.FileField(upload_to="videos")  # TODO: rename field.
+    uploaded_file = models.FileField(upload_to="videos")
     start_time = models.TimeField(help_text="The start time of the recording.")
     end_time = models.TimeField(help_text="The end time of the recording (usually 1h after start).")
     views = models.PositiveSmallIntegerField(default=0)
@@ -62,7 +62,7 @@ class Video(models.Model):
         return reverse("observations:video_detail", kwargs={"pk": self.pk})
 
     def get_video_filename(self):
-        return self.file.name.split("/")[-1]
+        return self.uploaded_file.name.split("/")[-1]
 
     def get_content_disposition(self):
         filename = self.get_video_filename()
@@ -101,9 +101,6 @@ class PenguinObservation(models.Model):
     """
 
     video = models.ForeignKey(Video, on_delete=models.PROTECT)
-    date = models.DateTimeField(
-        help_text="The date on which the observation is noted"
-    )  # TODO: remove this field (use Video.date). Also, it's a datetime :/
     observer = models.ForeignKey(settings.AUTH_USER_MODEL, related_name="observations", on_delete=models.PROTECT)
     position = models.FloatField(
         default=0,
@@ -111,19 +108,17 @@ class PenguinObservation(models.Model):
         verbose_name="Position (s)",
         help_text="Position in video (seconds from start)",
     )
-    seen = models.PositiveSmallIntegerField(
-        verbose_name="count",
+    count = models.PositiveSmallIntegerField(
         validators=[MinValueValidator(0), MaxValueValidator(100)],
-        help_text="The count of penguins seen in this observation.",
-        # TODO: rename this field to count
+        help_text="The count of penguins counted in this observation.",
     )
     comments = models.TextField(blank=True, null=True)
     raining = models.BooleanField(default=False, help_text="Was it raining at the time of the observation?")
     validated = models.BooleanField(default=True, verbose_name="Confirmed")
 
     def __str__(self):
-        return "{} penguin(s) seen on {} at {} by {}".format(
-            self.seen,
+        return "{} penguin(s) counted on {} at {} by {}".format(
+            self.count,
             self.video.camera.name,
             self.get_observation_datetime(),
             self.observer,

@@ -164,19 +164,17 @@ class PenguinObservationCreate(LoginRequiredMixin, SingleObjectMixin, View):
         video = self.get_object()
         observation = PenguinObservation.objects.create(
             video=video,
-            date=video.date,  # FIXME: remove when this field is removed from the model.
             observer=request.user,
             position=int(request.POST["videoPosition"]),
-            seen=request.POST["penguinCount"],
+            count=request.POST["penguinCount"],
             comments=request.POST["comments"],
         )
         d = {
             "id": observation.pk,
             "video_id": observation.video.pk,
-            "date": observation.video.date.isoformat(),
             "observer": observation.observer.get_full_name(),
             "position": observation.position,
-            "seen": observation.seen,
+            "count": observation.count,
             "comments": observation.comments,
             "timestamp": observation.get_observation_datetime().isoformat(),
         }

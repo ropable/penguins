@@ -49,7 +49,7 @@
                         disabled>Mark finished</button>
                 {% if user.is_superuser %}
                     <a class="btn btn-secondary"
-                       href="{{ object.file.url }}?rscd={{ object.get_content_disposition }}"
+                       href="{{ object.uploaded_file.url }}?rscd={{ object.get_content_disposition }}"
                        role="button"
                        id="downloadButton">Download video</a>
                 {% endif %}
@@ -61,7 +61,7 @@
             <div class="embed-responsive embed-responsive-16by9">
                 <video id="videoPlayer"
                        class="video-js vjs-fluid vjs-show-big-play-button-on-pause">
-                    <source src="{{ object.file.url }}" type="video/mp4" />
+                    <source src="{{ object.uploaded_file.url }}" type="video/mp4" />
                     <p class="vjs-no-js">
                         To view this video please enable JavaScript, and consider upgrading to a web browser that
                         <a href="https://videojs.com/html5-video-support/" target="_blank">supports HTML5 video</a>
