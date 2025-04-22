@@ -31,6 +31,16 @@ INTERNAL_IPS = ["127.0.0.1", "::1"]
 ROOT_URLCONF = "penguins.urls"
 WSGI_APPLICATION = "penguins.wsgi.application"
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+STORAGES = {
+    "default": {
+        # Use Azure storage as the default file backend.
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+    },
+    "staticfiles": {
+        # Use whitenoise to add compression and caching support for static files.
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Application definition
 INSTALLED_APPS = (
@@ -86,7 +96,9 @@ TEMPLATES = [
 STATIC_CONTEXT_VARS = {}
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
-project = tomllib.load(open(os.path.join(BASE_DIR, "pyproject.toml"), "rb"))
+pyproject = open(os.path.join(BASE_DIR, "pyproject.toml"), "rb")
+project = tomllib.load(pyproject)
+pyproject.close()
 APPLICATION_VERSION_NO = project["project"]["version"]
 SITE_TITLE = "Penguin Island Observations"
 SITE_ACRONYM = "Penguins"
@@ -111,7 +123,6 @@ TIME_ZONE = "Australia/Perth"
 TZ = ZoneInfo(TIME_ZONE)
 USE_TZ = True
 USE_I18N = False
-USE_L10N = True
 # Sensible AU date input formats
 DATE_INPUT_FORMATS = (
     "%d/%m/%Y",
@@ -128,14 +139,12 @@ DATE_INPUT_FORMATS = (
 # Static files (CSS, JavaScript, Images)
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATIC_URL = "/static/"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 WHITENOISE_ROOT = STATIC_ROOT
 
 # Media uploads
 MEDIA_URL = "/media/"
 
-# Azure blob storage
-DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
+# Azure blob storage configuration
 AZURE_ACCOUNT_NAME = os.environ.get("AZURE_ACCOUNT_NAME", None)
 AZURE_ACCOUNT_KEY = os.environ.get("AZURE_ACCOUNT_KEY", None)
 AZURE_CONTAINER = os.environ.get("AZURE_CONTAINER", None)
