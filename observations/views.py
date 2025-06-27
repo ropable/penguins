@@ -16,6 +16,7 @@ class SiteHome(LoginRequiredMixin, TemplateView):
     """Static template view for the site homepage."""
 
     template_name = "observations/site_home.html"
+    http_method_names = ["get", "head", "options"]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -47,6 +48,7 @@ class HelpPage(LoginRequiredMixin, TemplateView):
     """Help page (static template view)."""
 
     template_name = "observations/help_page.html"
+    http_method_names = ["get", "head", "options"]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -66,6 +68,7 @@ class VideoList(LoginRequiredMixin, ListView):
     template_name = "observations/video_list.html"
     model = Video
     paginate_by = 50
+    http_method_names = ["get", "head", "options"]
 
     def get_queryset(self):
         queryset = super().get_queryset()
@@ -114,6 +117,7 @@ class VideoDetail(LoginRequiredMixin, DetailView):
 
     template_name = "observations/video_detail.html"
     model = Video
+    http_method_names = ["get", "head", "options"]
 
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
@@ -136,6 +140,7 @@ class VideoObservations(LoginRequiredMixin, ListView):
 
     template_name = "observations/video_observations_table.html"
     model = PenguinObservation
+    http_method_names = ["get", "head", "options"]
 
     def get_queryset(self):
         qs = super().get_queryset()
@@ -148,7 +153,7 @@ class PenguinObservationCreate(LoginRequiredMixin, SingleObjectMixin, View):
     """API endpoint to create a new PenguinObservation on a parent Video."""
 
     model = Video
-    http_method_names = ["post"]
+    http_method_names = ["post", "head", "options"]
 
     def dispatch(self, request, *args, **kwargs):
         if not user_can_add_observations(request.user):
@@ -159,19 +164,17 @@ class PenguinObservationCreate(LoginRequiredMixin, SingleObjectMixin, View):
         video = self.get_object()
         observation = PenguinObservation.objects.create(
             video=video,
-            date=video.date,  # FIXME: remove when this field is removed from the model.
             observer=request.user,
             position=int(request.POST["videoPosition"]),
-            seen=request.POST["penguinCount"],
+            count=request.POST["penguinCount"],
             comments=request.POST["comments"],
         )
         d = {
             "id": observation.pk,
             "video_id": observation.video.pk,
-            "date": observation.video.date.isoformat(),
             "observer": observation.observer.get_full_name(),
             "position": observation.position,
-            "seen": observation.seen,
+            "count": observation.count,
             "comments": observation.comments,
             "timestamp": observation.get_observation_datetime().isoformat(),
         }
@@ -182,7 +185,7 @@ class VideoComplete(LoginRequiredMixin, SingleObjectMixin, View):
     """API endpoint to mark a Video as 'complete'."""
 
     model = Video
-    http_method_names = ["patch"]
+    http_method_names = ["patch", "head", "options"]
 
     def dispatch(self, request, *args, **kwargs):
         if not user_can_add_observations(request.user):

@@ -6,7 +6,7 @@ metadata:
     app: penguins-import-cronjob
 spec:
   # AWST: 07:05 every day.
-  schedule: "5 23 * * *"
+  schedule: '5 23 * * *'
   concurrencyPolicy: Forbid
   jobTemplate:
     spec:
@@ -18,11 +18,11 @@ spec:
           containers:
             - name: penguins-import-cronjob
               image: ghcr.io/dbca-wa/penguins
-              command: ["python"]
-              args: ["--version"]
+              command: ['python']
+              args: ['--version']
               env:
                 - name: TZ
-                  value: "Australia/Perth"
+                  value: 'Australia/Perth'
               securityContext:
                 #runAsNonRoot: true
                 privileged: false
@@ -37,4 +37,5 @@ spec:
           volumes:
             - name: tmpfs-ram
               emptyDir:
-                medium: "Memory"
+                medium: 'Memory'
+          automountServiceAccountToken: false

@@ -31,6 +31,16 @@ INTERNAL_IPS = ["127.0.0.1", "::1"]
 ROOT_URLCONF = "penguins.urls"
 WSGI_APPLICATION = "penguins.wsgi.application"
 DEFAULT_AUTO_FIELD = "django.db.models.AutoField"
+STORAGES = {
+    "default": {
+        # Use Azure storage as the default file backend.
+        "BACKEND": "storages.backends.azure_storage.AzureStorage",
+    },
+    "staticfiles": {
+        # Use whitenoise to add compression and caching support for static files.
+        "BACKEND": "whitenoise.storage.CompressedManifestStaticFilesStorage",
+    },
+}
 
 # Application definition
 INSTALLED_APPS = (
@@ -86,10 +96,12 @@ TEMPLATES = [
 STATIC_CONTEXT_VARS = {}
 LOGIN_URL = "/login/"
 LOGIN_REDIRECT_URL = "/"
-project = tomllib.load(open(os.path.join(BASE_DIR, "pyproject.toml"), "rb"))
+pyproject = open(os.path.join(BASE_DIR, "pyproject.toml"), "rb")
+project = tomllib.load(pyproject)
+pyproject.close()
+APPLICATION_VERSION_NO = project["project"]["version"]
 SITE_TITLE = "Penguin Island Observations"
 SITE_ACRONYM = "Penguins"
-APPLICATION_VERSION_NO = project["tool"]["poetry"]["version"]
 LOGOUT_URL = "/logout/"
 LOGOUT_REDIRECT_URL = LOGOUT_URL
 SITE_URL = env("SITE_URL", "localhost")
@@ -106,12 +118,19 @@ DATABASES = {
     "default": dj_database_url.config(),
 }
 
+DATABASES["default"]["TIME_ZONE"] = "Australia/Perth"
+# Use PostgreSQL connection pool if using that DB engine (use ConnectionPool defaults).
+if "ENGINE" in DATABASES["default"] and any(eng in DATABASES["default"]["ENGINE"] for eng in ["postgresql", "postgis"]):
+    if "OPTIONS" in DATABASES["default"]:
+        DATABASES["default"]["OPTIONS"]["pool"] = True
+    else:
+        DATABASES["default"]["OPTIONS"] = {"pool": True}
+
 # Internationalization
 TIME_ZONE = "Australia/Perth"
 TZ = ZoneInfo(TIME_ZONE)
 USE_TZ = True
 USE_I18N = False
-USE_L10N = True
 # Sensible AU date input formats
 DATE_INPUT_FORMATS = (
     "%d/%m/%Y",
@@ -128,14 +147,12 @@ DATE_INPUT_FORMATS = (
 # Static files (CSS, JavaScript, Images)
 STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 STATIC_URL = "/static/"
-STATICFILES_STORAGE = "whitenoise.storage.CompressedManifestStaticFilesStorage"
 WHITENOISE_ROOT = STATIC_ROOT
 
 # Media uploads
 MEDIA_URL = "/media/"
 
-# Azure blob storage
-DEFAULT_FILE_STORAGE = "storages.backends.azure_storage.AzureStorage"
+# Azure blob storage configuration
 AZURE_ACCOUNT_NAME = os.environ.get("AZURE_ACCOUNT_NAME", None)
 AZURE_ACCOUNT_KEY = os.environ.get("AZURE_ACCOUNT_KEY", None)
 AZURE_CONTAINER = os.environ.get("AZURE_CONTAINER", None)
@@ -146,7 +163,10 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {"format": "%(asctime)s %(levelname)-12s %(name)-12s %(message)s"},
+        "verbose": {
+            "format": "{asctime} {levelname} {name} {message}",
+            "style": "{",
+        },
     },
     "handlers": {
         "console": {
@@ -194,11 +214,9 @@ MAP_WIDGETS = {
                     "attributionControl": False,
                 },
                 "tileLayer": {
-                    # "urlTemplate": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                     "urlTemplate": f"{GEOSERVER_URL}/gwc/service/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=mercator&tilematrix=mercator:{{z}}&tilecol={{x}}&tilerow={{y}}&format=image/png&layer={LAYER_NAME}",
                     "options": {"maxZoom": 22, "minZoom": 12},
                 },
-                # "markerFitZoom": 14,
                 "showZoomNavigation": True,
                 "mapCenterLocation": (-32.305, 115.695),
             }

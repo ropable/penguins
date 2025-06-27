@@ -51,7 +51,7 @@ class VideoAdmin(ModelAdmin):
         "mark_complete",
     )
     list_filter = ("camera", MarkedCompleteFilter)
-    readonly_fields = ("date", "camera", "file", "start_time", "end_time")
+    readonly_fields = ("date", "camera", "uploaded_file", "start_time", "end_time")
     filter_horizontal = ("completed_by",)
     fieldsets = (
         (
@@ -60,7 +60,7 @@ class VideoAdmin(ModelAdmin):
                 "fields": (
                     "date",
                     "camera",
-                    "file",
+                    "uploaded_file",
                     "start_time",
                     "end_time",
                 )
@@ -122,7 +122,7 @@ def export_to_xlsx(modeladmin, request, queryset):
                     obj.video.__str__(),
                     obj.observer.get_full_name(),
                     obj.get_observation_datetime().strftime("%d/%b/%Y %H:%M:%S"),
-                    obj.seen,
+                    obj.count,
                     obj.validated,
                     obj.comments,
                     request.build_absolute_uri(obj.video.get_absolute_url()),
@@ -142,9 +142,9 @@ def export_to_xlsx(modeladmin, request, queryset):
 class PenguinObservationAdmin(ModelAdmin):
     actions = [export_to_xlsx]
     date_hierarchy = "video__date"
-    list_display = ("video", "position", "seen", "observer", "validated")
+    list_display = ("video", "position", "count", "observer", "validated")
     list_filter = ("video__camera", "validated")
-    readonly_fields = ("video", "observer", "position", "seen", "comments")
+    readonly_fields = ("video", "observer", "position", "count", "comments")
     fieldsets = (
         (
             "Observation information",
@@ -153,7 +153,7 @@ class PenguinObservationAdmin(ModelAdmin):
                     "video",
                     "observer",
                     "position",
-                    "seen",
+                    "count",
                     "comments",
                 )
             },
