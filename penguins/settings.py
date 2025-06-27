@@ -118,6 +118,14 @@ DATABASES = {
     "default": dj_database_url.config(),
 }
 
+DATABASES["default"]["TIME_ZONE"] = "Australia/Perth"
+# Use PostgreSQL connection pool if using that DB engine (use ConnectionPool defaults).
+if "ENGINE" in DATABASES["default"] and any(eng in DATABASES["default"]["ENGINE"] for eng in ["postgresql", "postgis"]):
+    if "OPTIONS" in DATABASES["default"]:
+        DATABASES["default"]["OPTIONS"]["pool"] = True
+    else:
+        DATABASES["default"]["OPTIONS"] = {"pool": True}
+
 # Internationalization
 TIME_ZONE = "Australia/Perth"
 TZ = ZoneInfo(TIME_ZONE)
@@ -155,7 +163,10 @@ LOGGING = {
     "version": 1,
     "disable_existing_loggers": False,
     "formatters": {
-        "verbose": {"format": "%(asctime)s %(levelname)-12s %(name)-12s %(message)s"},
+        "verbose": {
+            "format": "{asctime} {levelname} {name} {message}",
+            "style": "{",
+        },
     },
     "handlers": {
         "console": {
@@ -203,11 +214,9 @@ MAP_WIDGETS = {
                     "attributionControl": False,
                 },
                 "tileLayer": {
-                    # "urlTemplate": "https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png",
                     "urlTemplate": f"{GEOSERVER_URL}/gwc/service/wmts?service=WMTS&request=GetTile&version=1.0.0&tilematrixset=mercator&tilematrix=mercator:{{z}}&tilecol={{x}}&tilerow={{y}}&format=image/png&layer={LAYER_NAME}",
                     "options": {"maxZoom": 22, "minZoom": 12},
                 },
-                # "markerFitZoom": 14,
                 "showZoomNavigation": True,
                 "mapCenterLocation": (-32.305, 115.695),
             }
