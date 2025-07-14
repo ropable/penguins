@@ -1,10 +1,11 @@
-from datetime import date, datetime, timedelta
-from django.core.management.base import BaseCommand
 import logging
 import re
+from datetime import date, datetime, timedelta
+
+from django.core.management.base import BaseCommand
 from storages.backends.azure_storage import AzureStorage
 
-from observations.models import Video, Camera
+from observations.models import Camera, Video
 
 
 class Command(BaseCommand):
@@ -20,17 +21,13 @@ class Command(BaseCommand):
         # Historically, all videos (blobs) are saved with the prefix path `beach_return_cams_2`.
         # Filter the response to only those blobs for the current year.
         prefix = f"beach_return_cams_2/{year}"
-        all_blobs = [
-            name
-            for name in store.client.list_blob_names(name_starts_with=prefix)
-            if name.endswith(".mp4")
-        ]
+        all_blobs = [name for name in store.client.list_blob_names(name_starts_with=prefix) if name.endswith(".mp4")]
         count = 0
         pattern = re.compile(r"^([-\d]+)_([-\d]+)_(.+)$")
 
         logger.info("Checking for unpublished videos")
         for blob in all_blobs:
-            if Video.objects.filter(file=blob).exists():
+            if Video.objects.filter(uploaded_file=blob).exists():
                 continue
             # Final segment of the blob name e.g 2024-08-20_1700_South.mp4
             video_filename = blob.split("/")[-1]
@@ -40,9 +37,7 @@ class Command(BaseCommand):
             try:
                 video_datetime = datetime.strptime(timestamp, "%Y-%m-%d_%H")
             except:
-                logger.warning(
-                    "Unable to parse timestamp from {}".format(video_filename)
-                )
+                logger.warning("Unable to parse timestamp from {}".format(video_filename))
                 continue
 
             # Parse camera name and find matches. There are three capture groups in the regex,
@@ -60,11 +55,7 @@ class Command(BaseCommand):
                 camera = None
 
             if not camera:
-                logger.warning(
-                    "No matching camera found, skipping video: {}".format(
-                        video_filename
-                    )
-                )
+                logger.warning("No matching camera found, skipping video: {}".format(video_filename))
 
             if video_datetime and camera:
                 Video.objects.create(
@@ -72,7 +63,7 @@ class Command(BaseCommand):
                     start_time=video_datetime.time(),
                     end_time=(video_datetime + timedelta(hours=1)).time(),
                     camera=camera,
-                    file=blob,
+                    uploaded_file=blob,
                 )
 
                 count += 1
