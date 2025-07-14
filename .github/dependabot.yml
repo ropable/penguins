@@ -5,6 +5,8 @@ updates:
     schedule:
       interval: 'weekly'
     target-branch: 'master'
+    ignore:
+      - dependency-name: 'requirements.txt'
   - package-ecosystem: 'github-actions'
     directory: '/'
     schedule:
