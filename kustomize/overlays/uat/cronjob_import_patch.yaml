@@ -8,26 +8,31 @@ spec:
       template:
         spec:
           containers:
-          - name: penguins-import-cronjob
-            args: ["manage.py", "video_import"]
-            env:
-            - name: DATABASE_URL
-              valueFrom:
-                secretKeyRef:
-                  name: penguins-env-uat
-                  key: DATABASE_URL
-            - name: AZURE_ACCOUNT_NAME
-              valueFrom:
-                secretKeyRef:
-                  name: penguins-env-uat
-                  key: AZURE_ACCOUNT_NAME
-            - name: AZURE_ACCOUNT_KEY
-              valueFrom:
-                secretKeyRef:
-                  name: penguins-env-uat
-                  key: AZURE_ACCOUNT_KEY
-            - name: AZURE_CONTAINER
-              valueFrom:
-                secretKeyRef:
-                  name: penguins-env-uat
-                  key: AZURE_CONTAINER
+            - name: penguins-import-cronjob
+              args: ['manage.py', 'video_import']
+              env:
+                - name: DATABASE_URL
+                  valueFrom:
+                    secretKeyRef:
+                      name: penguins-env-uat
+                      key: DATABASE_URL
+                - name: AZURE_ACCOUNT_NAME
+                  valueFrom:
+                    secretKeyRef:
+                      name: penguins-env-uat
+                      key: AZURE_ACCOUNT_NAME
+                - name: AZURE_ACCOUNT_KEY
+                  valueFrom:
+                    secretKeyRef:
+                      name: penguins-env-uat
+                      key: AZURE_ACCOUNT_KEY
+                - name: AZURE_CONTAINER
+                  valueFrom:
+                    secretKeyRef:
+                      name: penguins-env-uat
+                      key: AZURE_CONTAINER
+          tolerations:
+            - effect: NoSchedule
+              key: kubernetes.azure.com/scalesetpriority
+              operator: Equal
+              value: spot

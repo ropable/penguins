@@ -9,7 +9,7 @@ spec:
         - name: penguins
           env:
             - name: SITE_URL
-              value: "penguins.dbca.wa.gov.au"
+              value: 'penguins.dbca.wa.gov.au'
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:

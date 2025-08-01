@@ -4,14 +4,14 @@ metadata:
   name: penguins-import-cronjob
 spec:
   # x minutes past the hour, every hour.
-  schedule: "5 * * * *"
+  schedule: '5 * * * *'
   jobTemplate:
     spec:
       template:
         spec:
           containers:
             - name: penguins-import-cronjob
-              args: ["manage.py", "video_import"]
+              args: ['manage.py', 'video_import']
               env:
                 - name: DATABASE_URL
                   valueFrom:

@@ -7,10 +7,10 @@ spec:
     spec:
       containers:
         - name: penguins
-          image: ghcr.io/ropable/penguins
+          image: ghcr.io/dbca-wa/penguins
           env:
             - name: SITE_URL
-              value: "penguins-uat.dbca.wa.gov.au"
+              value: 'penguins-uat.dbca.wa.gov.au'
             - name: DATABASE_URL
               valueFrom:
                 secretKeyRef:
@@ -51,3 +51,8 @@ spec:
                 secretKeyRef:
                   name: penguins-env-uat
                   key: EXAMPLE_VIDEO_URL
+      tolerations:
+        - effect: NoSchedule
+          key: kubernetes.azure.com/scalesetpriority
+          operator: Equal
+          value: spot
