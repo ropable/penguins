@@ -3,6 +3,8 @@ kind: CronJob
 metadata:
   name: penguins-import-cronjob
 spec:
+  # AWST: 07:05 every day.
+  schedule: '5 23 * * *'
   jobTemplate:
     spec:
       template:
@@ -10,24 +12,6 @@ spec:
           containers:
             - name: penguins-import-cronjob
               args: ['manage.py', 'video_import']
-              env:
-                - name: DATABASE_URL
-                  valueFrom:
-                    secretKeyRef:
-                      name: penguins-env-uat
-                      key: DATABASE_URL
-                - name: AZURE_ACCOUNT_NAME
-                  valueFrom:
-                    secretKeyRef:
-                      name: penguins-env-uat
-                      key: AZURE_ACCOUNT_NAME
-                - name: AZURE_ACCOUNT_KEY
-                  valueFrom:
-                    secretKeyRef:
-                      name: penguins-env-uat
-                      key: AZURE_ACCOUNT_KEY
-                - name: AZURE_CONTAINER
-                  valueFrom:
-                    secretKeyRef:
-                      name: penguins-env-uat
-                      key: AZURE_CONTAINER
+              envFrom:
+                - secretRef:
+                    name: penguins-env-uat
