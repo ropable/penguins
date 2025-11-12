@@ -1,6 +1,6 @@
 [project]
 name = "penguins"
-version = "2.1.2"
+version = "2.1.3"
 description = "DBCA Little Penguins Observations application"
 authors = ["Ashley Felton <ashley.felton@dbca.wa.gov.au>"]
 license = "Apache-2.0"
