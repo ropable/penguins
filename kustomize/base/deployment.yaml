@@ -20,14 +20,6 @@ spec:
           image: ghcr.io/dbca-wa/penguins
           imagePullPolicy: Always
           env:
-            - name: ALLOWED_HOSTS
-              value: '.dbca.wa.gov.au'
-            - name: CSRF_TRUSTED_ORIGINS
-              value: 'https://*.dbca.wa.gov.au'
-            - name: CSRF_COOKIE_SECURE
-              value: 'True'
-            - name: SESSION_COOKIE_SECURE
-              value: 'True'
             - name: TZ
               value: 'Australia/Perth'
           resources:
@@ -72,3 +64,8 @@ spec:
       restartPolicy: Always
       terminationGracePeriodSeconds: 180
       automountServiceAccountToken: false
+      tolerations:
+        - key: arch
+          operator: Equal
+          value: arm64
+          effect: NoSchedule
