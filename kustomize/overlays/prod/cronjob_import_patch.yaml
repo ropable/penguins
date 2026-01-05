@@ -12,6 +12,6 @@ spec:
           containers:
             - name: penguins-import-cronjob
               args: ['manage.py', 'video_import']
-          envFrom:
-            - secretRef:
-                name: penguins-env-prod
+              envFrom:
+                - secretRef:
+                    name: penguins-env-prod

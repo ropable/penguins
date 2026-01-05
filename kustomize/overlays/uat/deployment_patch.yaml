@@ -7,7 +7,6 @@ spec:
     spec:
       containers:
         - name: penguins
-          image: ghcr.io/dbca-wa/penguins
           envFrom:
             - secretRef:
                 name: penguins-env-uat
