@@ -11,10 +11,30 @@ from observations.models import Camera, Video
 class Command(BaseCommand):
     help = "Imports outstanding encoded videos"
 
+    def add_arguments(self, parser):
+        parser.add_argument(
+            "--year",
+            action="store",
+            type=str,
+            dest="year",
+            help="Calendar year for video import (optional, defaults to current year)",
+        )
+
     def handle(self, *args, **options):
         logger = logging.getLogger("penguins")
         logger.info("Starting import of encoded videos")
-        year = date.today().year
+
+        if options["year"]:
+            # Validate the passed-in year value.
+            try:
+                datetime.strptime(options["year"], "%Y")
+                year = options["year"]
+            except ValueError:
+                logger.warning(f"Unable to parse value {options['year']} as calendar year")
+                return
+        else:
+            year = date.today().year
+
         logger.info(f"Querying uploaded videos in Azure for {year}")
         store = AzureStorage()
 
