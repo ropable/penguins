@@ -5,7 +5,7 @@ name: Build multi-architecture Docker Image with separate GitHub Runners and run
 on:
   push:
     branches:
-      - master
+      - main
     tags:
       - '*'
 env:
@@ -73,9 +73,9 @@ jobs:
           echo "PLATFORM_PAIR=${platform//\//-}" >> $GITHUB_ENV
 
       - name: Checkout
-        uses: actions/checkout@v6
         # This step checks out the code from the repository.
         # It uses the actions/checkout action to clone the repository into the runner's workspace.
+        uses: actions/checkout@v6
 
       - name: Docker meta default
         # This step generates metadata for the Docker image.
@@ -201,7 +201,7 @@ jobs:
           annotations: |
             type=org.opencontainers.image.description,value=${{ github.event.repository.description || 'No description provided' }}
           tags: |
-            type=raw,value=latest,enable=${{ github.ref_name == 'master' }}
+            type=raw,value=latest,enable=${{ github.ref_name == 'main' }}
             type=semver,pattern={{version}}
 
       - name: Set up Docker Buildx
