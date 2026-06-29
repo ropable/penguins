@@ -478,7 +478,7 @@ wheels = [
 
 [[package]]
 name = "ipython"
-version = "9.14.1"
+version = "9.15.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "colorama", marker = "sys_platform == 'win32'" },
@@ -488,14 +488,14 @@ dependencies = [
     { name = "matplotlib-inline" },
     { name = "pexpect", marker = "sys_platform != 'emscripten' and sys_platform != 'win32'" },
     { name = "prompt-toolkit" },
-    { name = "psutil", marker = "sys_platform != 'emscripten'" },
+    { name = "psutil", marker = "sys_platform != 'cygwin' and sys_platform != 'emscripten'" },
     { name = "pygments" },
     { name = "stack-data" },
     { name = "traitlets" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/e2/23/3a27530575643c8bb7bfc757a28e2e7ef80092afbf59a2bc5716320b6602/ipython-9.14.1.tar.gz", hash = "sha256:f913bf74df06d458e46ced84ca506c23797590d594b236fe60b14df213291e7b", size = 4433457, upload-time = "2026-06-05T08:12:34.921Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/53/59/165d3b4d75cc34add3122c4417ecb229085140ac573103c223cd01dde96f/ipython-9.15.0.tar.gz", hash = "sha256:da2819ce2aa83135257df830660b1176d986c3d2876db24df01974fa955b2756", size = 4442580, upload-time = "2026-06-26T11:03:35.913Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/9d/22/58818a63eaf8982b67632b1bc20585c811611b15a8da19d6012323dc76a5/ipython-9.14.1-py3-none-any.whl", hash = "sha256:5d4a9ecaa3b10e6e5f269dd0948bdb58ca9cb851899cd23e07c320d3eb11613c", size = 627770, upload-time = "2026-06-05T08:12:33.045Z" },
+    { url = "https://files.pythonhosted.org/packages/40/3a/948263ca3b9d65bb2b1b0c521b3a49fad5d59ada58724bd87d2bd5ff3f36/ipython-9.15.0-py3-none-any.whl", hash = "sha256:515ad9c3cdf0c932a5a9f6245419e8aba706b7bd03c3e1d3a1c83d9351d6aa6e", size = 630895, upload-time = "2026-06-26T11:03:33.809Z" },
 ]
 
 [[package]]
@@ -683,7 +683,7 @@ requires-dist = [
     { name = "gunicorn", extras = ["fast"], specifier = "==26.0.0" },
     { name = "psycopg", extras = ["binary", "pool"], specifier = "==3.3.4" },
     { name = "python-dotenv", specifier = "==1.2.2" },
-    { name = "webtemplate-dbca", specifier = "==1.8.3" },
+    { name = "webtemplate-dbca", specifier = "==1.9.0" },
     { name = "whitenoise", extras = ["brotli"], specifier = "==6.12.0" },
     { name = "xlsxwriter", specifier = "==3.2.9" },
 ]
@@ -1071,14 +1071,14 @@ wheels = [
 
 [[package]]
 name = "webtemplate-dbca"
-version = "1.8.3"
+version = "1.9.0"
 source = { registry = "https://pypi.org/simple" }
 dependencies = [
     { name = "django" },
 ]
-sdist = { url = "https://files.pythonhosted.org/packages/09/bb/c5148bfb97a5f4c9df60036efc8036f65cd246f3ee0e299654a33946e6ed/webtemplate_dbca-1.8.3.tar.gz", hash = "sha256:caacf886c5b59bf6b53edc8ffcc3602fd51f4c5c719cb491ffc3e5e166535b5d", size = 47295, upload-time = "2025-10-15T01:31:03.946Z" }
+sdist = { url = "https://files.pythonhosted.org/packages/20/48/2e738d152f4802d632458a20cfebb9af360b01066fe980568a21fa913529/webtemplate_dbca-1.9.0.tar.gz", hash = "sha256:08436682c33a2feb7d2348b5e20843d420a47534ccc9433f815bcf2042cff567", size = 129896, upload-time = "2026-06-10T07:44:06.084Z" }
 wheels = [
-    { url = "https://files.pythonhosted.org/packages/f3/89/b523a67691f5efc52bb1abd0d5f90ad27f4442ab596a1b9bdb16f2f65f44/webtemplate_dbca-1.8.3-py3-none-any.whl", hash = "sha256:85da2f6d8f121c6abb66ca2d98ec4b1a7bd603d574ecb3276996ab003144ef1e", size = 48056, upload-time = "2025-10-15T01:31:03.078Z" },
+    { url = "https://files.pythonhosted.org/packages/49/a4/8169ad34729a9991339ce2a804aa4c1fa491b5bb2b04b948c663b6e16ebf/webtemplate_dbca-1.9.0-py3-none-any.whl", hash = "sha256:050ed8d00e471ff3e48c7779fc894bff01aeeb1bb11b83910ee28560f468c1d3", size = 127940, upload-time = "2026-06-10T07:44:07.247Z" },
 ]
 
 [[package]]
