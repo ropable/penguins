@@ -1,0 +1,5 @@
+{
+  "venvPath": "./.venv",
+  "include": ["observations", "penguins"],
+  "exclude": ["**/migrations", "kustomize"]
+}
