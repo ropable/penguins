@@ -75,7 +75,7 @@ jobs:
       - name: Checkout
         # This step checks out the code from the repository.
         # It uses the actions/checkout action to clone the repository into the runner's workspace.
-        uses: actions/checkout@v6
+        uses: actions/checkout@v7
 
       - name: Docker meta default
         # This step generates metadata for the Docker image.
@@ -280,7 +280,7 @@ jobs:
       security-events: write
     steps:
       - name: Run Trivy vulnerability scanner
-        uses: aquasecurity/trivy-action@0.35.0
+        uses: aquasecurity/trivy-action@v0.36.0
         env:
           TRIVY_DB_REPOSITORY: public.ecr.aws/aquasecurity/trivy-db
         with:

@@ -62,6 +62,20 @@ class HelpPage(LoginRequiredMixin, TemplateView):
         return context
 
 
+class PrivacyPage(LoginRequiredMixin, TemplateView):
+    """Privacy statement page (static template view)."""
+
+    template_name = "observations/privacy_page.html"
+    http_method_names = ["get", "head", "options"]
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context["page_title"] = "Penguins | Privacy"
+        links = [(reverse("observations:site_home"), "Home"), (None, "Privacy")]
+        context["breadcrumb_trail"] = breadcrumbs_html(links)
+        return context
+
+
 class VideoList(LoginRequiredMixin, ListView):
     """User-facing list view for all videos."""
 
