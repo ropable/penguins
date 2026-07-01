@@ -216,7 +216,7 @@ class VideoComplete(LoginRequiredMixin, SingleObjectMixin, View):
             "id": video.pk,
             "date": video.date,
             "camera": str(video.camera),
-            "file": video.file.url,
+            "uploaded_file": video.uploaded_file.url,
             "start_time": video.start_time,
             "end_time": video.end_time,
             "views": video.views,
