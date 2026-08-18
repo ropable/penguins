@@ -1,6 +1,6 @@
 [project]
 name = "penguins"
-version = "2.1.6"
+version = "2.1.7"
 description = "DBCA Little Penguins Observations application"
 authors = ["Ashley Felton <ashley.felton@dbca.wa.gov.au>"]
 license = "Apache-2.0"
@@ -40,5 +40,5 @@ profile = "django"
 
 [tool.pyright]
 venvPath = ".venv"
-include = ["harvester", "indexer", "prs", "referral", "reports"]
+include = ["bbservations", "penguins"]
 exclude = ["**/migrations", "kustomize"]
