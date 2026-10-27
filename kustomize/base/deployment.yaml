@@ -47,6 +47,8 @@ spec:
             failureThreshold: 3
           securityContext:
             runAsNonRoot: true
+            seccompProfile:
+              type: RuntimeDefault
             runAsUser: 65532
             privileged: false
             allowPrivilegeEscalation: false
