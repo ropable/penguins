@@ -1,37 +1,65 @@
 # syntax=docker/dockerfile:1
-FROM dhi.io/python:3.13-debian13-dev AS build-stage
-LABEL org.opencontainers.image.authors=asi@dbca.wa.gov.au
-LABEL org.opencontainers.image.source=https://github.com/dbca-wa/penguins
+# Args to centralise versions.
+ARG PYTHON_VERSION=3.13-debian13-dev
 
-# Install system packages required to install the project
-RUN apt-get update -y \
-  # Python package dependencies: gunicorn_h1c requires gcc, Django requires gdal, proj
-  && apt-get install -y --no-install-recommends gdal-bin proj-bin libgdal36 gcc g++ \
-  # Run shared library linker after installing packages
-  && ldconfig \
-  && rm -rf /var/lib/apt/lists/*
+# ---- Builder stage ----
+FROM dhi.io/python:${PYTHON_VERSION} AS builder
 
-# Import uv to install dependencies
-COPY --from=ghcr.io/astral-sh/uv:0.13 /uv /bin/
+RUN <<EOF
+set -euxo pipefail
+apt-get update
+apt-get install -y --no-install-recommends \
+  gdal-bin \
+  proj-bin \
+  libgdal36 \
+  gcc \
+  g++
+EOF
+
 WORKDIR /app
-# Install project dependencies
+COPY --from=ghcr.io/astral-sh/uv:0.13 /uv /bin/
 COPY pyproject.toml uv.lock ./
-RUN uv sync --no-group dev --link-mode=copy --compile-bytecode --no-python-downloads --frozen \
-  # Remove uv and lockfile after use
-  && rm -rf /bin/uv \
-  && rm uv.lock
+RUN uv sync --no-group dev --link-mode=copy --compile-bytecode --no-python-downloads --frozen
+
+# ---- Runtime stage ----
+FROM dhi.io/python:${PYTHON_VERSION} AS runtime
+LABEL org.opencontainers.image.title="penguins" \
+  org.opencontainers.image.description="DBCA Little Penguins Observations system" \
+  org.opencontainers.image.source="https://github.com/dbca-wa/penguins" \
+  org.opencontainers.image.vendor="DBCA" \
+  org.opencontainers.image.authors="asi@dbca.wa.gov.au"
+
+RUN <<EOF
+set -euxo pipefail
+apt-get update
+apt-get install -y --no-install-recommends \
+  gdal-bin \
+  proj-bin \
+  libgdal36
+ldconfig
+rm -rf /var/lib/apt/lists/* /tmp/* /var/tmp/*
+EOF
 
 # Environment variables
-ENV PYTHONUNBUFFERED=1
-ENV PATH="/app/.venv/bin:$PATH"
+ENV PYTHONUNBUFFERED=1 \
+  PYTHONDONTWRITEBYTECODE=1 \
+  PATH="/app/.venv/bin:$PATH"
+
+WORKDIR /app
+
+# Copy installed virtualenv from builder
+COPY --from=builder /app /app
 
 # Copy the remaining project files to finish building the project
-COPY gunicorn.py manage.py pyproject.toml ./
-COPY observations ./observations
-COPY penguins ./penguins
+COPY --chown=nonroot:nonroot gunicorn.py manage.py pyproject.toml ./
+COPY --chown=nonroot:nonroot observations ./observations/
+COPY --chown=nonroot:nonroot penguins ./penguins/
+
 # Compile scripts and collect static files
-RUN python -m compileall manage.py observations penguins \
-  && python manage.py collectstatic --noinput
+RUN <<EOF
+python -m compileall manage.py observations penguins
+python manage.py collectstatic --noinput
+EOF
 
 # Run the project as the nonroot user
 USER nonroot
